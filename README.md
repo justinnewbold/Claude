@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Two unique experimental games that explore consciousness, reality, and computation in ways never seen before.
+Three unique experimental games that explore consciousness, reality, and infinity in ways never seen before.
 
 ---
 
@@ -187,6 +187,108 @@ See [CODE_ARCHAEOLOGY.md](CODE_ARCHAEOLOGY.md) for full documentation.
 
 ---
 
+## 📚 THE INFINITE LIBRARY
+
+### Navigate Infinity. Search for Meaning. Find Nothing.
+
+**The Infinite Library** is an interactive exploration of Jorge Luis Borges' "Library of Babel". Navigate endless hexagonal rooms containing every possible book that has ever been or could ever be written.
+
+### The Premise
+
+The library contains:
+- Every book that exists
+- Every book that could exist
+- Every combination of letters possible
+
+Which means it contains:
+- Your complete biography (and infinite false ones)
+- The cure for every disease (and infinite false cures)
+- Perfect prophecies (and infinite lies)
+- This exact moment, recorded perfectly
+- Pure meaningless gibberish (which fills 99.9999...% of shelves)
+
+### The Paradox
+
+In a library containing all possible texts:
+- **Truth is drowned in lies** - signal-to-noise ratio approaches zero
+- **Everything exists but nothing can be found** - probabilistically impossible
+- **Meaning becomes meaningless** - when all meanings exist equally
+
+### How to Play
+
+```bash
+python3 infinite_library.py
+```
+
+### Gameplay
+
+1. **Navigate** infinite hexagonal rooms using cube coordinates
+2. **Pull random books** - mostly gibberish, rarely coherent fragments
+3. **Search for text** - find books containing *any* phrase you imagine
+4. **Discover prophecies** - books that know your name
+5. **Meditate** on the meaning (or meaninglessness) of infinity
+6. **Realize** - the search itself is all you have
+
+### Features
+
+- **Truly Infinite**: Uses cryptographic hashing for deterministic generation
+- **Search Works**: Actually finds books containing your query text
+- **Personal Prophecies**: The library knows who you are
+- **Hexagonal Navigation**: Explore 2D infinite space with cube coordinates
+- **Philosophical Depth**: Meditations on meaning, infinity, and probability
+- **Deterministic**: Same book location always has same content
+
+### Example
+
+```
+> Search for: "hello world"
+
+Found!
+Book: "xmz,qwpczlk.vnmbhjxfd..."
+Room -234,512,-278, Wall 3, Shelf 2, Book 15
+Page 89, Line 23
+
+Context:
+fdjklqpwzmxncvbhjklfdspoqiwnmxczbvhkjfdlspqowimxnczbvjhfkdls
+,.mqwpeorifkdjslx.czpoqwiejrkfdls,mxnc.vbqoiwejrk.fdmslx,cn
+hello worldxnzcvbhfkldspoqiwzmxncvbhjklfdspqowimxn
+czpvbqowijekrdmfslx,cnvzpoqwijekrdmfslx.,cnvbzpoqwierjkdmfsl
+```
+
+Did you find meaning? Or just your query reflected back?
+
+### The Mathematics
+
+- **410 pages** per book
+- **40 lines** per page
+- **80 characters** per line
+- **29 symbols** (alphabet + space, comma, period)
+
+Total possible books: **29^1,312,000** ≈ **10^1,834,097**
+
+For scale:
+- Atoms in universe: ~10^80
+- The library is 10^1,834,017 times larger
+- **Effectively infinite**
+
+### Why It's Unique
+
+Unlike other "infinite" games:
+- **Actually mathematically infinite** (bounded only by hash space)
+- **Deterministic** (same book is always the same)
+- **Search works** (you CAN find what you seek)
+- **But meaning is impossible** (surrounded by infinite noise)
+
+The game asks: *If you can find anything, does finding something mean anything?*
+
+### The Experience
+
+*"I searched for my name and found a book about me. But is it true? Or coincidence? Or does the distinction even matter when everything exists?"*
+
+See [INFINITE_LIBRARY.md](INFINITE_LIBRARY.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -198,6 +300,9 @@ python3 echo_chambers.py
 
 # Play Code Archaeology
 python3 code_archaeology.py
+
+# Play The Infinite Library
+python3 infinite_library.py
 ```
 
 ## 📋 Requirements
@@ -208,12 +313,13 @@ python3 code_archaeology.py
 
 ## 🧠 Philosophy
 
-Both games explore the nature of consciousness, reality, and computation:
+These three games explore fundamental questions about existence:
 
 - **Echo Chambers**: What does it mean to exist across multiple realities? Is wholeness worth the cost of infinite possibility?
 - **Code Archaeology**: Can we see beyond our own paradigms? What assumptions blind us to our own fatal bugs?
+- **The Infinite Library**: Can meaning exist in infinite information? What are we really searching for?
 
-These aren't just games - they're thought experiments made playable.
+These aren't just games - they're playable philosophy experiments.
 
 ---
 
