@@ -1181,4 +1181,43 @@ Together, they span narrative exploration, philosophical inquiry, puzzle-solving
 
 ---
 
+## 🚀 Cloud Deployment
+
+Want to share these games with the world? Deploy to the cloud in minutes!
+
+### Quick Deploy (Easiest)
+
+```bash
+cd deploy
+./quickstart.sh
+```
+
+### Deploy to Railway (2 minutes)
+
+```bash
+cd deploy/web-terminal
+npx @railway/cli login
+npx @railway/cli up
+```
+
+### Deploy with Docker
+
+```bash
+cd deploy
+docker-compose up
+# Visit http://localhost:5000
+```
+
+### Available Platforms
+
+- **Railway.app** ⭐ - Easiest (free $5/month credit)
+- **Render.com** - Simple GitHub integration (free tier)
+- **Heroku** - Classic platform (free tier)
+- **Google Cloud Run** - Auto-scaling (free tier)
+- **DigitalOcean** - Full control ($5/month)
+
+**See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment guide with all options.**
+
+---
+
 *Built with curiosity, creativity, and a desire to make something truly unique.*

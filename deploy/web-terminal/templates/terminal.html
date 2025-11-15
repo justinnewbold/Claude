@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Terminal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: #000;
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+
+        #terminal-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 40px;
+            padding: 10px;
+        }
+
+        #terminal {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .back-button {
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .back-button:hover {
+            background: #764ba2;
+        }
+
+        .status {
+            color: #888;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal-container">
+        <div id="terminal"></div>
+    </div>
+
+    <div class="controls">
+        <button class="back-button" onclick="location.href='/'">← Back to Games</button>
+        <span class="status" id="status">Connecting...</span>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+
+    <script>
+        // Initialize xterm.js
+        const term = new Terminal({
+            cursorBlink: true,
+            fontSize: 14,
+            fontFamily: 'Monaco, Courier New, monospace',
+            theme: {
+                background: '#000000',
+                foreground: '#ffffff',
+                cursor: '#ffffff',
+                cursorAccent: '#000000',
+                selection: 'rgba(255, 255, 255, 0.3)',
+                black: '#000000',
+                red: '#e06c75',
+                green: '#98c379',
+                yellow: '#d19a66',
+                blue: '#61afef',
+                magenta: '#c678dd',
+                cyan: '#56b6c2',
+                white: '#abb2bf',
+                brightBlack: '#5c6370',
+                brightRed: '#e06c75',
+                brightGreen: '#98c379',
+                brightYellow: '#d19a66',
+                brightBlue: '#61afef',
+                brightMagenta: '#c678dd',
+                brightCyan: '#56b6c2',
+                brightWhite: '#ffffff'
+            }
+        });
+
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal'));
+        fitAddon.fit();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            fitAddon.fit();
+            if (socket.connected) {
+                socket.emit('resize', {
+                    cols: term.cols,
+                    rows: term.rows
+                });
+            }
+        });
+
+        // Initialize Socket.IO
+        const socket = io();
+        const gameFile = '{{ game_file }}';
+
+        socket.on('connect', () => {
+            document.getElementById('status').textContent = 'Connected';
+            // Start the game
+            socket.emit('start', { game_file: gameFile });
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('status').textContent = 'Disconnected';
+        });
+
+        socket.on('output', (data) => {
+            term.write(data.output);
+        });
+
+        // Send keyboard input to server
+        term.onData((data) => {
+            socket.emit('input', { input: data });
+        });
+
+        // Handle paste
+        term.onPaste((data) => {
+            socket.emit('input', { input: data });
+        });
+    </script>
+</body>
+</html>

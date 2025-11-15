@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovative Game Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .game-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        .game-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .play-button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 INNOVATIVE GAME COLLECTION</h1>
+            <p class="subtitle">Ten unique experimental games exploring consciousness, reality, and computation</p>
+        </header>
+
+        <div class="games-grid">
+            {% for game in games %}
+            <div class="game-card" onclick="location.href='/play/{{ game.file }}'">
+                <div class="icon">
+                    {% if 'echo' in game.id %}🌌
+                    {% elif 'code' in game.id %}💾
+                    {% elif 'library' in game.id %}📚
+                    {% elif 'forking' in game.id %}🌳
+                    {% elif 'recursion' in game.id %}🔄
+                    {% elif 'schrodinger' in game.id %}🐱
+                    {% elif 'emergence' in game.id %}🧬
+                    {% elif 'theseus' in game.id %}🚢
+                    {% elif 'butterfly' in game.id %}🦋
+                    {% elif 'syntax' in game.id %}🌳
+                    {% elif 'entanglement' in game.id %}🔗
+                    {% endif %}
+                </div>
+                <h2>{{ game.name }}</h2>
+                <a href="/play/{{ game.file }}" class="play-button">Play Now →</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <footer>
+            <p>Built with curiosity, creativity, and a desire to make something truly unique.</p>
+        </footer>
+    </div>
+</body>
+</html>
