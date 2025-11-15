@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Eight unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, and chaos theory in ways never seen before.
+Nine unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, and meta-programming in ways never seen before.
 
 ---
 
@@ -786,6 +786,200 @@ See [BUTTERFLY_EFFECT.md](BUTTERFLY_EFFECT.md) for full documentation.
 
 ---
 
+## 🌳 SYNTAX TREE CLIMBER
+
+### Navigate Code Structure. Modify From Within. Become The Parser.
+
+**Syntax Tree Climber** is the ultimate meta-programming puzzle game. Navigate through the Abstract Syntax Tree (AST) of living Python code, modify nodes directly, and watch as structural changes transform program behavior.
+
+### The Innovation
+
+**Traditional programming games**: Type code, see if it works
+
+**Syntax Tree Climber**: **Navigate code as architectural space**, move through AST nodes like rooms in a dungeon, modify structure directly
+
+This makes the invisible visible - the hierarchical structure of code becomes physically navigable.
+
+### How to Play
+
+```bash
+python3 syntax_tree_climber.py
+```
+
+### Core Mechanic
+
+```
+╔═ SYNTAX TREE CLIMBER ═╗
+Level 1 | Modifications: 0/1
+
+Current Code:
+ 1 │ def calculate():
+ 2 │     x = 5
+ 3 │     y = 3
+ 4 │     result = x + y
+ 5 │     return result
+
+AST Structure:
+  Module (root)
+   ► FunctionDef: calculate
+      Assign: x = 5
+        Constant: 5
+      Assign: y = 3
+      Return: result
+
+Current Node: FunctionDef: calculate
+```
+
+### What is an AST?
+
+Every time code runs, it's first parsed into an **Abstract Syntax Tree**:
+
+**Code**:
+```python
+def add(x, y):
+    return x + y
+```
+
+**AST Structure**:
+```
+FunctionDef(name='add')
+ └─ Return
+     └─ BinOp(op=Add)
+         ├─ Name('x')
+         └─ Name('y')
+```
+
+The AST is code's **conceptual architecture** - not text, but structure.
+
+### Gameplay
+
+**Navigate** (↑/↓/←/→):
+- **Up**: Move to parent node
+- **Down**: Move to first child
+- **Left/Right**: Move between siblings
+- Traverse the tree like a dungeon
+
+**Modify** (M):
+- Change constants: `5` → `10`
+- Swap operators: `+` → `*`
+- Fix comparisons: `<` → `>`
+- Direct AST manipulation
+
+**Execute** (E):
+- Run the modified code
+- See output
+- Compare to goal
+
+### Node Types You'll Navigate
+
+**Control Flow**:
+- `FunctionDef`: Function definitions
+- `If`: Conditional statements
+- `While`/`For`: Loops
+
+**Operations**:
+- `Assign`: Variable assignments
+- `BinOp`: Binary operations (+, -, *, /)
+- `Compare`: Comparisons (<, >, ==)
+
+**Values**:
+- `Name`: Variable references
+- `Constant`: Literal values (numbers, strings)
+
+### Example Level
+
+**Code** (buggy):
+```python
+def process_data():
+    value = 10
+    multiplier = 2
+    result = value - multiplier  # BUG!
+    return result
+```
+
+**Goal**: Output = 20
+
+**Solution**:
+1. Navigate down to `BinOp: value - multiplier`
+2. Press M to modify
+3. Change `-` to `*`
+4. Execute → Result: 20
+5. Level complete!
+
+### Strategy
+
+1. **Understand structure**: Navigate to see hierarchy
+2. **Trace execution**: Follow code flow through nodes
+3. **Identify bug**: Which node causes wrong output?
+4. **Navigate precisely**: Move to that exact node
+5. **Modify minimally**: Change only what's needed
+6. **Verify**: Execute and check goal
+
+### Why It's Unique
+
+**Other games**: Programming through typing
+**Syntax Tree Climber**: Programming through **navigation**
+
+You experience code as:
+- **Space** (tree structure)
+- **Architecture** (hierarchical organization)
+- **Navigable** (move through like a dungeon)
+
+### Educational Value
+
+Learn through gameplay:
+- **ASTs**: How parsers understand code
+- **Code structure**: Programs as hierarchical data
+- **Meta-programming**: Code that modifies code
+- **Operators**: How operations compose
+- **Control flow**: Branching and looping structurally
+
+### The Meta-Programming
+
+**You are code**:
+- Written in Python
+- Parsing Python
+- Navigating Python's AST
+- Modifying Python
+- Executing Python
+
+**Code modifying code modifying code.** It's Python all the way down.
+
+### Real Tools
+
+Uses Python's real `ast` module:
+```python
+import ast
+
+code = "x = 5 + 3"
+tree = ast.parse(code)        # Parse to AST
+# ... navigate and modify ...
+new_code = ast.unparse(tree)  # Back to code
+```
+
+Everything is real. The AST is Python's actual AST. The modifications are genuine meta-programming.
+
+### The Philosophy
+
+**Code as Data**:
+- Programs are text AND structure
+- AST is the data representation of code
+- You can modify code like any data
+
+**Homoiconicity** (Lisp's gift to programming):
+- Code and data have the same structure
+- This game brings that to Python
+- Navigate code like you navigate data
+
+**Self-Reference**:
+- You (code) navigate code representing code written in code
+- Four levels of meta-reference
+- The game examines itself
+
+See [SYNTAX_TREE_CLIMBER.md](SYNTAX_TREE_CLIMBER.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -815,6 +1009,9 @@ python3 emergence_engine.py
 
 # Play The Butterfly Effect
 python3 butterfly_effect.py
+
+# Play Syntax Tree Climber
+python3 syntax_tree_climber.py
 ```
 
 ## 📋 Requirements
@@ -825,7 +1022,7 @@ python3 butterfly_effect.py
 
 ## 🧠 Philosophy & Design
 
-These eight games explore fundamental questions through interactive mechanics:
+These nine games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -838,8 +1035,9 @@ These eight games explore fundamental questions through interactive mechanics:
 - **Schrödinger's Dungeon**: Observation creates reality - does anything exist before you look at it?
 - **The Emergence Engine**: Simple rules, complex behavior - can you navigate complexity that emerges from simplicity?
 - **The Butterfly Effect**: Tiny changes, massive consequences - can you orchestrate chaos when prediction is impossible?
+- **Syntax Tree Climber**: Navigate code structure spatially - can you experience programs as architecture instead of text?
 
-Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, and chaos theory - all with mechanics that have never been done before.
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, and meta-programming - all with mechanics that have never been done before.
 
 ---
 
