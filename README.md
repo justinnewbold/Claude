@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Four unique experimental games that explore consciousness, reality, time, and infinity in ways never seen before.
+Five unique experimental games that explore consciousness, reality, time, infinity, and computation in ways never seen before.
 
 ---
 
@@ -356,6 +356,105 @@ See [FORKING_PATHS.md](FORKING_PATHS.md) for full documentation.
 
 ---
 
+## 🔄 THE LAST RECURSION
+
+### You Are The Function. Debug Yourself From The Inside.
+
+**The Last Recursion** is a puzzle/roguelike where you play as a function trapped in infinite recursion. Navigate through your own stack frames, collect return values, avoid code corruption, and find the base case before stack overflow destroys you.
+
+### The Innovation
+
+This is **code as a playable space**. Unlike the narrative games, this is actual puzzle/action gameplay where abstract CS concepts become physically navigable:
+
+```
+╔═ STACK FRAME 3 ═╗
+Stack: ████░░░░░░ 40%
+Returns: 2/3 | Corruption: 30%
+
+  ####################
+  #@.......R.........#
+  #.###.......X.....#
+  #........R........#
+  #..............B..>#
+  ####################
+
+@ = You (the function executing)
+R = Return values (collect these)
+X = Corruption (avoid!)
+B = Base case (your escape!)
+> = Exit (recurse deeper)
+```
+
+### How to Play
+
+```bash
+python3 last_recursion.py
+```
+
+### Core Mechanics
+
+- **Navigate stack frames** - Each level is a recursive call to yourself
+- **Collect return values** - Required to satisfy function contracts
+- **Recurse deeper** - Exit to call yourself again (depth++)
+- **Return to previous** - Go back if you have returns (depth--)
+- **Find the base case** - The ONLY way to escape infinite recursion
+- **Avoid corruption** - Hitting bugs damages your stack
+- **Beat stack overflow** - Reach depth 10 and you crash
+
+### Why It's Unique
+
+**Traditional roguelikes**: Navigate dungeons, find stairs, go deeper
+
+**The Last Recursion**: Navigate code, call yourself, debug yourself
+
+Abstract programming concepts become **physically navigable**:
+- Recursion = going deeper into levels
+- Stack frames = the levels themselves
+- Base case = win condition
+- Stack overflow = death
+- Return values = currency to go back
+
+### Features
+
+- **Procedural stack generation** - Deeper levels = more walls + corruption
+- **Stack pressure system** - Visual feedback on overflow risk
+- **Color-coded depth** - Cyan (safe) → Purple → Red (critical)
+- **Strategic recursion** - Don't go deeper than necessary
+- **Return mechanics** - Collect values to safely return
+- **Base case hunting** - Appears randomly at depth 5+
+
+### Strategy
+
+1. Collect all returns before exiting each frame
+2. Explore depth 5+ thoroughly - base case appears there
+3. Avoid corruption tiles - they damage your stack
+4. You can return! Use R key if you have enough values
+5. Don't reach depth 10 - that's stack overflow
+
+### Educational Value
+
+Players learn through gameplay (not lectures):
+- How recursion actually works
+- Why base cases are critical
+- What stack frames are
+- How stack overflow happens
+- Why return values matter
+
+### The Meta
+
+You are playing a function, from inside itself, trying to debug itself. The game is literally self-referential code made playable:
+
+```python
+def escape(depth):
+    if found_base_case():  # What you're searching for
+        return SUCCESS
+    return escape(depth + 1)  # Where you're trapped
+```
+
+See [LAST_RECURSION.md](LAST_RECURSION.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -373,6 +472,9 @@ python3 infinite_library.py
 
 # Play The Garden of Forking Paths
 python3 forking_paths.py
+
+# Play The Last Recursion
+python3 last_recursion.py
 ```
 
 ## 📋 Requirements
@@ -381,16 +483,20 @@ python3 forking_paths.py
 - Terminal with ANSI color support
 - An open mind
 
-## 🧠 Philosophy
+## 🧠 Philosophy & Design
 
-These four games explore fundamental questions about existence:
+These five games explore fundamental questions through interactive mechanics:
 
-- **Echo Chambers**: What does it mean to exist across multiple realities? Is wholeness worth the cost of infinite possibility?
-- **Code Archaeology**: Can we see beyond our own paradigms? What assumptions blind us to our own fatal bugs?
-- **The Infinite Library**: Can meaning exist in infinite information? What are we really searching for?
-- **The Garden of Forking Paths**: If you could see all futures, would your choices still be meaningful? Are you navigating time or is time navigating you?
+**Philosophical Narratives:**
+- **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
+- **Code Archaeology**: Debugging extinct civilizations - can we see beyond our own paradigms?
+- **The Infinite Library**: Searching infinite information - can meaning exist when everything exists?
+- **The Garden of Forking Paths**: Navigating visible futures - are choices meaningful with perfect information?
 
-These aren't just games - they're playable philosophy experiments.
+**Action/Puzzle:**
+- **The Last Recursion**: Debug yourself from inside - what does it mean to be both the code and the debugger?
+
+Together, they span narrative exploration, philosophical inquiry, and puzzle-solving - all with mechanics that have never been done before.
 
 ---
 
