@@ -1,0 +1,8 @@
+BUILDING GAMES 9-12:
+
+9. The Ship of Theseus - DONE ✓
+10. The Butterfly Effect - chaos theory sensitive dependence  
+11. Syntax Tree Climber - navigate your own AST
+12. Entanglement - quantum entangled puzzle objects
+
+These complete the DOZEN!
