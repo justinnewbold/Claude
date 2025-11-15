@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Three unique experimental games that explore consciousness, reality, and infinity in ways never seen before.
+Four unique experimental games that explore consciousness, reality, time, and infinity in ways never seen before.
 
 ---
 
@@ -289,6 +289,73 @@ See [INFINITE_LIBRARY.md](INFINITE_LIBRARY.md) for full documentation.
 
 ---
 
+## 🌳 THE GARDEN OF FORKING PATHS
+
+### See All Futures. Choose the One True Path.
+
+**The Garden of Forking Paths** is based on another Borges story - a game where you can see branching futures before you choose. Unlike traditional choice games where you make blind decisions, here you **visualize the entire decision tree** and strategically navigate toward your goal.
+
+### The Innovation
+
+**Traditional games**: Make choice → See outcome → Live with it
+**Forking Paths**: See all futures → Explore outcomes → Choose optimally
+
+You're given a goal (e.g., "prevent the assassination") and can see 3 moments into each possible future. You can "meditate" to explore paths without committing, discovering which branches lead to success, failure, or temporal paradox.
+
+### How to Play
+
+```bash
+python3 forking_paths.py
+```
+
+### Core Mechanic
+
+```
+Current: "you stand at a crossroads under a blood moon"
+
+Futures:
+├── ○ take the left path → stranger approaches
+│   ├── ○ trust the ally → time slows
+│   │   ├── ★ intervene directly [SUCCESS!]
+│   │   └── ✗ let events unfold [FAILURE]
+│   └── ⚠ proceed alone [PARADOX]
+└── ○ take the right path → find library...
+
+Meditate to explore deeper? Or choose now?
+```
+
+### Features
+
+- **Visual Decision Trees**: ASCII art showing all visible futures
+- **Strategic Meditation**: Explore outcomes before committing
+- **Color-Coded Paths**: Green = success, Red = failure, Purple = paradox
+- **Procedural Goals**: Different objectives each playthrough
+- **Limited Vision**: See only 3 steps ahead - must explore to learn more
+- **Temporal Paradoxes**: Some paths lead to impossible situations
+- **Optimization Gameplay**: Find the ONE correct sequence of choices
+
+### The Philosophy
+
+- **Time as Space**: Navigate moments like rooms in a dungeon
+- **Determinism**: If you can see all futures, are you still free?
+- **Elimination**: Every choice kills infinite un-chosen possibilities
+- **Optimization vs Experience**: When you can see the optimal path, do you take it?
+
+### Why It's Unique
+
+Other games make you choose blindly and live with consequences. This game inverts that - you have **perfect information** but must still navigate complex trees of possibility. The challenge isn't "what will happen?" but "how do I navigate when I can see it all?"
+
+### The Difference from Echo Chambers
+
+- **Echo Chambers**: Manage parallel PRESENTS (multiple timelines existing now)
+- **Forking Paths**: Navigate parallel FUTURES (branching possibilities ahead)
+
+Both explore time, but from opposite directions.
+
+See [FORKING_PATHS.md](FORKING_PATHS.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -303,6 +370,9 @@ python3 code_archaeology.py
 
 # Play The Infinite Library
 python3 infinite_library.py
+
+# Play The Garden of Forking Paths
+python3 forking_paths.py
 ```
 
 ## 📋 Requirements
@@ -313,11 +383,12 @@ python3 infinite_library.py
 
 ## 🧠 Philosophy
 
-These three games explore fundamental questions about existence:
+These four games explore fundamental questions about existence:
 
 - **Echo Chambers**: What does it mean to exist across multiple realities? Is wholeness worth the cost of infinite possibility?
 - **Code Archaeology**: Can we see beyond our own paradigms? What assumptions blind us to our own fatal bugs?
 - **The Infinite Library**: Can meaning exist in infinite information? What are we really searching for?
+- **The Garden of Forking Paths**: If you could see all futures, would your choices still be meaningful? Are you navigating time or is time navigating you?
 
 These aren't just games - they're playable philosophy experiments.
 
