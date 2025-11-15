@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Seven unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, and emergence in ways never seen before.
+Eight unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, and chaos theory in ways never seen before.
 
 ---
 
@@ -668,6 +668,124 @@ See [EMERGENCE_ENGINE.md](EMERGENCE_ENGINE.md) for full documentation.
 
 ---
 
+## 🦋 THE BUTTERFLY EFFECT
+
+### Small Changes. Big Consequences.
+
+**The Butterfly Effect** is a chaos theory puzzle game where tiny interventions cascade into massive consequences. Make microscopic changes to a simulated physical world, then watch as those tiny nudges create completely different outcomes 100 timesteps later.
+
+### The Innovation
+
+**Traditional puzzle games**: Actions have immediate, predictable effects
+
+**The Butterfly Effect**: Actions have delayed, amplified, chaotic effects
+
+This isn't about randomness - the physics simulation is completely deterministic. But it's also unpredictable. Tiny differences in initial conditions get exponentially amplified over time.
+
+### How to Play
+
+```bash
+python3 butterfly_effect.py
+```
+
+### Core Mechanic
+
+```
+╔═ BUTTERFLY EFFECT - PLANNING PHASE ═╗
+Level 1 | Interventions: 1/3
+
+  ········································
+  ·····●·································
+  ········································
+  ··················███████···············
+  ········································
+  ··························◉············
+  ·············███████····················
+  ········································
+  ··································◆····
+  ████████████████████████████████████████
+
+● = Particle (physics-enabled)
+@ = Agent (special particle)
+█ = Wall (solid obstacle)
+◆ = Goal (target)
+✖ = Danger (avoid!)
+◉ = Your intervention
+```
+
+### Gameplay
+
+1. **Observe the simulation** - Run it without interventions (SPACE)
+2. **Identify the problem** - Why doesn't the goal get reached?
+3. **Plan interventions** - Where can tiny changes matter most?
+4. **Make microscopic changes**:
+   - **V**: Add +0.5 velocity nudge
+   - **E**: Add +2.0 energy boost
+5. **Simulate forward** - Watch 100 timesteps evolve
+6. **Watch chaos unfold** - See how tiny changes cascade
+
+### The Science
+
+**Edward Lorenz (1961)** discovered while studying weather that rounding errors of 0.000001 led to completely different forecasts. This became the **butterfly effect**:
+
+*"A butterfly flaps its wings in Brazil, causing a tornado in Texas."*
+
+### Key Principles
+
+**Sensitive Dependence on Initial Conditions**:
+- Tiny starting differences → Massive outcome differences
+- Exponential divergence over time
+- Deterministic but unpredictable
+
+**Deterministic ≠ Predictable**:
+- Physics is perfectly deterministic (same input = same output)
+- But tiny measurement errors make prediction impossible
+- You must simulate to know what happens
+
+### Strategy
+
+- **Observe baseline first** - Run original simulation
+- **Find critical points** - Where do particles almost reach goals?
+- **Minimal interventions** - Small nudges, not big changes
+- **Early timing** - More timesteps = more amplification
+- **Use platforms** - Bounces amplify velocity changes
+
+### Why It's Unique
+
+Other physics puzzles: Direct causation (cut rope → ball falls)
+
+The Butterfly Effect: **Indirect causation** (nudge particle → 100 steps later → cascade reaches goal)
+
+The challenge isn't predicting - it's understanding how chaos works and intervening strategically.
+
+### Educational Value
+
+Learn through play:
+- **Chaos theory**: Deterministic unpredictability
+- **Sensitive dependence**: Small causes, big effects
+- **Emergence**: Complex behavior from simple physics
+- **Nonlinearity**: Effects don't scale linearly with causes
+- **Computational irreducibility**: Must simulate to predict
+
+### Real-World Applications
+
+**Weather**: Why forecasts fail after ~2 weeks
+**Ecosystems**: How small changes cascade through food webs
+**Economics**: How minor news triggers market crashes
+**Evolution**: How tiny mutations create new species
+
+### The Philosophy
+
+The game demonstrates:
+- **Determinism without predictability** - Rules are fixed, outcomes aren't
+- **The illusion of control** - You intervene but can't precisely predict
+- **Computational irreducibility** - No shortcuts to knowing the future
+- **Emergence** - Complex global patterns from simple local rules
+
+See [BUTTERFLY_EFFECT.md](BUTTERFLY_EFFECT.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -694,6 +812,9 @@ python3 schrodingers_dungeon.py
 
 # Play The Emergence Engine
 python3 emergence_engine.py
+
+# Play The Butterfly Effect
+python3 butterfly_effect.py
 ```
 
 ## 📋 Requirements
@@ -704,7 +825,7 @@ python3 emergence_engine.py
 
 ## 🧠 Philosophy & Design
 
-These seven games explore fundamental questions through interactive mechanics:
+These eight games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -716,8 +837,9 @@ These seven games explore fundamental questions through interactive mechanics:
 - **The Last Recursion**: Debug yourself from inside - what does it mean to be both the code and the debugger?
 - **Schrödinger's Dungeon**: Observation creates reality - does anything exist before you look at it?
 - **The Emergence Engine**: Simple rules, complex behavior - can you navigate complexity that emerges from simplicity?
+- **The Butterfly Effect**: Tiny changes, massive consequences - can you orchestrate chaos when prediction is impossible?
 
-Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, and emergent systems - all with mechanics that have never been done before.
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, and chaos theory - all with mechanics that have never been done before.
 
 ---
 
