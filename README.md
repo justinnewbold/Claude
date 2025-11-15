@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Five unique experimental games that explore consciousness, reality, time, infinity, and computation in ways never seen before.
+Six unique experimental games that explore consciousness, reality, time, infinity, computation, and quantum mechanics in ways never seen before.
 
 ---
 
@@ -455,6 +455,110 @@ See [LAST_RECURSION.md](LAST_RECURSION.md) for full documentation.
 
 ---
 
+## 🐱 SCHRÖDINGER'S DUNGEON
+
+### Where Observation Creates Reality
+
+**Schrödinger's Dungeon** is a roguelike where every room exists in quantum superposition until you observe it. Enemies are simultaneously alive AND dead. Treasure both exists AND doesn't exist. You navigate a dungeon where observation literally creates reality.
+
+### The Innovation
+
+**Traditional roguelikes**: World is generated, you discover it
+
+**Schrödinger's Dungeon**: World exists in superposition, you **collapse** it
+
+Nothing is determined until you observe it. You're not exploring a fixed dungeon - you're creating reality through observation.
+
+### How to Play
+
+```bash
+python3 schrodingers_dungeon.py
+```
+
+### Core Mechanic
+
+```
+╔═ QUANTUM DUNGEON ═╗
+Room (0, 0) | HP: 10/10 | Gold: 0 | Q-Power: 3
+
+  ###############
+  #.....?.......#
+  #.?...@...?...#
+  #.......E.....#
+  #...?.....$...#
+  ###############
+
+? = Superposed (enemy/treasure/empty)
+E = Collapsed to Enemy
+$ = Collapsed to Treasure
+@ = You (the observer)
+```
+
+### Quantum Mechanics
+
+#### Superposition
+- Every **?** is simultaneously enemy, treasure, and empty
+- Probabilities: 40-70% enemy, 20% treasure, 10-40% empty
+- Nothing is determined until observed
+
+#### Wave Function Collapse
+- **Move into entity** → Collapses to one state
+- **Observe nearby** → Auto-collapse within radius
+- **Quantum Manipulate** → Force favorable collapse (limited)
+
+### Gameplay
+
+- **W/A/S/D**: Move (touch = collapse)
+- **O**: Observe at range (see without touching)
+- **Q**: Quantum Manipulate (force safe collapse, 3 uses)
+- **Goal**: Survive 10 rooms
+
+### Strategy
+
+1. **Observe before committing** - Look before you leap
+2. **Save Q-Power for danger** - Only 3 uses total
+3. **Manage probability** - Deep rooms = more enemies
+4. **Fight strategically** - Combat is risky
+
+### Why It's Unique
+
+Other roguelikes: Randomness determined at generation
+
+Schrödinger's Dungeon: Randomness exists in **superposition**
+
+You don't discover what was there - you **create** what's there by observing.
+
+The quantum mechanics are real gameplay mechanics, not just theme.
+
+### Educational Value
+
+Learn through gameplay:
+- Superposition (multiple states simultaneously)
+- Wave function collapse (observation creates reality)
+- Observer effect (measurement changes system)
+- Probability distributions (weighted outcomes)
+
+### The Philosophy
+
+**Does the enemy exist before you see it?**
+
+In traditional roguelikes: Yes, you just don't know about it
+
+In Schrödinger's Dungeon: **No, it exists in superposition**
+
+This isn't just hidden information - it's genuine quantum indeterminacy.
+
+### Speedrun Categories
+
+- **Any%**: Reach 10 rooms, any means
+- **Pacifist**: 0 enemies defeated
+- **No Q-Power**: No quantum manipulation
+- **Blind%**: No Observe ability usage
+
+See [SCHRODINGERS_DUNGEON.md](SCHRODINGERS_DUNGEON.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -475,6 +579,9 @@ python3 forking_paths.py
 
 # Play The Last Recursion
 python3 last_recursion.py
+
+# Play Schrödinger's Dungeon
+python3 schrodingers_dungeon.py
 ```
 
 ## 📋 Requirements
@@ -485,7 +592,7 @@ python3 last_recursion.py
 
 ## 🧠 Philosophy & Design
 
-These five games explore fundamental questions through interactive mechanics:
+These six games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -493,10 +600,11 @@ These five games explore fundamental questions through interactive mechanics:
 - **The Infinite Library**: Searching infinite information - can meaning exist when everything exists?
 - **The Garden of Forking Paths**: Navigating visible futures - are choices meaningful with perfect information?
 
-**Action/Puzzle:**
+**Action/Puzzle/Roguelike:**
 - **The Last Recursion**: Debug yourself from inside - what does it mean to be both the code and the debugger?
+- **Schrödinger's Dungeon**: Observation creates reality - does anything exist before you look at it?
 
-Together, they span narrative exploration, philosophical inquiry, and puzzle-solving - all with mechanics that have never been done before.
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, and roguelike action - all with mechanics that have never been done before.
 
 ---
 
