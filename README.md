@@ -1185,38 +1185,42 @@ Together, they span narrative exploration, philosophical inquiry, puzzle-solving
 
 Want to share these games with the world? Deploy to the cloud in minutes!
 
-### Quick Deploy (Easiest)
+### ⭐ RECOMMENDED: Google Cloud Run (Best Option)
+
+**Auto-scaling, free tier, production-ready:**
 
 ```bash
 cd deploy
-./quickstart.sh
+./deploy-cloudrun.sh
 ```
 
-### Deploy to Railway (2 minutes)
+**Why Cloud Run?**
+- ✅ 2 million requests/month FREE (forever)
+- ✅ Auto-scales from 0 to 1000+ users
+- ✅ Only pay when someone is playing ($0 most likely)
+- ✅ HTTPS included automatically
+- ✅ Global CDN built-in
+
+**📖 See [CLOUDRUN-QUICKSTART.md](CLOUDRUN-QUICKSTART.md) for step-by-step guide**
+
+### Alternative Platforms
 
 ```bash
-cd deploy/web-terminal
-npx @railway/cli login
-npx @railway/cli up
+# Railway.app - Easiest setup
+cd deploy/web-terminal && npx @railway/cli up
+
+# Docker - Run anywhere
+cd deploy && docker-compose up
 ```
 
-### Deploy with Docker
-
-```bash
-cd deploy
-docker-compose up
-# Visit http://localhost:5000
-```
-
-### Available Platforms
-
-- **Railway.app** ⭐ - Easiest (free $5/month credit)
-- **Render.com** - Simple GitHub integration (free tier)
-- **Heroku** - Classic platform (free tier)
-- **Google Cloud Run** - Auto-scaling (free tier)
+**Other options:**
+- **Railway.app** - Easiest (free $5/month credit)
+- **Render.com** - Simple GitHub integration
+- **Heroku** - Classic platform
+- **Google Cloud Run** - Auto-scaling (see above)
 - **DigitalOcean** - Full control ($5/month)
 
-**See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment guide with all options.**
+**See [DEPLOYMENT.md](DEPLOYMENT.md) for all deployment options.**
 
 ---
 
