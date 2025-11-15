@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Nine unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, and meta-programming in ways never seen before.
+Ten unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, and quantum entanglement in ways never seen before.
 
 ---
 
@@ -980,6 +980,142 @@ See [SYNTAX_TREE_CLIMBER.md](SYNTAX_TREE_CLIMBER.md) for full documentation.
 
 ---
 
+## 🔗 ENTANGLEMENT
+
+### Spooky Action at a Distance
+
+**Entanglement** is a quantum puzzle game where blocks are quantum-entangled. Push one block, its partner moves simultaneously - regardless of distance. Navigate correlated pairs to goals using nothing but quantum correlation.
+
+### The Innovation
+
+**Traditional puzzle games**: One action → One consequence
+
+**Entanglement**: One action → Multiple simultaneous correlated consequences
+
+You don't control blocks independently - you control them through their **quantum relationships**. This is correlation as gameplay.
+
+### How to Play
+
+```bash
+python3 entanglement.py
+```
+
+### Core Mechanic
+
+```
+╔═ ENTANGLEMENT ═╗
+Level 1 | Moves: 5
+
+  ████████████████████
+  █··@···■·····■····█
+  █·············○···█
+  █·············○···█
+  ████████████████████
+
+@ = You (player)
+■ = Entangled blocks (same color = entangled)
+○ = Goal (empty)
+◆ = Goal (with block)
+█ = Wall
+
+Entangled Pairs:
+  ■ (5,1) ⟷ ■ (10,1)
+```
+
+### The Physics
+
+**Quantum Entanglement**: When two particles become entangled, measuring one instantly affects the other - regardless of distance.
+
+Einstein called this **"spooky action at a distance"** and refused to believe it. But experiments prove it's real.
+
+In this game:
+- Blocks are quantum-correlated
+- Push one → Its partner moves the same direction
+- Both move **simultaneously**
+- Distance doesn't matter
+- This is how real entanglement works (conceptually)
+
+### Gameplay
+
+**Push entangled blocks**:
+- Walk into a block to push it
+- If entangled, its partner moves too
+- Both must be able to move (no walls blocking)
+- If either is blocked, neither moves
+
+**Goal**: Get all blocks onto goal positions (○)
+
+**Strategy**:
+1. **Think in pairs** - Blocks aren't independent
+2. **Visualize both paths** - Where does each need to go?
+3. **Use walls as guides** - Pin one, move the other
+4. **Plan sequences** - What order of pushes works?
+
+### Entanglement Types
+
+Different colored blocks = different entangled pairs:
+- **Cyan blocks** (■) entangled with each other
+- **Magenta blocks** (■) entangled with each other
+- **Yellow blocks** (■) entangled with each other
+- Each pair moves together, pairs independent
+
+### Why It's Unique
+
+**Sokoban-style games**: Push one box at a time
+
+**Entanglement**: Push quantum-correlated pairs that move **simultaneously**
+
+The innovation:
+- **Action at a distance** (separated blocks move together)
+- **Constraint solving** (both must satisfy movement rules)
+- **Correlation puzzles** (managing multiple entangled systems)
+
+### Educational Value
+
+Learn through gameplay:
+- **Quantum correlation**: How entangled particles share states
+- **Non-locality**: Instant effects regardless of distance
+- **EPR Paradox**: Einstein's "spooky action" concern
+- **Bell's Theorem**: Experimental proof of entanglement
+- **Constraint propagation**: How correlations limit possibilities
+
+### The Science
+
+**Real quantum entanglement**:
+- Verified in thousands of experiments
+- Works at distances of 1200+ km
+- Used in quantum computing and cryptography
+- Fundamental to quantum mechanics
+
+**EPR Paradox (1935)**: Einstein, Podolsky, Rosen questioned if entanglement proved quantum mechanics incomplete
+
+**Bell's Theorem (1964)**: John Stewart Bell proved entanglement is real - no hidden variables
+
+### Strategy Examples
+
+**Level 1**: Two blocks side by side
+- Push left block right → Both move right
+- Position both on goals
+
+**Level 4**: Complex maze
+- Blocks separated by walls
+- Must navigate different paths simultaneously
+- Use walls to control individual positions
+
+### The Philosophy
+
+**Non-locality**: The universe has instant correlations across distance
+
+**Holism**: Entangled particles aren't separate - they're one system
+
+**Measurement**: Does correlation exist before you test it? (Quantum mechanics says no definite state before measurement)
+
+The game doesn't answer these questions - it just makes them playable.
+
+See [ENTANGLEMENT.md](ENTANGLEMENT.md) for full documentation.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -1012,6 +1148,9 @@ python3 butterfly_effect.py
 
 # Play Syntax Tree Climber
 python3 syntax_tree_climber.py
+
+# Play Entanglement
+python3 entanglement.py
 ```
 
 ## 📋 Requirements
@@ -1022,7 +1161,7 @@ python3 syntax_tree_climber.py
 
 ## 🧠 Philosophy & Design
 
-These nine games explore fundamental questions through interactive mechanics:
+These ten games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -1036,8 +1175,9 @@ These nine games explore fundamental questions through interactive mechanics:
 - **The Emergence Engine**: Simple rules, complex behavior - can you navigate complexity that emerges from simplicity?
 - **The Butterfly Effect**: Tiny changes, massive consequences - can you orchestrate chaos when prediction is impossible?
 - **Syntax Tree Climber**: Navigate code structure spatially - can you experience programs as architecture instead of text?
+- **Entanglement**: Quantum-correlated objects - can you solve puzzles using spooky action at a distance?
 
-Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, and meta-programming - all with mechanics that have never been done before.
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, and quantum entanglement - all with mechanics that have never been done before.
 
 ---
 
