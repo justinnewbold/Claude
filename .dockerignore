@@ -1,0 +1,30 @@
+# Ignore everything by default
+*
+
+# Allow only what we need
+!echo_chambers.py
+!code_archaeology.py
+!infinite_library.py
+!forking_paths.py
+!last_recursion.py
+!schrodingers_dungeon.py
+!emergence_engine.py
+!ship_of_theseus.py
+!butterfly_effect.py
+!syntax_tree_climber.py
+!entanglement.py
+
+# Web terminal files
+!deploy/web-terminal/requirements.txt
+!deploy/web-terminal/templates/
+
+# Don't include these
+.git
+.gitignore
+*.md
+__pycache__
+*.pyc
+.env
+venv/
+env/
+node_modules/

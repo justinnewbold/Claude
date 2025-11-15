@@ -1,0 +1,153 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy ONLY the game files (not all Python files)
+COPY echo_chambers.py ./games/
+COPY code_archaeology.py ./games/
+COPY infinite_library.py ./games/
+COPY forking_paths.py ./games/
+COPY last_recursion.py ./games/
+COPY schrodingers_dungeon.py ./games/
+COPY emergence_engine.py ./games/
+COPY ship_of_theseus.py ./games/
+COPY butterfly_effect.py ./games/
+COPY syntax_tree_climber.py ./games/
+COPY entanglement.py ./games/
+
+# Copy web terminal application
+COPY deploy/web-terminal/requirements.txt ./
+COPY deploy/web-terminal/templates ./templates/
+
+# Create a clean app.py for Cloud Run
+RUN cat > app.py <<'EOF'
+#!/usr/bin/env python3
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, emit
+import pty, os, select, termios, struct, fcntl
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+class Terminal:
+    def __init__(self):
+        self.fd = None
+        self.child_pid = None
+
+    def spawn(self, game_file):
+        (child_pid, fd) = pty.fork()
+        if child_pid == 0:
+            os.execvp('python3', ['python3', f'/app/games/{game_file}'])
+        else:
+            self.child_pid = child_pid
+            self.fd = fd
+            self.set_terminal_size(80, 24)
+            return fd
+
+    def set_terminal_size(self, cols, rows):
+        if self.fd:
+            fcntl.ioctl(self.fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
+
+    def read(self):
+        if self.fd:
+            try:
+                return os.read(self.fd, 10240).decode('utf-8', errors='replace')
+            except:
+                return None
+
+    def write(self, data):
+        if self.fd:
+            os.write(self.fd, data.encode())
+
+terminals = {}
+
+@app.route('/')
+def index():
+    games = [
+        {'id': 'echo_chambers', 'name': 'Echo Chambers', 'file': 'echo_chambers.py'},
+        {'id': 'code_archaeology', 'name': 'Code Archaeology', 'file': 'code_archaeology.py'},
+        {'id': 'infinite_library', 'name': 'The Infinite Library', 'file': 'infinite_library.py'},
+        {'id': 'forking_paths', 'name': 'The Garden of Forking Paths', 'file': 'forking_paths.py'},
+        {'id': 'last_recursion', 'name': 'The Last Recursion', 'file': 'last_recursion.py'},
+        {'id': 'schrodingers_dungeon', 'name': 'Schrödinger\\'s Dungeon', 'file': 'schrodingers_dungeon.py'},
+        {'id': 'emergence_engine', 'name': 'The Emergence Engine', 'file': 'emergence_engine.py'},
+        {'id': 'ship_of_theseus', 'name': 'The Ship of Theseus', 'file': 'ship_of_theseus.py'},
+        {'id': 'butterfly_effect', 'name': 'The Butterfly Effect', 'file': 'butterfly_effect.py'},
+        {'id': 'syntax_tree_climber', 'name': 'Syntax Tree Climber', 'file': 'syntax_tree_climber.py'},
+        {'id': 'entanglement', 'name': 'Entanglement', 'file': 'entanglement.py'},
+    ]
+    return render_template('index.html', games=games)
+
+@app.route('/play/<game_file>')
+def play(game_file):
+    return render_template('terminal.html', game_file=game_file)
+
+@app.route('/health')
+def health():
+    return {'status': 'healthy'}, 200
+
+@socketio.on('start')
+def handle_start(data):
+    terminal = Terminal()
+    terminal.spawn(data['game_file'])
+    terminals[request.sid] = terminal
+    socketio.start_background_task(read_output, request.sid)
+
+@socketio.on('input')
+def handle_input(data):
+    if request.sid in terminals:
+        terminals[request.sid].write(data['input'])
+
+@socketio.on('resize')
+def handle_resize(data):
+    if request.sid in terminals:
+        terminals[request.sid].set_terminal_size(data['cols'], data['rows'])
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    if request.sid in terminals:
+        terminal = terminals[request.sid]
+        try:
+            if terminal.child_pid:
+                os.kill(terminal.child_pid, 9)
+            if terminal.fd:
+                os.close(terminal.fd)
+        except:
+            pass
+        del terminals[request.sid]
+
+def read_output(session_id):
+    while session_id in terminals:
+        terminal = terminals[session_id]
+        if terminal.fd:
+            try:
+                ready, _, _ = select.select([terminal.fd], [], [], 0.1)
+                if ready:
+                    output = terminal.read()
+                    if output:
+                        socketio.emit('output', {'output': output}, room=session_id)
+                    else:
+                        break
+            except:
+                break
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
+    socketio.run(app, host='0.0.0.0', port=port, debug=False)
+EOF
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set environment
+ENV PORT=8080
+EXPOSE 8080
+
+# Run the application
+CMD exec python app.py
