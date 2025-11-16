@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Ten unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, and quantum entanglement in ways never seen before.
+Sixteen unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, quantum entanglement, ethics, retrocausality, incompleteness, thermodynamics, and computability in ways never seen before.
 
 ---
 
@@ -1116,6 +1116,514 @@ See [ENTANGLEMENT.md](ENTANGLEMENT.md) for full documentation.
 
 ---
 
+## 🚃 THE TROLLEY PROBLEM ENGINE
+
+### Ethics as Cascading Consequences
+
+**The Trolley Problem Engine** is an interactive ethics game where moral dilemmas cascade into deeper consequences. Every choice saves some and sacrifices others - but the story doesn't end there. Watch your decisions ripple forward, creating new dilemmas born from the original.
+
+### The Innovation
+
+**Traditional ethics games**: Make choice → See immediate outcome → Move on
+
+**The Trolley Problem Engine**: Make choice → See immediate outcome → **Consequences create new dilemmas** → Repeat
+
+Your utilitarian choice might create conditions for a deontological crisis. Your virtue ethics decision might force a consequentialist nightmare. The game tracks how your framework shifts under pressure.
+
+### How to Play
+
+```bash
+python3 trolley_problem.py
+```
+
+### Core Mechanic
+
+Each scenario presents an impossible choice:
+- **Utilitarian**: Maximize total welfare (greatest good for greatest number)
+- **Deontological**: Follow moral rules (never use people as means)
+- **Virtue Ethics**: Act with virtuous character (what would a good person do?)
+
+But choices have consequences that spawn new scenarios based on your previous actions.
+
+### Ethical Frameworks Tracked
+
+**Utilitarian Score**: Do you maximize net welfare?
+**Deontological Score**: Do you respect moral rules and rights?
+**Virtue Score**: Do you act with wisdom, courage, and compassion?
+
+The game tracks which framework you align with - and tests if you can stay consistent when scenarios get harder.
+
+### Example Cascade
+
+**Level 1**: Classic trolley problem - 5 workers vs 1 worker
+- Pull lever → Save 5, sacrifice 1
+- Don't pull → Save 1, let 5 die
+
+**Level 2**: (Consequence of Level 1 choice)
+- If you pulled: The 1 person's family now seeks justice...
+- If you didn't: The 5 families demand you be held accountable...
+
+**Level 3**: Each prior choice creates new moral landscape
+
+### Why It's Unique
+
+Other ethics games present isolated dilemmas. **The Trolley Problem Engine** shows how:
+- Consequences cascade into new dilemmas
+- Your framework is tested across scenarios
+- Moral consistency becomes harder under pressure
+- There are no clean hands - only trade-offs
+
+### The Philosophy
+
+**Trolley Problem (Philippa Foot, 1967)**: The classic thought experiment that launched modern ethics
+
+**Variations explored**:
+- Fat man variant (using someone as a means)
+- Loop variant (is redirection different from pushing?)
+- Personal involvement (distance from consequence)
+- Organ harvesting (individual rights vs collective good)
+
+### Educational Value
+
+Learn through play:
+- **Consequentialism**: Judge actions by outcomes
+- **Deontology**: Some acts are wrong regardless of consequences
+- **Virtue Ethics**: Character and wisdom matter
+- **Moral psychology**: How we actually make ethical decisions
+- **Consistency**: Can you maintain principles under pressure?
+
+### The Message
+
+*There are no perfect choices. Only consequences you must live with.*
+
+---
+
+## ⚛️ QUANTUM ERASER
+
+### The Future Determines the Past
+
+**Quantum Eraser** is a puzzle game based on the delayed-choice quantum eraser experiment. Navigate mazes where **future measurements determine past paths**. Your actions later in time retroactively change what happened earlier. Causality runs backwards.
+
+### The Innovation
+
+**Traditional puzzle games**: Past determines future (normal causality)
+
+**Quantum Eraser**: **Future determines past** (retrocausality)
+
+Make a measurement at the end of a level, and watch as the path you took changes retroactively. The game simulates real quantum mechanics.
+
+### How to Play
+
+```bash
+python3 quantum_eraser.py
+```
+
+### Core Mechanic
+
+Navigate through quantum interference patterns:
+- Particles exist in **superposition** (both paths simultaneously)
+- Travel creates **interference patterns** (wave behavior)
+- **Measuring** collapses to definite path (particle behavior)
+- **Erasing** that measurement restores interference (retroactively!)
+
+The delayed-choice aspect: You choose whether to measure AFTER the particle passed through - but your future choice determines its past behavior.
+
+### The Physics
+
+**Wheeler's Delayed-Choice Experiment (1978)**: You can decide what the photon "did" in the past by measuring it in the future
+
+**Quantum Eraser Experiment (1982-2000)**: If you erase "which-path" information, interference returns - even after the particle already went through
+
+**Retrocausality**: Future measurements affect past behavior
+
+### Gameplay
+
+**Levels 1-3**: Basic quantum mechanics
+- Superposition (particle in both paths)
+- Interference (wave patterns)
+- Measurement (collapse to one state)
+
+**Levels 4-6**: Delayed-choice mechanics
+- Particle already passed through slits
+- You measure after
+- Your choice determines what it "did" before
+
+**Levels 7-8**: Quantum eraser
+- Measurement destroys interference
+- Erasing measurement restores it
+- The past changes based on future erasure
+
+### Strategy
+
+- **Leave superposition when possible** - More options
+- **Measure only when necessary** - Collapses possibilities
+- **Erase to restore interference** - Regain quantum behavior
+- **Plan backwards** - Future determines past
+
+### Why It's Unique
+
+Other quantum games: Superposition and measurement
+
+**Quantum Eraser**: Retroactive causality - your future choices change the past
+
+This isn't time travel - it's how quantum mechanics actually works according to experiments.
+
+### Educational Value
+
+Learn through play:
+- **Superposition**: Multiple states simultaneously
+- **Interference**: Wave-like behavior
+- **Measurement**: Observer effect collapses superposition
+- **Complementarity**: Can't have both wave and particle properties
+- **Retrocausality**: Future measurements affect past events
+
+### The Science
+
+**Real experiments** (Scully et al., 2000):
+- Photons sent through double slits
+- "Which-path" detector placed after slits
+- Interference disappears (particle behavior)
+- Erase which-path info (even after detection!)
+- Interference returns (wave behavior restored)
+
+The photon's behavior in the past depends on what you do in the future.
+
+### The Philosophy
+
+**Does the past exist independently of future measurements?**
+
+Traditional physics: Yes
+Quantum mechanics: **No definite past until measured**
+
+The game makes this playable - you experience retrocausality firsthand.
+
+---
+
+## ∞ GÖDEL'S PARADOX
+
+### Some Puzzles Cannot Be Solved Within The System
+
+**Gödel's Paradox** is a self-referential puzzle game about incompleteness. Solve puzzles using formal rules - until you encounter puzzles that are **impossible within the system**. Step outside the rules (meta-solve) to win.
+
+### The Innovation
+
+**Traditional puzzle games**: All puzzles solvable using given rules
+
+**Gödel's Paradox**: **Some puzzles are formally unsolvable** - you must recognize incompleteness and step outside
+
+The game IS its own formal system. And it is incomplete.
+
+### How to Play
+
+```bash
+python3 godels_paradox.py
+```
+
+### Core Mechanic
+
+Each puzzle has:
+- **Formal rules** you must follow
+- **Goal state** you must reach
+- **Solvability** (some CAN'T be solved with rules)
+
+**System Solution (S)**: Solve using the formal rules given
+**Meta Solution (M)**: Recognize unsolvability and step outside
+
+### The Levels
+
+**Level 1-2**: Normal puzzles
+- Solvable using system rules
+- Build confidence in the formal system
+
+**Level 3**: Impossible puzzle
+- Rules: Move, Delete
+- Goal: CREATE new object
+- System can't solve (no CREATE rule exists)
+- Must use meta-solution
+
+**Level 4**: The ultimate paradox
+- Rules: "You cannot win" + "Rules cannot be broken"
+- Solving requires questioning the game itself
+- Pure Gödelian self-reference
+
+### The Mathematics
+
+**Gödel's Incompleteness Theorems (1931)**:
+
+**First Theorem**: Any consistent formal system F that can express arithmetic contains true statements that cannot be proven within F
+
+**Second Theorem**: No consistent formal system can prove its own consistency
+
+### Why It's Unique
+
+Other puzzle games: Git gud, solve all puzzles
+
+**Gödel's Paradox**: **Some puzzles are provably unsolvable** - the challenge is recognizing which ones
+
+This isn't frustration - it's education. You experience incompleteness firsthand.
+
+### Educational Value
+
+Learn through play:
+- **Formal systems**: Rules + axioms + inference
+- **Completeness**: Can all truths be proven?
+- **Consistency**: Can contradictions be derived?
+- **Self-reference**: Systems that talk about themselves
+- **Meta-reasoning**: Stepping outside the system
+
+### The Philosophy
+
+**Limits of formal reasoning**:
+- Mathematics is incomplete (has unprovable truths)
+- No system can fully validate itself
+- Self-reference creates paradoxes
+- Some truths require stepping outside
+
+**Modern implications**:
+- Limits of AI (can't be both complete and consistent)
+- Halting problem (related undecidability)
+- Consciousness (self-reference in minds?)
+
+### The Experience
+
+You'll try system solutions on impossible puzzles. Feel the frustration. Then realize: **The puzzle isn't broken - the system is incomplete.**
+
+That moment of recognition IS the game's victory condition.
+
+---
+
+## 🔥 MAXWELL'S DEMON
+
+### Information is Not Free
+
+**Maxwell's Demon** is a thermodynamics puzzle where you sort particles to decrease entropy. But observations cost memory, and erasing memory costs energy. Learn why perpetual motion is impossible through the thermodynamic cost of information.
+
+### The Innovation
+
+**Traditional physics games**: Manipulate particles freely
+
+**Maxwell's Demon**: **Every observation has cost, every memory must be erased, every erasure dissipates energy**
+
+You can decrease entropy - but information processing has thermodynamic cost that exactly balances it.
+
+### How to Play
+
+```bash
+python3 maxwells_demon.py
+```
+
+### Core Mechanic
+
+**Two chambers** with particles:
+- **Left chamber**: Slow (cold) particles
+- **Right chamber**: Fast (hot) particles
+- **Door between**: You control it
+
+**Your mission**: Sort particles (fast right, slow left) to create temperature difference
+
+**The catch**:
+- Must **observe** particles to know their speed (costs memory)
+- Memory is **limited** (fills up)
+- Must **erase** memory to continue (costs energy!)
+- Energy cost = entropy decrease (Second Law preserved)
+
+### The Physics
+
+**Maxwell's Demon (1867)**: James Clerk Maxwell's thought experiment
+- Demon guards door between chambers
+- Observes each molecule
+- Fast ones → Hot chamber
+- Slow ones → Cold chamber
+- **Entropy decreases without work** (?!)
+- Perpetual motion machine (?!)
+
+**Landauer's Principle (1961)**: Rolf Landauer resolved the paradox
+- **Information erasure has energy cost**: kT ln(2) per bit
+- Demon's memory fills with observations
+- Must erase memory to continue
+- Erasure dissipates energy ≥ entropy decrease
+- **Second Law of Thermodynamics is safe**
+
+### Gameplay
+
+**Observe (O)**: Measure particle speed → Uses memory slot
+**Door (D)**: Open/close door → Control particle flow
+**Erase (E)**: Clear memory → **Costs energy**
+**Time (SPACE)**: Advance simulation
+
+**Goal**: Create target temperature difference before running out of energy
+
+### Strategy
+
+- **Observe strategically** - Don't waste memory on wrong particles
+- **Sort efficiently** - Minimize observations needed
+- **Erase when necessary** - Memory fills fast
+- **Accept the cost** - You can't beat thermodynamics
+
+### Why It's Unique
+
+Other thermodynamics games: Entropy as abstract concept
+
+**Maxwell's Demon**: **Information and thermodynamics are unified** - you experience Landauer's principle through gameplay
+
+The game proves you can't beat physics by being clever about information.
+
+### Educational Value
+
+Learn through play:
+- **Entropy**: Disorder in thermodynamic systems
+- **Second Law**: Entropy always increases in closed systems
+- **Information theory**: Memory, observation, erasure
+- **Landauer's principle**: Information has thermodynamic cost
+- **Maxwell's demon paradox**: Why it doesn't violate physics
+
+### Modern Implications
+
+**Why this matters**:
+- Quantum computing (reversible computation to minimize erasure)
+- Black hole thermodynamics (information paradox)
+- Limits of computation (minimum energy per operation)
+- Nanoscale engineering (can't ignore thermodynamic costs)
+
+### The Philosophy
+
+**Information is physical**:
+- Not abstract - exists in physical systems
+- Subject to physical laws
+- Costs energy to process
+- Connects information theory and thermodynamics
+
+**No free lunch**:
+- Can't get perpetual motion
+- Can't beat entropy with cleverness
+- Information processing has fundamental limits
+- Physics always wins
+
+---
+
+## ⏸️ THE HALTING PROBLEM
+
+### Can You Predict If Any Program Will Halt?
+
+**The Halting Problem** is a computational puzzle where you predict whether programs halt or loop forever. Start with simple programs, progress to complex ones, and finally encounter **self-referential programs that make your prediction impossible**.
+
+### The Innovation
+
+**Traditional coding games**: Debug programs, make them work
+
+**The Halting Problem**: **Predict behavior of programs that reference your predictions** - encounter fundamental limits of computation
+
+### How to Play
+
+```bash
+python3 halting_problem.py
+```
+
+### Core Mechanic
+
+Analyze programs and predict:
+- **[H]alts**: Program finishes and returns
+- **[L]oops**: Program runs forever
+
+**Levels 1-4**: Normal programs
+- Simple loops (you can analyze these)
+- Conditional logic
+- Collatz conjecture (mathematical challenges)
+
+**Levels 5-7**: Undecidable programs
+- Depend on unsolved math (Goldbach's conjecture)
+- Self-referential code
+- Programs that check their own source
+
+**Level 8**: The ultimate paradox
+```python
+def PARADOX():
+    prediction = YOUR_PREDICTION()
+    if prediction == "HALTS":
+        while True: pass  # Loop forever
+    else:
+        return True  # Halt
+```
+
+Whatever you predict, the program does the opposite. **Contradiction.**
+
+### The Mathematics
+
+**Turing's Proof (1936)**:
+
+**Assume**: Perfect halting detector ORACLE(program) exists
+
+**Construct**:
+```python
+def PARADOX():
+    if ORACLE(PARADOX) == "halts":
+        loop_forever()
+    else:
+        return
+```
+
+**Ask**: Does PARADOX() halt?
+- If ORACLE says "halts" → PARADOX loops (contradiction!)
+- If ORACLE says "loops" → PARADOX halts (contradiction!)
+
+**Conclusion**: No perfect ORACLE can exist. **The Halting Problem is undecidable.**
+
+### Why It's Unique
+
+Other programming games: Write code, debug code
+
+**The Halting Problem**: **Experience the limits of what can be computed** - no algorithm can solve all instances
+
+This isn't about skill - it's about **fundamental impossibility**.
+
+### Educational Value
+
+Learn through play:
+- **Computability theory**: What can/can't be computed
+- **Undecidability**: Problems with no algorithmic solution
+- **Self-reference**: Programs that reference themselves
+- **Rice's theorem**: ANY non-trivial program property is undecidable
+- **Limits of formal systems**: Related to Gödel
+
+### Rice's Theorem
+
+**Any non-trivial semantic property of programs is undecidable**:
+- Does program compute primes? Undecidable.
+- Does program print "hello"? Undecidable.
+- Does program run in polynomial time? Undecidable.
+- **Everything interesting about programs: Undecidable.**
+
+### Modern Implications
+
+**Why halting problem matters**:
+- Perfect virus detection: **Impossible** (halting problem)
+- Perfect bug detection: **Impossible** (halting problem)
+- Perfect optimization: **Impossible** (halting problem)
+- Program verification: **Limited** (halting problem)
+
+Compilers can't perfectly optimize all code. Antiviruses can miss malware. Debuggers can't find all bugs. **Not because they're bad - because it's mathematically impossible.**
+
+### The Philosophy
+
+**Limits of knowledge**:
+- Some questions have no algorithmic answer
+- Computation has fundamental boundaries
+- Perfect analysis is impossible
+- Self-reference creates paradoxes
+
+**Determinism ≠ Predictability**:
+- Programs are deterministic (same input = same output)
+- But behavior may be unpredictable (can't decide if halts)
+- Must actually run to know
+
+### The Experience
+
+You'll correctly predict simple programs. Feel confident. Then encounter self-referential code that **makes your prediction impossible**.
+
+That's not failure - that's **the limit of computation itself**.
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -1151,6 +1659,21 @@ python3 syntax_tree_climber.py
 
 # Play Entanglement
 python3 entanglement.py
+
+# Play The Trolley Problem Engine
+python3 trolley_problem.py
+
+# Play Quantum Eraser
+python3 quantum_eraser.py
+
+# Play Gödel's Paradox
+python3 godels_paradox.py
+
+# Play Maxwell's Demon
+python3 maxwells_demon.py
+
+# Play The Halting Problem
+python3 halting_problem.py
 ```
 
 ## 📋 Requirements
@@ -1161,7 +1684,7 @@ python3 entanglement.py
 
 ## 🧠 Philosophy & Design
 
-These ten games explore fundamental questions through interactive mechanics:
+These sixteen games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -1177,7 +1700,14 @@ These ten games explore fundamental questions through interactive mechanics:
 - **Syntax Tree Climber**: Navigate code structure spatially - can you experience programs as architecture instead of text?
 - **Entanglement**: Quantum-correlated objects - can you solve puzzles using spooky action at a distance?
 
-Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, and quantum entanglement - all with mechanics that have never been done before.
+**Fundamental Limits:**
+- **The Trolley Problem Engine**: Ethics as cascading consequences - can moral frameworks stay consistent under pressure?
+- **Quantum Eraser**: Retrocausality in action - can the future determine the past?
+- **Gödel's Paradox**: Incompleteness and self-reference - can you recognize when a system can't solve itself?
+- **Maxwell's Demon**: Information and thermodynamics - can you beat physics by being clever about information?
+- **The Halting Problem**: Limits of computation - can you predict programs that reference your predictions?
+
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, quantum mechanics, ethics, retrocausality, formal systems, thermodynamics, and computability - all with mechanics that have never been done before.
 
 ---
 
