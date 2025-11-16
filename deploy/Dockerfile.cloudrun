@@ -34,6 +34,16 @@ COPY the_categorizer.py ./games/
 COPY bootstrap_paradox.py ./games/
 COPY doomsday_argument.py ./games/
 COPY braess_paradox.py ./games/
+COPY ship_of_theseus_complete.py ./games/
+COPY monty_hall.py ./games/
+COPY twin_paradox.py ./games/
+COPY sleeping_beauty.py ./games/
+COPY boltzmann_brains.py ./games/
+COPY pascals_wager.py ./games/
+COPY simulation_hypothesis.py ./games/
+COPY platos_cave.py ./games/
+COPY sorites_paradox.py ./games/
+COPY munchhausen_trilemma.py ./games/
 
 # Copy web terminal application
 COPY deploy/web-terminal/requirements.txt ./
@@ -111,6 +121,16 @@ def index():
         {'id': 'bootstrap_paradox', 'name': 'Bootstrap Paradox', 'file': 'bootstrap_paradox.py'},
         {'id': 'doomsday_argument', 'name': 'The Doomsday Argument', 'file': 'doomsday_argument.py'},
         {'id': 'braess_paradox', 'name': 'Braess\\'s Paradox', 'file': 'braess_paradox.py'},
+        {'id': 'ship_of_theseus', 'name': 'The Ship of Theseus', 'file': 'ship_of_theseus_complete.py'},
+        {'id': 'monty_hall', 'name': 'The Monty Hall Problem', 'file': 'monty_hall.py'},
+        {'id': 'twin_paradox', 'name': 'The Twin Paradox', 'file': 'twin_paradox.py'},
+        {'id': 'sleeping_beauty', 'name': 'The Sleeping Beauty Problem', 'file': 'sleeping_beauty.py'},
+        {'id': 'boltzmann_brains', 'name': 'Boltzmann Brains', 'file': 'boltzmann_brains.py'},
+        {'id': 'pascals_wager', 'name': 'Pascal\\'s Wager', 'file': 'pascals_wager.py'},
+        {'id': 'simulation_hypothesis', 'name': 'The Simulation Hypothesis', 'file': 'simulation_hypothesis.py'},
+        {'id': 'platos_cave', 'name': 'Plato\\'s Cave', 'file': 'platos_cave.py'},
+        {'id': 'sorites_paradox', 'name': 'The Sorites Paradox', 'file': 'sorites_paradox.py'},
+        {'id': 'munchhausen', 'name': 'The Münchhausen Trilemma', 'file': 'munchhausen_trilemma.py'},
     ]
     return render_template('index.html', games=games)
 

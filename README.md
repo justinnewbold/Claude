@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-**Twenty-six** unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, quantum entanglement, ethics, retrocausality, incompleteness, thermodynamics, computability, understanding, motion paradoxes, determinism, game theory, free will, qualia, ontology, causality, anthropic reasoning, and network effects in ways never seen before.
+**Thirty-six** unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, quantum entanglement, ethics, retrocausality, incompleteness, thermodynamics, computability, understanding, motion paradoxes, determinism, game theory, free will, qualia, ontology, causality, anthropic reasoning, network effects, identity, probability, relativity, self-location, cosmology, decision theory, epistemology, vagueness, and justification in ways never seen before.
 
 ---
 
@@ -1714,6 +1714,96 @@ python3 braess_paradox.py
 
 ---
 
+## 🪞 THE SHIP OF THESEUS (Complete)
+**Identity Through Change** - Replace planks one by one. At what point is it no longer the same ship? Rebuild from old planks - which is the real ship? Experience the ancient paradox of persistence and identity through gradual replacement.
+
+```bash
+python3 ship_of_theseus_complete.py
+```
+
+---
+
+## 🎲 THE MONTY HALL PROBLEM
+**Counter-Intuitive Probability** - 3 doors, 1 car, 2 goats. You pick one. Host reveals a goat. Switch or stay? Switching DOUBLES your odds from 1/3 to 2/3! Experience the famous probability paradox that stumped even mathematicians.
+
+```bash
+python3 monty_hall.py
+```
+
+---
+
+## 👥 THE TWIN PARADOX
+**Relativity Puzzle** - One twin travels at 90% light speed, one stays on Earth. Time dilation makes the traveling twin age slower. Both see the other's clock moving slow - who's actually younger? Special relativity in action.
+
+```bash
+python3 twin_paradox.py
+```
+
+---
+
+## 😴 THE SLEEPING BEAUTY PROBLEM
+**Self-Locating Belief** - Coin flipped. If heads: wake once. If tails: wake twice with memory erased. You wake up - what's the probability it was heads? Halfers say 1/2, Thirders say 1/3. No consensus answer!
+
+```bash
+python3 sleeping_beauty.py
+```
+
+---
+
+## 🧠 BOLTZMANN BRAINS
+**Thermodynamic Absurdity** - Random quantum fluctuations can create conscious observers. Such "Boltzmann Brains" are vastly more common than evolved beings. Therefore: You're probably a random fluctuation with false memories. Cosmology meets anthropic reasoning.
+
+```bash
+python3 boltzmann_brains.py
+```
+
+---
+
+## 💰 PASCAL'S WAGER
+**Decision Theory Theology** - Should you believe in God? Infinite reward if right, finite cost if wrong. Expected value favors belief! But which God? The many gods problem breaks the wager. Decision theory meets theology.
+
+```bash
+python3 pascals_wager.py
+```
+
+---
+
+## 🖥️ THE SIMULATION HYPOTHESIS
+**Are We Simulated?** - If simulations are possible, advanced civilizations will run many. Therefore: simulated beings >> real beings. You're probably in a simulation. Look for glitches in reality. Based on Nick Bostrom's argument.
+
+```bash
+python3 simulation_hypothesis.py
+```
+
+---
+
+## 🕳️ PLATO'S CAVE
+**Shadows vs Reality** - Prisoners chained in cave see only shadows. One escapes, sees true reality (sunlight, real objects). Returns to tell others. They don't believe him. Epistemology and the nature of knowledge.
+
+```bash
+python3 platos_cave.py
+```
+
+---
+
+## 📚 THE SORITES PARADOX
+**Heap of Sand** - 1 grain isn't a heap. Adding 1 grain never creates a heap. But eventually: a heap! When did it become one? Vagueness breaks classical logic. The paradox of gradual change.
+
+```bash
+python3 sorites_paradox.py
+```
+
+---
+
+## 🔄 THE MÜNCHHAUSEN TRILEMMA
+**Foundations of Knowledge** - To justify a belief needs another belief. Three options: infinite regress, circular reasoning, or arbitrary stopping. All problematic. Can you truly justify anything? Epistemological limits.
+
+```bash
+python3 munchhausen_trilemma.py
+```
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -1794,6 +1884,36 @@ python3 doomsday_argument.py
 
 # Play Braess's Paradox
 python3 braess_paradox.py
+
+# Play The Ship of Theseus (Complete)
+python3 ship_of_theseus_complete.py
+
+# Play The Monty Hall Problem
+python3 monty_hall.py
+
+# Play The Twin Paradox
+python3 twin_paradox.py
+
+# Play The Sleeping Beauty Problem
+python3 sleeping_beauty.py
+
+# Play Boltzmann Brains
+python3 boltzmann_brains.py
+
+# Play Pascal's Wager
+python3 pascals_wager.py
+
+# Play The Simulation Hypothesis
+python3 simulation_hypothesis.py
+
+# Play Plato's Cave
+python3 platos_cave.py
+
+# Play The Sorites Paradox
+python3 sorites_paradox.py
+
+# Play The Münchhausen Trilemma
+python3 munchhausen_trilemma.py
 ```
 
 ## 📋 Requirements
@@ -1804,7 +1924,7 @@ python3 braess_paradox.py
 
 ## 🧠 Philosophy & Design
 
-These twenty-six games explore fundamental questions through interactive mechanics:
+These thirty-six games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -1839,7 +1959,19 @@ These twenty-six games explore fundamental questions through interactive mechani
 - **Doomsday Argument**: Anthropic reasoning - does your birth order predict humanity's extinction?
 - **Braess's Paradox**: Network effects - can adding options make everyone worse off?
 
-Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, quantum mechanics, ethics, retrocausality, formal systems, thermodynamics, computability, understanding, motion, determinism, game theory, free will, consciousness, ontology, time travel, anthropics, and network effects - all with mechanics that have never been done before.
+**Advanced Paradoxes & Puzzles:**
+- **The Ship of Theseus**: Identity through change - when all parts are replaced, is it still the same?
+- **Monty Hall Problem**: Counter-intuitive probability - switching doubles your odds!
+- **Twin Paradox**: Special relativity - time dilation makes twins age differently
+- **Sleeping Beauty**: Self-locating belief - halfers vs thirders, no consensus
+- **Boltzmann Brains**: Random fluctuations vs evolved observers - are you a random brain?
+- **Pascal's Wager**: Decision theory theology - infinite stakes, but which God?
+- **Simulation Hypothesis**: Are we simulated? - look for glitches in reality
+- **Plato's Cave**: Shadows vs reality - epistemology and knowledge
+- **Sorites Paradox**: Vagueness and heaps - when does gradual change create categories?
+- **Münchhausen Trilemma**: Justification limits - infinite regress, circular, or arbitrary?
+
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, quantum mechanics, ethics, retrocausality, formal systems, thermodynamics, computability, understanding, motion, determinism, game theory, free will, consciousness, ontology, time travel, anthropics, network effects, identity, probability, relativity, self-location, cosmology, decision theory, epistemology, vagueness, and justification - all with mechanics that have never been done before.
 
 ---
 
