@@ -1,6 +1,6 @@
 # INNOVATIVE GAME COLLECTION
 
-Sixteen unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, quantum entanglement, ethics, retrocausality, incompleteness, thermodynamics, and computability in ways never seen before.
+**Twenty-six** unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, quantum entanglement, ethics, retrocausality, incompleteness, thermodynamics, computability, understanding, motion paradoxes, determinism, game theory, free will, qualia, ontology, causality, anthropic reasoning, and network effects in ways never seen before.
 
 ---
 
@@ -1624,6 +1624,96 @@ That's not failure - that's **the limit of computation itself**.
 
 ---
 
+## 🏛️ THE CHINESE ROOM
+**Syntax without Semantics** - You're inside the Chinese Room, matching symbols using a rulebook without understanding meaning. Pass the Turing test through pure symbol manipulation. Experience Searle's argument firsthand: Can syntax become semantics?
+
+```bash
+python3 chinese_room.py
+```
+
+---
+
+## 🏃 ZENO'S RUNNER
+**Infinite Steps to Finite Goals** - Navigate space that infinitely subdivides. To reach 100m, first reach 50m. To reach 50m, first reach 25m. Infinitely many steps. Complete supertasks and resolve ancient paradoxes through calculus.
+
+```bash
+python3 zenos_runner.py
+```
+
+---
+
+## 🔮 LAPLACE'S DEMON
+**Perfect Determinism** - Observe a deterministic universe. Rewind time. Watch it unfold exactly the same way. Every particle's position and momentum determines the future completely. Free will in a clockwork universe?
+
+```bash
+python3 laplaces_demon.py
+```
+
+---
+
+## 🤝 THE PRISONER'S DILEMMA TOURNAMENT
+**Evolving Cooperation** - Compete against AI strategies in iterated prisoner's dilemma. Tit-for-tat, always defect, grudger, forgiving. Which strategy survives? Based on Axelrod's famous tournaments.
+
+```bash
+python3 prisoners_dilemma.py
+```
+
+---
+
+## 📦 NEWCOMB'S PARADOX
+**Prediction vs Free Will** - The Predictor knows your choice before you make it. Take both boxes or only Box B? The predictor is never wrong. But you have free will... right?
+
+```bash
+python3 newcombs_paradox.py
+```
+
+---
+
+## 🎨 MARY'S ROOM
+**Qualia and Experience** - Mary knows all physical facts about color but has never seen it. She lives in black and white. One day, she sees red. Does she learn something new? The knowledge argument for qualia.
+
+```bash
+python3 marys_room.py
+```
+
+---
+
+## 🏷️ THE CATEGORIZER
+**Ontology Creation** - Your categories create reality. Is a hotdog a sandwich? Is a tomato a fruit? Your classifications determine what things ARE. Taxonomy as power.
+
+```bash
+python3 the_categorizer.py
+```
+
+---
+
+## 🔁 BOOTSTRAP PARADOX
+**Information Without Origin** - Travel back in time with a book. Give it to Shakespeare. He publishes it. Centuries later, you read it and bring it back. Where did the book come from? Causeless causation.
+
+```bash
+python3 bootstrap_paradox.py
+```
+
+---
+
+## ⏳ THE DOOMSDAY ARGUMENT
+**Anthropic Reasoning** - You're human #100 billion. If you're typical, you're near the median. Therefore, only ~200 billion total humans. Therefore, humanity ends soon. Statistical inference about extinction.
+
+```bash
+python3 doomsday_argument.py
+```
+
+---
+
+## 🚦 BRAESS'S PARADOX
+**When More Is Less** - Adding a road makes traffic worse. Each driver makes the rational choice. All drivers end up worse off. Nash equilibrium meets network topology. Real-world paradox.
+
+```bash
+python3 braess_paradox.py
+```
+
+---
+
 ## 🎮 Quick Start
 
 ```bash
@@ -1674,6 +1764,36 @@ python3 maxwells_demon.py
 
 # Play The Halting Problem
 python3 halting_problem.py
+
+# Play The Chinese Room
+python3 chinese_room.py
+
+# Play Zeno's Runner
+python3 zenos_runner.py
+
+# Play Laplace's Demon
+python3 laplaces_demon.py
+
+# Play The Prisoner's Dilemma Tournament
+python3 prisoners_dilemma.py
+
+# Play Newcomb's Paradox
+python3 newcombs_paradox.py
+
+# Play Mary's Room
+python3 marys_room.py
+
+# Play The Categorizer
+python3 the_categorizer.py
+
+# Play Bootstrap Paradox
+python3 bootstrap_paradox.py
+
+# Play The Doomsday Argument
+python3 doomsday_argument.py
+
+# Play Braess's Paradox
+python3 braess_paradox.py
 ```
 
 ## 📋 Requirements
@@ -1684,7 +1804,7 @@ python3 halting_problem.py
 
 ## 🧠 Philosophy & Design
 
-These sixteen games explore fundamental questions through interactive mechanics:
+These twenty-six games explore fundamental questions through interactive mechanics:
 
 **Philosophical Narratives:**
 - **Echo Chambers**: Consciousness across parallel realities - is wholeness worth losing infinite possibility?
@@ -1707,7 +1827,19 @@ These sixteen games explore fundamental questions through interactive mechanics:
 - **Maxwell's Demon**: Information and thermodynamics - can you beat physics by being clever about information?
 - **The Halting Problem**: Limits of computation - can you predict programs that reference your predictions?
 
-Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, quantum mechanics, ethics, retrocausality, formal systems, thermodynamics, and computability - all with mechanics that have never been done before.
+**Classic Thought Experiments:**
+- **The Chinese Room**: Syntax vs semantics - can symbol manipulation become understanding?
+- **Zeno's Runner**: Motion paradoxes - can you complete infinitely many steps in finite time?
+- **Laplace's Demon**: Perfect determinism - does knowledge of all particles determine all futures?
+- **Prisoner's Dilemma**: Game theory evolution - what strategies survive when cooperation competes with betrayal?
+- **Newcomb's Paradox**: Prediction vs free will - can a perfect predictor coexist with your choices?
+- **Mary's Room**: Qualia and experience - does experiencing color teach you something physical facts cannot?
+- **The Categorizer**: Ontology creation - do your categories create or discover reality?
+- **Bootstrap Paradox**: Causeless causation - can information exist without an origin?
+- **Doomsday Argument**: Anthropic reasoning - does your birth order predict humanity's extinction?
+- **Braess's Paradox**: Network effects - can adding options make everyone worse off?
+
+Together, they span narrative exploration, philosophical inquiry, puzzle-solving, roguelike action, emergent systems, chaos theory, meta-programming, quantum mechanics, ethics, retrocausality, formal systems, thermodynamics, computability, understanding, motion, determinism, game theory, free will, consciousness, ontology, time travel, anthropics, and network effects - all with mechanics that have never been done before.
 
 ---
 

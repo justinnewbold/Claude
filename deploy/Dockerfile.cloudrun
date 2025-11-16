@@ -24,6 +24,16 @@ COPY quantum_eraser.py ./games/
 COPY godels_paradox.py ./games/
 COPY maxwells_demon.py ./games/
 COPY halting_problem.py ./games/
+COPY chinese_room.py ./games/
+COPY zenos_runner.py ./games/
+COPY laplaces_demon.py ./games/
+COPY prisoners_dilemma.py ./games/
+COPY newcombs_paradox.py ./games/
+COPY marys_room.py ./games/
+COPY the_categorizer.py ./games/
+COPY bootstrap_paradox.py ./games/
+COPY doomsday_argument.py ./games/
+COPY braess_paradox.py ./games/
 
 # Copy web terminal application
 COPY deploy/web-terminal/requirements.txt ./
@@ -91,6 +101,16 @@ def index():
         {'id': 'godels_paradox', 'name': 'Gödel\\'s Paradox', 'file': 'godels_paradox.py'},
         {'id': 'maxwells_demon', 'name': 'Maxwell\\'s Demon', 'file': 'maxwells_demon.py'},
         {'id': 'halting_problem', 'name': 'The Halting Problem', 'file': 'halting_problem.py'},
+        {'id': 'chinese_room', 'name': 'The Chinese Room', 'file': 'chinese_room.py'},
+        {'id': 'zenos_runner', 'name': 'Zeno\\'s Runner', 'file': 'zenos_runner.py'},
+        {'id': 'laplaces_demon', 'name': 'Laplace\\'s Demon', 'file': 'laplaces_demon.py'},
+        {'id': 'prisoners_dilemma', 'name': 'The Prisoner\\'s Dilemma', 'file': 'prisoners_dilemma.py'},
+        {'id': 'newcombs_paradox', 'name': 'Newcomb\\'s Paradox', 'file': 'newcombs_paradox.py'},
+        {'id': 'marys_room', 'name': 'Mary\\'s Room', 'file': 'marys_room.py'},
+        {'id': 'the_categorizer', 'name': 'The Categorizer', 'file': 'the_categorizer.py'},
+        {'id': 'bootstrap_paradox', 'name': 'Bootstrap Paradox', 'file': 'bootstrap_paradox.py'},
+        {'id': 'doomsday_argument', 'name': 'The Doomsday Argument', 'file': 'doomsday_argument.py'},
+        {'id': 'braess_paradox', 'name': 'Braess\\'s Paradox', 'file': 'braess_paradox.py'},
     ]
     return render_template('index.html', games=games)
 
