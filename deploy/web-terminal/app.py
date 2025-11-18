@@ -67,6 +67,10 @@ terminals = {}
 def index():
     """Show game selection page"""
     games = [
+        # MAIN GAME
+        {'id': 'vault_shelter', 'name': '🏛️ VAULT 13 - Survival Protocol (MAIN GAME)', 'file': 'vault_shelter.py'},
+
+        # MINI GAMES - Philosophical & Computational Thought Experiments
         {'id': 'echo_chambers', 'name': 'Echo Chambers', 'file': 'echo_chambers.py'},
         {'id': 'code_archaeology', 'name': 'Code Archaeology', 'file': 'code_archaeology.py'},
         {'id': 'infinite_library', 'name': 'The Infinite Library', 'file': 'infinite_library.py'},

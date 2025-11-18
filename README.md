@@ -1,5 +1,19 @@
 # INNOVATIVE GAME COLLECTION
 
+## 🏛️ NEW: VAULT 13 - SURVIVAL PROTOCOL (MAIN GAME)
+
+**A full-featured post-apocalyptic vault management simulation inspired by Fallout Shelter!**
+
+Manage an underground vault, assign dwellers to production rooms, build facilities, respond to random events, and keep your population alive in the wasteland. Features resource management (Power, Water, Food, Caps), SPECIAL stat system, random events (raiders, fires, infestations), room building, dweller happiness/health tracking, and a complete save/load system.
+
+**[See full documentation: VAULT_SHELTER.md](VAULT_SHELTER.md)**
+
+This is the flagship "main game" - a deep, replayable management sim separate from the philosophical mini-games below.
+
+---
+
+## MINI-GAMES: Philosophical Thought Experiments
+
 **Thirty-six** unique experimental games that explore consciousness, reality, time, infinity, computation, quantum mechanics, emergence, chaos theory, meta-programming, quantum entanglement, ethics, retrocausality, incompleteness, thermodynamics, computability, understanding, motion paradoxes, determinism, game theory, free will, qualia, ontology, causality, anthropic reasoning, network effects, identity, probability, relativity, self-location, cosmology, decision theory, epistemology, vagueness, and justification in ways never seen before.
 
 ---
