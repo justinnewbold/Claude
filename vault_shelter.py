@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-VAULT 13 - SURVIVAL PROTOCOL
+VAULT 13 - SURVIVAL PROTOCOL v2.0
 A vault management simulation inspired by Fallout Shelter
 
-Manage your underground vault, allocate resources, assign dwellers to rooms,
-and survive against random events. Build, expand, and keep your dwellers happy!
+NEW FEATURES:
+- Rush Production mechanic
+- Room Upgrades (Level 1-3)
+- Active Incident Resolution (combat fires/infestations)
+- Enhanced Vault Visualization
+- Equipment System (weapons & outfits)
+- Smart Resource Allocation
 """
 
 import random
@@ -24,18 +29,18 @@ class C:
     DIM = '\033[2m'
 
     # UI Colors
-    HEADER = '\033[38;5;51m'      # Cyan
-    BORDER = '\033[38;5;39m'      # Blue
-    SUCCESS = '\033[38;5;46m'     # Green
-    WARNING = '\033[38;5;226m'    # Yellow
-    DANGER = '\033[38;5;196m'     # Red
-    INFO = '\033[38;5;159m'       # Light cyan
+    HEADER = '\033[38;5;51m'
+    BORDER = '\033[38;5;39m'
+    SUCCESS = '\033[38;5;46m'
+    WARNING = '\033[38;5;226m'
+    DANGER = '\033[38;5;196m'
+    INFO = '\033[38;5;159m'
 
     # Resource Colors
-    POWER = '\033[38;5;226m'      # Yellow (electricity)
-    WATER = '\033[38;5;51m'       # Cyan (water)
-    FOOD = '\033[38;5;208m'       # Orange (food)
-    CAPS = '\033[38;5;226m'       # Yellow (money)
+    POWER = '\033[38;5;226m'
+    WATER = '\033[38;5;51m'
+    FOOD = '\033[38;5;208m'
+    CAPS = '\033[38;5;226m'
 
     # Room Colors
     ROOM_POWER = '\033[38;5;220m'
@@ -65,6 +70,44 @@ class RoomType(Enum):
     SCIENCE_LAB = "Science Lab"
 
 
+class EquipmentType(Enum):
+    """Types of equipment"""
+    WEAPON = "Weapon"
+    OUTFIT = "Outfit"
+
+
+@dataclass
+class Equipment:
+    """Equipment that can be given to dwellers"""
+    name: str
+    equipment_type: EquipmentType
+    stat_bonus: Dict[str, int] = field(default_factory=dict)  # e.g., {"strength": 2}
+    damage: int = 0  # For weapons
+    icon: str = "⚔️"
+
+    def get_description(self) -> str:
+        """Get equipment description"""
+        if self.equipment_type == EquipmentType.WEAPON:
+            return f"Damage: {self.damage}"
+        else:
+            bonuses = ", ".join([f"+{v} {k.upper()[0]}" for k, v in self.stat_bonus.items()])
+            return f"Bonuses: {bonuses}"
+
+
+# Pre-defined equipment
+EQUIPMENT_LIBRARY = {
+    # Weapons
+    "rusty_pistol": Equipment("Rusty Pistol", EquipmentType.WEAPON, damage=5, icon="🔫"),
+    "laser_rifle": Equipment("Laser Rifle", EquipmentType.WEAPON, damage=15, icon="⚡"),
+    "plasma_gun": Equipment("Plasma Gun", EquipmentType.WEAPON, damage=25, icon="💚"),
+
+    # Outfits
+    "vault_suit": Equipment("Vault Suit", EquipmentType.OUTFIT, stat_bonus={"endurance": 1}, icon="👔"),
+    "scientist_coat": Equipment("Scientist Coat", EquipmentType.OUTFIT, stat_bonus={"intelligence": 2}, icon="🥼"),
+    "power_armor": Equipment("Power Armor", EquipmentType.OUTFIT, stat_bonus={"strength": 3, "endurance": 2}, icon="🛡️"),
+}
+
+
 @dataclass
 class RoomStats:
     """Stats for different room types"""
@@ -73,6 +116,7 @@ class RoomStats:
     capacity: int
     stat_required: Optional[str] = None
     description: str = ""
+    upgrade_cost_multiplier: float = 1.5
 
 
 # Room configurations
@@ -145,11 +189,30 @@ class Dweller:
     luck: int = 5
     happiness: int = 50
     health: int = 100
-    assigned_room: Optional[Tuple[int, int]] = None  # (floor, position)
+    assigned_room: Optional[Tuple[int, int]] = None
+    weapon: Optional[str] = None  # Equipment key
+    outfit: Optional[str] = None  # Equipment key
 
     def get_stat(self, stat_name: str) -> int:
-        """Get a specific SPECIAL stat"""
-        return getattr(self, stat_name.lower(), 5)
+        """Get a specific SPECIAL stat with equipment bonuses"""
+        base_stat = getattr(self, stat_name.lower(), 5)
+        bonus = 0
+
+        # Add outfit bonuses
+        if self.outfit and self.outfit in EQUIPMENT_LIBRARY:
+            outfit = EQUIPMENT_LIBRARY[self.outfit]
+            bonus += outfit.stat_bonus.get(stat_name.lower(), 0)
+
+        return min(10, base_stat + bonus)
+
+    def get_combat_power(self) -> int:
+        """Get combat effectiveness"""
+        weapon_damage = 0
+        if self.weapon and self.weapon in EQUIPMENT_LIBRARY:
+            weapon_damage = EQUIPMENT_LIBRARY[self.weapon].damage
+
+        # Base damage from strength + weapon
+        return self.get_stat("strength") + weapon_damage
 
     def modify_stat(self, stat_name: str, amount: int):
         """Modify a SPECIAL stat"""
@@ -176,24 +239,44 @@ class Room:
     under_construction: bool = False
     on_fire: bool = False
     has_incident: bool = False
+    incident_strength: int = 0  # For combat
+    rush_cooldown: int = 0  # Turns until can rush again
 
-    def get_production(self) -> Dict[str, int]:
+    def get_production(self, dwellers_list: List[Dweller]) -> Dict[str, int]:
         """Calculate room production based on assigned dwellers and level"""
-        if self.room_type == RoomType.EMPTY or self.under_construction:
+        if self.room_type == RoomType.EMPTY or self.under_construction or self.on_fire or self.has_incident:
             return {}
 
         config = ROOM_CONFIGS.get(self.room_type)
         if not config:
             return {}
 
-        # Base production
         production = config.production.copy()
+        if not production:
+            return {}
 
-        # Bonus from dwellers and level
+        # Base production multiplied by level
+        base_multiplier = self.level
+
+        # Worker bonus: each worker adds 20%
         worker_count = len(self.assigned_dwellers)
         if worker_count > 0:
+            # Get average stat of workers for relevant stat
+            if config.stat_required:
+                total_stat = 0
+                for dweller_name in self.assigned_dwellers:
+                    dweller = next((d for d in dwellers_list if d.name == dweller_name), None)
+                    if dweller:
+                        total_stat += dweller.get_stat(config.stat_required)
+                avg_stat = total_stat / worker_count if worker_count > 0 else 5
+                stat_multiplier = avg_stat / 5  # 5 is average
+            else:
+                stat_multiplier = 1.0
+
+            worker_multiplier = 1 + (worker_count * 0.2)
+
             for resource in production:
-                production[resource] = int(production[resource] * (1 + worker_count * 0.2) * self.level)
+                production[resource] = int(production[resource] * base_multiplier * worker_multiplier * stat_multiplier)
 
         return production
 
@@ -203,6 +286,24 @@ class Room:
             return False
         config = ROOM_CONFIGS.get(self.room_type)
         return len(self.assigned_dwellers) < config.capacity if config else False
+
+    def get_upgrade_cost(self) -> int:
+        """Get cost to upgrade room to next level"""
+        if self.level >= 3:
+            return 0
+        config = ROOM_CONFIGS.get(self.room_type)
+        if not config:
+            return 0
+        return int(config.cost * config.upgrade_cost_multiplier * self.level)
+
+    def can_rush(self) -> bool:
+        """Check if room can be rushed"""
+        return (self.rush_cooldown == 0 and
+                not self.under_construction and
+                not self.on_fire and
+                not self.has_incident and
+                len(self.assigned_dwellers) > 0 and
+                self.room_type in [RoomType.POWER_GENERATOR, RoomType.WATER_TREATMENT, RoomType.DINER])
 
 
 @dataclass
@@ -233,6 +334,13 @@ class Resources:
             return True
         return False
 
+    def consume_with_rationing(self, resource: str, amount: int) -> int:
+        """Consume resources with rationing. Returns actual amount consumed."""
+        current = getattr(self, resource)
+        actual = min(current, amount)
+        setattr(self, resource, current - actual)
+        return actual
+
     def has_enough(self, resource: str, amount: int) -> bool:
         """Check if enough resources available"""
         return getattr(self, resource) >= amount
@@ -246,15 +354,6 @@ class Resources:
         return current < max_val * 0.2
 
 
-@dataclass
-class GameEvent:
-    """Random event that can occur in the vault"""
-    title: str
-    description: str
-    effect: str
-    severity: str  # "info", "warning", "danger"
-
-
 class VaultGame:
     """Main game class for Vault 13"""
 
@@ -264,6 +363,7 @@ class VaultGame:
         self.dwellers: List[Dweller] = []
         self.vault_layout: List[List[Room]] = []
         self.event_log: List[str] = []
+        self.equipment_inventory: List[str] = []  # Equipment keys
         self.game_over = False
         self.max_floors = 10
         self.floors_unlocked = 3
@@ -272,23 +372,21 @@ class VaultGame:
         self._initialize_vault()
         self._create_starting_dwellers()
 
+        # Starting equipment
+        self.equipment_inventory = ["rusty_pistol", "vault_suit"]
+
     def _initialize_vault(self):
         """Create initial vault layout"""
-        # Start with 3 floors, 3 rooms each
         for floor in range(3):
             floor_rooms = []
             for pos in range(3):
                 if floor == 0 and pos == 0:
-                    # Starting power room
                     room = Room(RoomType.POWER_GENERATOR, floor, pos)
                 elif floor == 0 and pos == 1:
-                    # Starting water room
                     room = Room(RoomType.WATER_TREATMENT, floor, pos)
                 elif floor == 1 and pos == 0:
-                    # Starting living quarters
                     room = Room(RoomType.LIVING_QUARTERS, floor, pos)
                 else:
-                    # Empty rooms
                     room = Room(RoomType.EMPTY, floor, pos)
                 floor_rooms.append(room)
             self.vault_layout.append(floor_rooms)
@@ -313,11 +411,11 @@ class VaultGame:
             )
             self.dwellers.append(dweller)
 
-        # Assign starting dwellers to rooms
-        self.dwellers[0].assigned_room = (0, 0)  # Power
+        # Assign starting dwellers
+        self.dwellers[0].assigned_room = (0, 0)
         self.vault_layout[0][0].assigned_dwellers.append(self.dwellers[0].name)
 
-        self.dwellers[1].assigned_room = (0, 1)  # Water
+        self.dwellers[1].assigned_room = (0, 1)
         self.vault_layout[0][1].assigned_dwellers.append(self.dwellers[1].name)
 
     def clear_screen(self):
@@ -327,7 +425,7 @@ class VaultGame:
     def print_header(self):
         """Print game header"""
         print(f"\n{C.HEADER}{C.BOLD}╔══════════════════════════════════════════════════════════════════════╗{C.RESET}")
-        print(f"{C.HEADER}{C.BOLD}║                  VAULT 13 - SURVIVAL PROTOCOL                        ║{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}║              VAULT 13 - SURVIVAL PROTOCOL v2.0                       ║{C.RESET}")
         print(f"{C.HEADER}{C.BOLD}║                         DAY {self.day:4d}                                    ║{C.RESET}")
         print(f"{C.HEADER}{C.BOLD}╚══════════════════════════════════════════════════════════════════════╝{C.RESET}\n")
 
@@ -366,21 +464,23 @@ class VaultGame:
         print()
 
     def print_vault_layout(self):
-        """Print vault room layout"""
+        """Print enhanced vault room layout"""
         print(f"{C.BOLD}Vault Layout:{C.RESET}")
-        print(f"{C.BORDER}{'─' * 70}{C.RESET}")
+        print(f"{C.BORDER}{'═' * 75}{C.RESET}")
 
         for floor_idx, floor in enumerate(self.vault_layout):
-            floor_str = f"{C.DIM}Floor {floor_idx + 1}:{C.RESET} "
+            floor_str = f"{C.DIM}F{floor_idx + 1}:{C.RESET} "
+
             for room in floor:
-                room_str = self._get_room_display(room)
-                floor_str += f"{room_str}  "
+                room_str = self._get_enhanced_room_display(room)
+                floor_str += f"{room_str} "
+
             print(floor_str)
 
-        print(f"{C.BORDER}{'─' * 70}{C.RESET}\n")
+        print(f"{C.BORDER}{'═' * 75}{C.RESET}\n")
 
-    def _get_room_display(self, room: Room) -> str:
-        """Get colored room display string"""
+    def _get_enhanced_room_display(self, room: Room) -> str:
+        """Get enhanced colored room display with level and workers"""
         room_colors = {
             RoomType.EMPTY: C.ROOM_EMPTY,
             RoomType.POWER_GENERATOR: C.ROOM_POWER,
@@ -394,25 +494,42 @@ class VaultGame:
         }
 
         color = room_colors.get(room.room_type, C.RESET)
-        room_name = room.room_type.value
 
-        # Truncate room name if too long
-        if len(room_name) > 15:
-            room_name = room_name[:12] + "..."
+        # Room icons
+        room_icons = {
+            RoomType.POWER_GENERATOR: "⚡",
+            RoomType.WATER_TREATMENT: "💧",
+            RoomType.DINER: "🍖",
+            RoomType.LIVING_QUARTERS: "🏠",
+            RoomType.TRAINING_ROOM: "💪",
+            RoomType.STORAGE_ROOM: "📦",
+            RoomType.MEDBAY: "⚕️",
+            RoomType.SCIENCE_LAB: "🔬",
+            RoomType.EMPTY: "░░",
+        }
 
-        # Add worker count
-        worker_display = f"({len(room.assigned_dwellers)})" if room.assigned_dwellers else ""
+        icon = room_icons.get(room.room_type, "  ")
 
-        # Add status indicators
+        # Show room level with roman numerals
+        level_display = ["", "I", "II", "III"][min(room.level, 3)] if room.room_type != RoomType.EMPTY else ""
+
+        # Worker icons
+        worker_count = len(room.assigned_dwellers)
+        worker_icons = "👤" * min(worker_count, 3)
+
+        # Status indicators
         status = ""
-        if room.under_construction:
-            status = "🔨"
-        elif room.on_fire:
+        if room.on_fire:
             status = "🔥"
         elif room.has_incident:
-            status = "⚠️ "
+            status = "⚠️"
+        elif room.rush_cooldown > 0:
+            status = "⏳"
 
-        return f"{color}[{room_name:15s}]{worker_display}{status}{C.RESET}"
+        if room.room_type == RoomType.EMPTY:
+            return f"{color}[{icon:^6s}]{C.RESET}"
+        else:
+            return f"{color}[{icon}{level_display:2s}{worker_icons:3s}{status}]{C.RESET}"
 
     def print_event_log(self):
         """Print recent events"""
@@ -420,98 +537,536 @@ class VaultGame:
             return
 
         print(f"{C.BOLD}Recent Events:{C.RESET}")
-        for event in self.event_log[-5:]:  # Show last 5 events
+        for event in self.event_log[-5:]:
             print(f"  {C.DIM}•{C.RESET} {event}")
         print()
 
     def print_menu(self):
         """Print action menu"""
         print(f"{C.BOLD}Actions:{C.RESET}")
-        print(f"  {C.SUCCESS}[B]{C.RESET} Build Room      {C.SUCCESS}[D]{C.RESET} Manage Dwellers")
-        print(f"  {C.SUCCESS}[R]{C.RESET} Assign Workers  {C.SUCCESS}[E]{C.RESET} End Turn")
-        print(f"  {C.SUCCESS}[V]{C.RESET} View Details    {C.SUCCESS}[S]{C.RESET} Save Game")
-        print(f"  {C.DANGER}[Q]{C.RESET} Quit Game")
+        print(f"  {C.SUCCESS}[B]{C.RESET} Build Room       {C.SUCCESS}[U]{C.RESET} Upgrade Room    {C.SUCCESS}[H]{C.RESET} Rush Production")
+        print(f"  {C.SUCCESS}[D]{C.RESET} Manage Dwellers  {C.SUCCESS}[R]{C.RESET} Assign Workers  {C.SUCCESS}[I]{C.RESET} Fight Incident")
+        print(f"  {C.SUCCESS}[G]{C.RESET} Manage Equipment {C.SUCCESS}[V]{C.RESET} View Details    {C.SUCCESS}[E]{C.RESET} End Turn")
+        print(f"  {C.SUCCESS}[S]{C.RESET} Save Game        {C.DANGER}[Q]{C.RESET} Quit Game")
         print()
 
     def process_turn(self):
-        """Process end of turn - production, consumption, events"""
+        """Process end of turn"""
         self.day += 1
+
+        # Decrease rush cooldowns
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.rush_cooldown > 0:
+                    room.rush_cooldown -= 1
 
         # Resource production
         for floor in self.vault_layout:
             for room in floor:
-                if not room.under_construction and not room.has_incident:
-                    production = room.get_production()
+                if not room.under_construction and not room.on_fire and not room.has_incident:
+                    production = room.get_production(self.dwellers)
                     for resource, amount in production.items():
                         self.resources.add(resource, amount)
-                        if amount > 0:
-                            self.add_event(f"{room.room_type.value} produced {amount} {resource}")
 
-        # Resource consumption
+        # Resource consumption with smart allocation
         dweller_count = len(self.dwellers)
-        power_consumption = dweller_count * 1
-        water_consumption = dweller_count * 1
-        food_consumption = dweller_count * 1
+        power_needed = dweller_count * 1
+        water_needed = dweller_count * 1
+        food_needed = dweller_count * 1
 
-        self.resources.remove("power", power_consumption)
-        self.resources.remove("water", water_consumption)
-        self.resources.remove("food", food_consumption)
+        power_consumed = self.resources.consume_with_rationing("power", power_needed)
+        water_consumed = self.resources.consume_with_rationing("water", water_needed)
+        food_consumed = self.resources.consume_with_rationing("food", food_needed)
 
-        # Check critical resources
-        if self.resources.is_critical("power"):
-            self.add_event(f"{C.WARNING}⚠️  Power running critically low!{C.RESET}")
-            self._apply_resource_penalty("power")
+        # Apply penalties for shortfalls
+        if power_consumed < power_needed:
+            shortage = power_needed - power_consumed
+            self._apply_shortage_penalty("power", shortage, dweller_count)
 
-        if self.resources.is_critical("water"):
-            self.add_event(f"{C.WARNING}⚠️  Water running critically low!{C.RESET}")
-            self._apply_resource_penalty("water")
+        if water_consumed < water_needed:
+            shortage = water_needed - water_consumed
+            self._apply_shortage_penalty("water", shortage, dweller_count)
 
-        if self.resources.is_critical("food"):
-            self.add_event(f"{C.WARNING}⚠️  Food running critically low!{C.RESET}")
-            self._apply_resource_penalty("food")
+        if food_consumed < food_needed:
+            shortage = food_needed - food_consumed
+            self._apply_shortage_penalty("food", shortage, dweller_count)
 
-        # Random events (20% chance per turn)
+        # Auto-resolve some incidents
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.on_fire or room.has_incident:
+                    # 30% chance to auto-resolve each turn
+                    if random.random() < 0.3:
+                        if room.on_fire:
+                            room.on_fire = False
+                            self.add_event(f"{C.SUCCESS}Fire in {room.room_type.value} burned out{C.RESET}")
+                        if room.has_incident:
+                            room.has_incident = False
+                            room.incident_strength = 0
+                            self.add_event(f"{C.SUCCESS}Incident in {room.room_type.value} resolved{C.RESET}")
+
+        # Random events
         if random.random() < 0.2:
             self._trigger_random_event()
 
         # Dweller happiness updates
         self._update_dweller_happiness()
 
-        # Check game over conditions
+        # Check game over
         self._check_game_over()
 
-    def _apply_resource_penalty(self, resource: str):
-        """Apply penalties for critical resource levels"""
-        for dweller in self.dwellers:
-            dweller.modify_happiness(-5)
-            if resource in ["food", "water"]:
-                dweller.modify_health(-10)
+    def _apply_shortage_penalty(self, resource: str, shortage: int, total_dwellers: int):
+        """Apply penalties when resources run short"""
+        if shortage == 0:
+            return
+
+        # Randomly select dwellers to suffer
+        affected_count = min(shortage, total_dwellers)
+        affected = random.sample(self.dwellers, affected_count)
+
+        for dweller in affected:
+            if resource == "power":
+                dweller.modify_happiness(-3)
+            elif resource in ["water", "food"]:
+                dweller.modify_health(-8)
+                dweller.modify_happiness(-5)
+
+        self.add_event(f"{C.DANGER}⚠️ Not enough {resource}! {affected_count} dwellers affected{C.RESET}")
 
     def _update_dweller_happiness(self):
-        """Update dweller happiness based on conditions"""
-        avg_happiness = sum(d.happiness for d in self.dwellers) // len(self.dwellers) if self.dwellers else 50
-
+        """Update dweller happiness"""
         for dweller in self.dwellers:
-            # Base happiness change
             happiness_change = 0
 
-            # Assigned to work
             if dweller.assigned_room:
                 happiness_change += 2
             else:
                 happiness_change -= 3
 
-            # Health affects happiness
             if dweller.health < 50:
                 happiness_change -= 5
 
-            # Random variation
-            happiness_change += random.randint(-2, 3)
+            if dweller.weapon or dweller.outfit:
+                happiness_change += 1
 
+            happiness_change += random.randint(-2, 3)
             dweller.modify_happiness(happiness_change)
 
+    def rush_production_menu(self):
+        """Rush production in a room"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.BOLD}RUSH PRODUCTION{C.RESET}\n")
+        print("Rush a room to instantly produce resources!")
+        print(f"{C.WARNING}Warning: Risk of fire or incident on failure!{C.RESET}\n")
+
+        rushable_rooms = []
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.can_rush():
+                    rushable_rooms.append(room)
+
+        if not rushable_rooms:
+            print(f"{C.INFO}No rooms available to rush.{C.RESET}\n")
+            input("Press Enter to continue...")
+            return
+
+        for idx, room in enumerate(rushable_rooms, 1):
+            # Calculate success chance based on luck
+            workers_luck = 0
+            for dweller_name in room.assigned_dwellers:
+                dweller = next((d for d in self.dwellers if d.name == dweller_name), None)
+                if dweller:
+                    workers_luck += dweller.get_stat("luck")
+            avg_luck = workers_luck / len(room.assigned_dwellers) if room.assigned_dwellers else 5
+            success_chance = min(95, 40 + (avg_luck * 5))
+
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {room.room_type.value} (Floor {room.floor + 1})")
+            print(f"      Workers: {len(room.assigned_dwellers)}")
+            print(f"      Success Chance: {C.SUCCESS if success_chance >= 70 else C.WARNING}{success_chance}%{C.RESET}")
+            print()
+
+        print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
+
+        choice = input(f"{C.BOLD}Select room to rush: {C.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(rushable_rooms):
+                self._execute_rush(rushable_rooms[choice_idx])
+        except ValueError:
+            print(f"{C.DANGER}Invalid choice!{C.RESET}")
+
+        input("\nPress Enter to continue...")
+
+    def _execute_rush(self, room: Room):
+        """Execute a rush attempt"""
+        # Calculate success chance
+        workers_luck = 0
+        for dweller_name in room.assigned_dwellers:
+            dweller = next((d for d in self.dwellers if d.name == dweller_name), None)
+            if dweller:
+                workers_luck += dweller.get_stat("luck")
+        avg_luck = workers_luck / len(room.assigned_dwellers) if room.assigned_dwellers else 5
+        success_chance = min(95, 40 + (avg_luck * 5))
+
+        # Roll for success
+        roll = random.randint(1, 100)
+
+        if roll <= success_chance:
+            # SUCCESS!
+            production = room.get_production(self.dwellers)
+            bonus_multiplier = 2 + (room.level * 0.5)
+
+            for resource, amount in production.items():
+                bonus_amount = int(amount * bonus_multiplier)
+                self.resources.add(resource, bonus_amount)
+                print(f"\n{C.SUCCESS}✨ RUSH SUCCESS! Produced {bonus_amount} {resource}!{C.RESET}")
+                self.add_event(f"{C.SUCCESS}Rush succeeded in {room.room_type.value} - produced {bonus_amount} {resource}{C.RESET}")
+
+            # Bonus caps
+            caps_bonus = random.randint(20, 50)
+            self.resources.caps += caps_bonus
+
+            # Happiness boost
+            for dweller_name in room.assigned_dwellers:
+                dweller = next((d for d in self.dwellers if d.name == dweller_name), None)
+                if dweller:
+                    dweller.modify_happiness(10)
+
+            room.rush_cooldown = 3
+        else:
+            # FAILURE!
+            print(f"\n{C.DANGER}💥 RUSH FAILED!{C.RESET}")
+
+            # 50/50 fire or incident
+            if random.random() < 0.5:
+                room.on_fire = True
+                print(f"{C.DANGER}🔥 Fire broke out!{C.RESET}")
+                self.add_event(f"{C.DANGER}Rush failed in {room.room_type.value} - fire!{C.RESET}")
+            else:
+                room.has_incident = True
+                room.incident_strength = random.randint(10, 25)
+                print(f"{C.WARNING}⚠️ Incident occurred!{C.RESET}")
+                self.add_event(f"{C.WARNING}Rush failed in {room.room_type.value} - incident!{C.RESET}")
+
+            # Happiness penalty
+            for dweller_name in room.assigned_dwellers:
+                dweller = next((d for d in self.dwellers if d.name == dweller_name), None)
+                if dweller:
+                    dweller.modify_happiness(-15)
+
+            room.rush_cooldown = 5
+
+    def fight_incident_menu(self):
+        """Fight fires or incidents"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.BOLD}FIGHT INCIDENT{C.RESET}\n")
+
+        # Find rooms with incidents
+        incident_rooms = []
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.on_fire or room.has_incident:
+                    incident_rooms.append(room)
+
+        if not incident_rooms:
+            print(f"{C.INFO}No incidents to fight!{C.RESET}\n")
+            input("Press Enter to continue...")
+            return
+
+        for idx, room in enumerate(incident_rooms, 1):
+            incident_type = "🔥 FIRE" if room.on_fire else f"⚠️ INCIDENT (Strength: {room.incident_strength})"
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {room.room_type.value} (Floor {room.floor + 1}) - {incident_type}")
+
+        print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
+
+        choice = input(f"{C.BOLD}Select incident to fight: {C.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(incident_rooms):
+                self._select_fighters(incident_rooms[choice_idx])
+        except ValueError:
+            print(f"{C.DANGER}Invalid choice!{C.RESET}")
+
+    def _select_fighters(self, room: Room):
+        """Select dwellers to fight incident"""
+        print(f"\n{C.BOLD}Select dwellers to fight (max 3):{C.RESET}\n")
+
+        for idx, dweller in enumerate(self.dwellers, 1):
+            combat_power = dweller.get_combat_power()
+            weapon_str = f" {EQUIPMENT_LIBRARY[dweller.weapon].icon}" if dweller.weapon else ""
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {dweller.name} - Combat: {combat_power}{weapon_str} (HP: {dweller.health}%)")
+
+        print(f"\n{C.INFO}Enter dweller numbers separated by spaces (e.g., '1 3 5'):{C.RESET}")
+        choice = input("> ").strip()
+
+        if not choice:
+            return
+
+        try:
+            indices = [int(x) - 1 for x in choice.split()]
+            fighters = [self.dwellers[i] for i in indices if 0 <= i < len(self.dwellers)][:3]
+
+            if fighters:
+                self._execute_combat(room, fighters)
+        except (ValueError, IndexError):
+            print(f"{C.DANGER}Invalid selection!{C.RESET}")
+
+        input("\nPress Enter to continue...")
+
+    def _execute_combat(self, room: Room, fighters: List[Dweller]):
+        """Execute combat against incident"""
+        total_combat = sum(d.get_combat_power() for d in fighters)
+
+        if room.on_fire:
+            # Fire requires total combat > 20
+            required = 20
+            if total_combat >= required:
+                room.on_fire = False
+                print(f"\n{C.SUCCESS}🎉 Fire extinguished!{C.RESET}")
+                self.add_event(f"{C.SUCCESS}Fire in {room.room_type.value} extinguished by {len(fighters)} dwellers{C.RESET}")
+
+                # Small damage to fighters
+                for fighter in fighters:
+                    damage = random.randint(3, 8)
+                    fighter.modify_health(-damage)
+            else:
+                print(f"\n{C.DANGER}Fire too strong! Need combat power {required}, have {total_combat}{C.RESET}")
+                # Damage fighters
+                for fighter in fighters:
+                    damage = random.randint(10, 20)
+                    fighter.modify_health(-damage)
+
+        elif room.has_incident:
+            # Incident requires defeating incident_strength
+            if total_combat >= room.incident_strength:
+                room.has_incident = False
+                room.incident_strength = 0
+                print(f"\n{C.SUCCESS}🎉 Incident resolved!{C.RESET}")
+                self.add_event(f"{C.SUCCESS}Incident in {room.room_type.value} defeated{C.RESET}")
+
+                # Reward caps
+                caps_reward = random.randint(30, 60)
+                self.resources.caps += caps_reward
+                print(f"{C.CAPS}Found {caps_reward} caps!{C.RESET}")
+
+                # Minor damage
+                for fighter in fighters:
+                    damage = random.randint(2, 5)
+                    fighter.modify_health(-damage)
+            else:
+                print(f"\n{C.WARNING}Incident too strong! Need {room.incident_strength}, have {total_combat}{C.RESET}")
+                # Damage based on strength difference
+                damage_per_dweller = (room.incident_strength - total_combat) // len(fighters)
+                for fighter in fighters:
+                    fighter.modify_health(-max(5, damage_per_dweller))
+
+    def upgrade_room_menu(self):
+        """Upgrade a room to next level"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.BOLD}UPGRADE ROOM{C.RESET}\n")
+
+        upgradeable = []
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.room_type != RoomType.EMPTY and room.level < 3:
+                    upgradeable.append(room)
+
+        if not upgradeable:
+            print(f"{C.INFO}No rooms available to upgrade.{C.RESET}\n")
+            input("Press Enter to continue...")
+            return
+
+        for idx, room in enumerate(upgradeable, 1):
+            cost = room.get_upgrade_cost()
+            next_level = room.level + 1
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {room.room_type.value} Lv.{room.level} → Lv.{next_level}")
+            print(f"      Cost: {C.CAPS}{cost} caps{C.RESET}")
+            print(f"      Floor {room.floor + 1}, Production x{next_level}")
+            print()
+
+        print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
+
+        choice = input(f"{C.BOLD}Select room to upgrade: {C.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(upgradeable):
+                room = upgradeable[choice_idx]
+                cost = room.get_upgrade_cost()
+
+                if self.resources.has_enough("caps", cost):
+                    self.resources.remove("caps", cost)
+                    room.level += 1
+                    print(f"\n{C.SUCCESS}Room upgraded to Level {room.level}!{C.RESET}")
+                    self.add_event(f"{C.SUCCESS}Upgraded {room.room_type.value} to Lv.{room.level}{C.RESET}")
+                else:
+                    print(f"\n{C.DANGER}Not enough caps! Need {cost}, have {self.resources.caps}{C.RESET}")
+        except ValueError:
+            print(f"{C.DANGER}Invalid choice!{C.RESET}")
+
+        input("\nPress Enter to continue...")
+
+    def manage_equipment_menu(self):
+        """Manage equipment"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.BOLD}EQUIPMENT MANAGEMENT{C.RESET}\n")
+        print(f"  {C.SUCCESS}[1]{C.RESET} Equip Item to Dweller")
+        print(f"  {C.SUCCESS}[2]{C.RESET} Unequip Item")
+        print(f"  {C.SUCCESS}[3]{C.RESET} View Inventory")
+        print(f"  {C.DANGER}[0]{C.RESET} Back\n")
+
+        choice = input(f"{C.BOLD}Select option: {C.RESET}").strip()
+
+        if choice == "1":
+            self.equip_item_menu()
+        elif choice == "2":
+            self.unequip_item_menu()
+        elif choice == "3":
+            self.view_equipment_inventory()
+
+    def equip_item_menu(self):
+        """Equip item to dweller"""
+        print(f"\n{C.BOLD}Available Equipment:{C.RESET}\n")
+
+        if not self.equipment_inventory:
+            print(f"{C.INFO}No equipment in inventory.{C.RESET}\n")
+            input("Press Enter to continue...")
+            return
+
+        for idx, eq_key in enumerate(self.equipment_inventory, 1):
+            eq = EQUIPMENT_LIBRARY[eq_key]
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {eq.icon} {eq.name} ({eq.equipment_type.value})")
+            print(f"      {eq.get_description()}")
+
+        print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
+
+        eq_choice = input(f"{C.BOLD}Select equipment: {C.RESET}").strip()
+
+        if eq_choice == "0":
+            return
+
+        try:
+            eq_idx = int(eq_choice) - 1
+            if 0 <= eq_idx < len(self.equipment_inventory):
+                eq_key = self.equipment_inventory[eq_idx]
+                eq = EQUIPMENT_LIBRARY[eq_key]
+
+                print(f"\n{C.BOLD}Select dweller:{C.RESET}\n")
+                for idx, dweller in enumerate(self.dwellers, 1):
+                    print(f"  {C.SUCCESS}[{idx}]{C.RESET} {dweller.name}")
+
+                dweller_choice = input(f"{C.BOLD}> {C.RESET}").strip()
+                dweller_idx = int(dweller_choice) - 1
+
+                if 0 <= dweller_idx < len(self.dwellers):
+                    dweller = self.dwellers[dweller_idx]
+
+                    if eq.equipment_type == EquipmentType.WEAPON:
+                        if dweller.weapon:
+                            self.equipment_inventory.append(dweller.weapon)
+                        dweller.weapon = eq_key
+                    else:
+                        if dweller.outfit:
+                            self.equipment_inventory.append(dweller.outfit)
+                        dweller.outfit = eq_key
+
+                    self.equipment_inventory.remove(eq_key)
+                    print(f"\n{C.SUCCESS}Equipped {eq.name} to {dweller.name}!{C.RESET}")
+                    self.add_event(f"{dweller.name} equipped {eq.name}")
+        except (ValueError, IndexError):
+            print(f"{C.DANGER}Invalid choice!{C.RESET}")
+
+        input("\nPress Enter to continue...")
+
+    def unequip_item_menu(self):
+        """Unequip item from dweller"""
+        print(f"\n{C.BOLD}Equipped Items:{C.RESET}\n")
+
+        equipped_dwellers = [(d, "weapon") for d in self.dwellers if d.weapon] + \
+                           [(d, "outfit") for d in self.dwellers if d.outfit]
+
+        if not equipped_dwellers:
+            print(f"{C.INFO}No items currently equipped.{C.RESET}\n")
+            input("Press Enter to continue...")
+            return
+
+        for idx, (dweller, slot) in enumerate(equipped_dwellers, 1):
+            eq_key = getattr(dweller, slot)
+            eq = EQUIPMENT_LIBRARY[eq_key]
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {dweller.name}: {eq.icon} {eq.name}")
+
+        print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
+
+        choice = input(f"{C.BOLD}Select item to unequip: {C.RESET}").strip()
+
+        if choice == "0":
+            return
+
+        try:
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(equipped_dwellers):
+                dweller, slot = equipped_dwellers[choice_idx]
+                eq_key = getattr(dweller, slot)
+                eq = EQUIPMENT_LIBRARY[eq_key]
+
+                setattr(dweller, slot, None)
+                self.equipment_inventory.append(eq_key)
+                print(f"\n{C.SUCCESS}Unequipped {eq.name} from {dweller.name}!{C.RESET}")
+        except (ValueError, IndexError):
+            print(f"{C.DANGER}Invalid choice!{C.RESET}")
+
+        input("\nPress Enter to continue...")
+
+    def view_equipment_inventory(self):
+        """View equipment inventory"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.BOLD}EQUIPMENT INVENTORY{C.RESET}\n")
+
+        if not self.equipment_inventory:
+            print(f"{C.INFO}No equipment in inventory.{C.RESET}\n")
+        else:
+            for eq_key in self.equipment_inventory:
+                eq = EQUIPMENT_LIBRARY[eq_key]
+                print(f"  {eq.icon} {C.BOLD}{eq.name}{C.RESET} ({eq.equipment_type.value})")
+                print(f"     {eq.get_description()}")
+                print()
+
+        print(f"{C.BOLD}EQUIPPED ITEMS:{C.RESET}\n")
+        for dweller in self.dwellers:
+            items = []
+            if dweller.weapon:
+                items.append(f"{EQUIPMENT_LIBRARY[dweller.weapon].icon} {EQUIPMENT_LIBRARY[dweller.weapon].name}")
+            if dweller.outfit:
+                items.append(f"{EQUIPMENT_LIBRARY[dweller.outfit].icon} {EQUIPMENT_LIBRARY[dweller.outfit].name}")
+
+            if items:
+                print(f"  {dweller.name}: {', '.join(items)}")
+
+        input("\n\nPress Enter to continue...")
+
     def _trigger_random_event(self):
-        """Trigger a random event"""
+        """Trigger random events"""
         events = [
             self._event_new_arrival,
             self._event_raider_attack,
@@ -519,13 +1074,12 @@ class VaultGame:
             self._event_rad_roach_infestation,
             self._event_resource_find,
             self._event_dweller_skill_up,
+            self._event_equipment_find,
         ]
-
-        event = random.choice(events)
-        event()
+        random.choice(events)()
 
     def _event_new_arrival(self):
-        """New dweller arrives at vault"""
+        """New dweller arrives"""
         first_names = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Sam", "Blake"]
         last_names = ["Anderson", "Thomas", "Moore", "Martin", "Jackson", "White", "Harris", "Clark"]
 
@@ -541,84 +1095,79 @@ class VaultGame:
             luck=random.randint(2, 8),
         )
         self.dwellers.append(new_dweller)
-        self.add_event(f"{C.SUCCESS}👤 New arrival: {name} joined the vault!{C.RESET}")
+        self.add_event(f"{C.SUCCESS}👤 {name} joined the vault!{C.RESET}")
 
     def _event_raider_attack(self):
-        """Raiders attack the vault"""
-        damage = random.randint(5, 15)
+        """Raiders attack"""
         if self.dwellers:
             victim = random.choice(self.dwellers)
+            damage = random.randint(5, 15)
             victim.modify_health(-damage)
             victim.modify_happiness(-10)
-            self.add_event(f"{C.DANGER}💀 Raider attack! {victim.name} lost {damage} health!{C.RESET}")
+            self.add_event(f"{C.DANGER}💀 Raiders! {victim.name} lost {damage} HP{C.RESET}")
 
     def _event_fire(self):
-        """Fire breaks out in a room"""
-        # Find occupied rooms
-        occupied_rooms = []
-        for floor in self.vault_layout:
-            for room in floor:
-                if room.room_type != RoomType.EMPTY and not room.under_construction:
-                    occupied_rooms.append(room)
-
-        if occupied_rooms:
-            room = random.choice(occupied_rooms)
+        """Fire event"""
+        occupied = [r for floor in self.vault_layout for r in floor if r.room_type != RoomType.EMPTY]
+        if occupied:
+            room = random.choice(occupied)
             room.on_fire = True
-            self.add_event(f"{C.DANGER}🔥 Fire in {room.room_type.value} on Floor {room.floor + 1}!{C.RESET}")
+            self.add_event(f"{C.DANGER}🔥 Fire in {room.room_type.value}!{C.RESET}")
 
     def _event_rad_roach_infestation(self):
-        """Rad roaches infest a room"""
-        occupied_rooms = []
-        for floor in self.vault_layout:
-            for room in floor:
-                if room.room_type != RoomType.EMPTY and not room.under_construction:
-                    occupied_rooms.append(room)
-
-        if occupied_rooms:
-            room = random.choice(occupied_rooms)
+        """Rad roaches"""
+        occupied = [r for floor in self.vault_layout for r in floor if r.room_type != RoomType.EMPTY]
+        if occupied:
+            room = random.choice(occupied)
             room.has_incident = True
-            self.add_event(f"{C.WARNING}🪳 Rad roach infestation in {room.room_type.value}!{C.RESET}")
+            room.incident_strength = random.randint(10, 20)
+            self.add_event(f"{C.WARNING}🪳 Rad roaches in {room.room_type.value}!{C.RESET}")
 
     def _event_resource_find(self):
-        """Dwellers find extra resources"""
-        resources = ["power", "water", "food"]
-        resource = random.choice(resources)
+        """Find resources"""
+        resource = random.choice(["power", "water", "food"])
         amount = random.randint(5, 15)
         self.resources.add(resource, amount)
-
-        caps_found = random.randint(10, 50)
-        self.resources.caps += caps_found
-
-        self.add_event(f"{C.SUCCESS}✨ Found {amount} {resource} and {caps_found} caps!{C.RESET}")
+        caps = random.randint(10, 50)
+        self.resources.caps += caps
+        self.add_event(f"{C.SUCCESS}✨ Found {amount} {resource} and {caps} caps!{C.RESET}")
 
     def _event_dweller_skill_up(self):
-        """Random dweller improves a skill"""
+        """Dweller skill improves"""
         if self.dwellers:
             dweller = random.choice(self.dwellers)
-            stats = ["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"]
-            stat = random.choice(stats)
+            stat = random.choice(["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"])
             dweller.modify_stat(stat, 1)
             dweller.modify_happiness(5)
-            self.add_event(f"{C.SUCCESS}📈 {dweller.name} improved their {stat}!{C.RESET}")
+            self.add_event(f"{C.SUCCESS}📈 {dweller.name} +1 {stat}!{C.RESET}")
+
+    def _event_equipment_find(self):
+        """Find equipment"""
+        available = ["rusty_pistol", "laser_rifle", "vault_suit", "scientist_coat"]
+        found = random.choice(available)
+        self.equipment_inventory.append(found)
+        eq = EQUIPMENT_LIBRARY[found]
+        self.add_event(f"{C.SUCCESS}🎁 Found {eq.icon} {eq.name}!{C.RESET}")
 
     def _check_game_over(self):
-        """Check if game over conditions are met"""
-        # All dwellers dead
-        alive_dwellers = [d for d in self.dwellers if d.health > 0]
-        if not alive_dwellers:
+        """Check game over"""
+        alive = [d for d in self.dwellers if d.health > 0]
+        if not alive:
             self.game_over = True
-            self.add_event(f"{C.DANGER}💀 All dwellers have perished. GAME OVER.{C.RESET}")
+            self.add_event(f"{C.DANGER}💀 All dwellers dead. GAME OVER.{C.RESET}")
             return
 
-        # Critical resources at 0 for too long
         if self.resources.power == 0 and self.resources.water == 0:
             self.game_over = True
-            self.add_event(f"{C.DANGER}⚠️  Vault systems failed. GAME OVER.{C.RESET}")
+            self.add_event(f"{C.DANGER}⚠️ Vault systems failed. GAME OVER.{C.RESET}")
             return
 
     def add_event(self, event: str):
         """Add event to log"""
         self.event_log.append(event)
+
+    # (Keeping existing methods: build_room_menu, assign_workers_menu, etc.)
+    # For brevity, I'll include the modified game_loop and key methods
 
     def build_room_menu(self):
         """Show build room menu"""
@@ -635,7 +1184,7 @@ class VaultGame:
             (RoomType.LIVING_QUARTERS, "🏠"),
             (RoomType.STORAGE_ROOM, "📦"),
             (RoomType.TRAINING_ROOM, "💪"),
-            (RoomType.MEDBAY, "⚕️ "),
+            (RoomType.MEDBAY, "⚕️"),
             (RoomType.SCIENCE_LAB, "🔬"),
         ]
 
@@ -700,15 +1249,13 @@ class VaultGame:
                 room = self.vault_layout[floor][position]
 
                 if room.room_type == RoomType.EMPTY:
-                    # Build the room
                     self.resources.remove("caps", config.cost)
                     room.room_type = room_type
-                    room.under_construction = False  # Instant build for now
+                    room.under_construction = False
 
                     self.add_event(f"{C.SUCCESS}Built {room_type.value} on Floor {floor + 1}{C.RESET}")
                     print(f"\n{C.SUCCESS}Room built successfully!{C.RESET}")
 
-                    # Update storage capacity
                     if room_type == RoomType.STORAGE_ROOM:
                         self.resources.power_max += 20
                         self.resources.water_max += 20
@@ -729,7 +1276,6 @@ class VaultGame:
 
         print(f"{C.BOLD}ASSIGN WORKERS{C.RESET}\n")
 
-        # Show unassigned dwellers
         unassigned = [d for d in self.dwellers if d.assigned_room is None]
 
         if not unassigned:
@@ -740,9 +1286,16 @@ class VaultGame:
         print(f"{C.BOLD}Unassigned Dwellers:{C.RESET}\n")
         for idx, dweller in enumerate(unassigned, 1):
             print(f"  {C.SUCCESS}[{idx}]{C.RESET} {dweller.name}")
-            print(f"      S:{dweller.strength} P:{dweller.perception} E:{dweller.endurance} " +
-                  f"C:{dweller.charisma} I:{dweller.intelligence} A:{dweller.agility} L:{dweller.luck}")
+            print(f"      S:{dweller.get_stat('strength')} P:{dweller.get_stat('perception')} E:{dweller.get_stat('endurance')} " +
+                  f"C:{dweller.get_stat('charisma')} I:{dweller.get_stat('intelligence')} A:{dweller.get_stat('agility')} L:{dweller.get_stat('luck')}")
             print(f"      Health: {dweller.health}% Happiness: {dweller.happiness}%")
+            if dweller.weapon or dweller.outfit:
+                items = []
+                if dweller.weapon:
+                    items.append(EQUIPMENT_LIBRARY[dweller.weapon].icon)
+                if dweller.outfit:
+                    items.append(EQUIPMENT_LIBRARY[dweller.outfit].icon)
+                print(f"      Equipment: {' '.join(items)}")
             print()
 
         print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
@@ -779,7 +1332,7 @@ class VaultGame:
         for idx, room in enumerate(available_rooms, 1):
             config = ROOM_CONFIGS[room.room_type]
             workers = f"{len(room.assigned_dwellers)}/{config.capacity}"
-            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {room.room_type.value} (Floor {room.floor + 1}, Pos {room.position + 1}) - Workers: {workers}")
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {room.room_type.value} Lv.{room.level} (Floor {room.floor + 1}, Pos {room.position + 1}) - Workers: {workers}")
 
         print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
 
@@ -793,7 +1346,6 @@ class VaultGame:
             if 0 <= choice_idx < len(available_rooms):
                 room = available_rooms[choice_idx]
 
-                # Assign dweller
                 dweller.assigned_room = (room.floor, room.position)
                 room.assigned_dwellers.append(dweller.name)
 
@@ -837,13 +1389,20 @@ class VaultGame:
 
             print(f"{C.BOLD}{dweller.name}{C.RESET}")
             print(f"  Health: {status_color}{dweller.health}%{C.RESET}  Happiness: {happiness_color}{dweller.happiness}%{C.RESET}")
-            print(f"  SPECIAL: S:{dweller.strength} P:{dweller.perception} E:{dweller.endurance} " +
-                  f"C:{dweller.charisma} I:{dweller.intelligence} A:{dweller.agility} L:{dweller.luck}")
+            print(f"  SPECIAL: S:{dweller.get_stat('strength')} P:{dweller.get_stat('perception')} E:{dweller.get_stat('endurance')} " +
+                  f"C:{dweller.get_stat('charisma')} I:{dweller.get_stat('intelligence')} A:{dweller.get_stat('agility')} L:{dweller.get_stat('luck')}")
+
+            if dweller.weapon:
+                weapon = EQUIPMENT_LIBRARY[dweller.weapon]
+                print(f"  Weapon: {weapon.icon} {weapon.name} (Dmg: {weapon.damage})")
+            if dweller.outfit:
+                outfit = EQUIPMENT_LIBRARY[dweller.outfit]
+                print(f"  Outfit: {outfit.icon} {outfit.name}")
 
             if dweller.assigned_room:
                 floor, pos = dweller.assigned_room
                 room = self.vault_layout[floor][pos]
-                print(f"  Assigned: {room.room_type.value} (Floor {floor + 1})")
+                print(f"  Assigned: {room.room_type.value} Lv.{room.level} (Floor {floor + 1})")
             else:
                 print(f"  {C.WARNING}Not assigned to any room{C.RESET}")
             print()
@@ -863,20 +1422,25 @@ class VaultGame:
                 if room.room_type == RoomType.EMPTY:
                     print(f"  {C.ROOM_EMPTY}[Empty Slot]{C.RESET}")
                 else:
-                    production = room.get_production()
+                    production = room.get_production(self.dwellers)
                     prod_str = ", ".join([f"+{v} {k}" for k, v in production.items()]) if production else "No production"
                     workers = len(room.assigned_dwellers)
 
-                    print(f"  {C.BOLD}{room.room_type.value}{C.RESET} - {prod_str}")
-                    print(f"    Workers: {workers} - Level: {room.level}")
+                    print(f"  {C.BOLD}{room.room_type.value} Lv.{room.level}{C.RESET} - {prod_str}")
+                    print(f"    Workers: {workers}")
 
                     if room.assigned_dwellers:
                         print(f"    Assigned: {', '.join(room.assigned_dwellers)}")
 
+                    if room.can_rush():
+                        print(f"    {C.SUCCESS}✓ Can Rush{C.RESET}")
+                    elif room.rush_cooldown > 0:
+                        print(f"    {C.WARNING}Rush cooldown: {room.rush_cooldown} turns{C.RESET}")
+
                     if room.on_fire:
                         print(f"    {C.DANGER}🔥 ON FIRE!{C.RESET}")
                     if room.has_incident:
-                        print(f"    {C.WARNING}⚠️  INCIDENT IN PROGRESS{C.RESET}")
+                        print(f"    {C.WARNING}⚠️ INCIDENT (Strength: {room.incident_strength}){C.RESET}")
             print()
 
         input("Press Enter to continue...")
@@ -891,7 +1455,7 @@ class VaultGame:
         if not self.event_log:
             print(f"{C.INFO}No events yet.{C.RESET}\n")
         else:
-            for event in self.event_log[-20:]:  # Show last 20 events
+            for event in self.event_log[-20:]:
                 print(f"  • {event}")
 
         print()
@@ -905,7 +1469,6 @@ class VaultGame:
         print(f"{C.BOLD}MANAGE DWELLERS{C.RESET}\n")
         print(f"  {C.SUCCESS}[1]{C.RESET} Unassign Dweller from Room")
         print(f"  {C.SUCCESS}[2]{C.RESET} Heal Dweller (costs 50 caps)")
-        print(f"  {C.SUCCESS}[3]{C.RESET} Train Dweller (if training room available)")
         print(f"  {C.DANGER}[0]{C.RESET} Back\n")
 
         choice = input(f"{C.BOLD}Select option: {C.RESET}").strip()
@@ -914,9 +1477,6 @@ class VaultGame:
             self.unassign_dweller()
         elif choice == "2":
             self.heal_dweller()
-        elif choice == "3":
-            print(f"{C.INFO}Training feature coming soon!{C.RESET}")
-            input("\nPress Enter to continue...")
 
     def unassign_dweller(self):
         """Unassign a dweller from their room"""
@@ -931,7 +1491,7 @@ class VaultGame:
         for idx, dweller in enumerate(assigned, 1):
             floor, pos = dweller.assigned_room
             room = self.vault_layout[floor][pos]
-            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {dweller.name} - {room.room_type.value} (Floor {floor + 1})")
+            print(f"  {C.SUCCESS}[{idx}]{C.RESET} {dweller.name} - {room.room_type.value} Lv.{room.level} (Floor {floor + 1})")
 
         print(f"  {C.DANGER}[0]{C.RESET} Cancel\n")
 
@@ -947,7 +1507,6 @@ class VaultGame:
                 floor, pos = dweller.assigned_room
                 room = self.vault_layout[floor][pos]
 
-                # Unassign
                 room.assigned_dwellers.remove(dweller.name)
                 dweller.assigned_room = None
 
@@ -990,7 +1549,6 @@ class VaultGame:
             if 0 <= choice_idx < len(injured):
                 dweller = injured[choice_idx]
 
-                # Heal
                 self.resources.remove("caps", heal_cost)
                 dweller.modify_health(50)
                 dweller.modify_happiness(10)
@@ -1009,7 +1567,8 @@ class VaultGame:
             "resources": asdict(self.resources),
             "dwellers": [asdict(d) for d in self.dwellers],
             "vault_layout": [[asdict(r) for r in floor] for floor in self.vault_layout],
-            "event_log": self.event_log[-50:],  # Save last 50 events
+            "equipment_inventory": self.equipment_inventory,
+            "event_log": self.event_log[-50:],
         }
 
         try:
@@ -1041,12 +1600,12 @@ class VaultGame:
             for floor_data in save_data["vault_layout"]:
                 floor = []
                 for r_data in floor_data:
-                    # Convert room_type string back to enum
                     r_data["room_type"] = RoomType(r_data["room_type"])
                     room = Room(**r_data)
                     floor.append(room)
                 self.vault_layout.append(floor)
 
+            self.equipment_inventory = save_data.get("equipment_inventory", [])
             self.event_log = save_data.get("event_log", [])
 
             print(f"\n{C.SUCCESS}Game loaded successfully!{C.RESET}")
@@ -1066,7 +1625,7 @@ class VaultGame:
         intro_text = f"""
 {C.HEADER}{C.BOLD}╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
-║                  VAULT 13 - SURVIVAL PROTOCOL                        ║
+║              VAULT 13 - SURVIVAL PROTOCOL v2.0                       ║
 ║                                                                      ║
 ║            Welcome to the Post-Nuclear Age, Overseer!                ║
 ║                                                                      ║
@@ -1075,27 +1634,16 @@ class VaultGame:
 {C.INFO}After the Great War, you've been selected as Overseer of Vault 13,
 one of the last bastions of humanity.{C.RESET}
 
-{C.BOLD}Your mission:{C.RESET}
-  • Manage vault resources (Power, Water, Food)
-  • Assign dwellers to production rooms
-  • Build and expand your underground shelter
-  • Respond to random events and crises
-  • Keep your dwellers happy and healthy
-  • Ensure the survival of humanity!
+{C.BOLD}NEW FEATURES in v2.0:{C.RESET}
+  • {C.SUCCESS}Rush Production{C.RESET} - Risk/reward instant resources
+  • {C.SUCCESS}Room Upgrades{C.RESET} - Level 1 → 2 → 3 for better output
+  • {C.SUCCESS}Active Combat{C.RESET} - Fight fires & incidents manually
+  • {C.SUCCESS}Equipment System{C.RESET} - Equip weapons & outfits
+  • {C.SUCCESS}Smart Rationing{C.RESET} - Fair resource distribution
 
-{C.BOLD}Game Mechanics:{C.RESET}
-  • {C.POWER}⚡ Power{C.RESET} - Keeps vault systems running
-  • {C.WATER}💧 Water{C.RESET} - Essential for dweller survival
-  • {C.FOOD}🍖 Food{C.RESET} - Keeps dwellers fed and happy
-  • {C.CAPS}💰 Caps{C.RESET} - Currency for building and healing
-
-{C.WARNING}Warning:{C.RESET} Let any critical resource run dry for too long,
-and your vault will fail!
-
-{C.BOLD}Controls:{C.RESET}
-  • Use letter keys to select menu options
-  • Each turn represents one day in the vault
-  • Build strategically and assign dwellers wisely
+{C.BOLD}Resources:{C.RESET}
+  • {C.POWER}⚡ Power{C.RESET} - Vault systems  • {C.WATER}💧 Water{C.RESET} - Survival
+  • {C.FOOD}🍖 Food{C.RESET} - Sustenance      • {C.CAPS}💰 Caps{C.RESET} - Currency
 
 {C.SUCCESS}Good luck, Overseer! The future of humanity rests in your hands!{C.RESET}
 """
@@ -1126,10 +1674,18 @@ and your vault will fail!
 
             if choice == 'b':
                 self.build_room_menu()
+            elif choice == 'u':
+                self.upgrade_room_menu()
+            elif choice == 'h':
+                self.rush_production_menu()
             elif choice == 'd':
                 self.manage_dwellers_menu()
             elif choice == 'r':
                 self.assign_workers_menu()
+            elif choice == 'i':
+                self.fight_incident_menu()
+            elif choice == 'g':
+                self.manage_equipment_menu()
             elif choice == 'e':
                 self.process_turn()
                 time.sleep(1)
