@@ -2708,6 +2708,9 @@ class VaultGame:
         print(f"{C.BOLD}🎭 GRAND BALL:{C.RESET}")
         print(f"  {C.TECH}[9]{C.RESET} Performance Dashboard  {C.DIM}(Easter eggs: Try typing cheat codes!){C.RESET}")
 
+        print(f"{C.BOLD}🚀 v8.0 ULTIMATE:{C.RESET}")
+        print(f"  {C.QUEST}[Y]{C.RESET} Pets  {C.INFO}[N]{C.RESET} Challenges  {C.QUEST}[J]{C.RESET} Stories  {C.LEGENDARY}[U]{C.RESET} Hall of Fame")
+
         if AI_ENABLED:
             print(f"{C.BOLD}AI:{C.RESET} {C.AI}[A]{C.RESET} Advisor  {C.AI}[W]{C.RESET} Talk")
 
@@ -2831,6 +2834,19 @@ class VaultGame:
         # 🏆 ENHANCEMENT: Check for achievements every turn
         self._check_achievements()
 
+        # 🚀 v8.0 ULTIMATE EDITION: Process new systems
+        self.generate_daily_challenges()  # Generate new challenges each day
+        self.check_challenge_progress()   # Update challenge progress
+
+        # Generate stories for dwellers who don't have one yet
+        for dweller in self.dwellers:
+            if dweller.dweller_id not in self.dweller_stories:
+                self.generate_dweller_story(dweller)
+
+        # Random pet discovery (5% chance per day)
+        if random.random() < 0.05 and len(self.pets) < 10:  # Max 10 pets
+            self.discover_pet()
+
         self.log_event(f"=== Day {self.day} ===")
 
     def process_expedition_returns(self):
@@ -2874,7 +2890,15 @@ class VaultGame:
 
                 self.log_event(f"✓ {dweller.name} returned (+{loot_caps} caps)")
                 dweller.modify_happiness(10)
-                
+
+                # 🚀 v8.0: Pet discovery on expeditions (20% chance)
+                if random.random() < 0.20 and len(self.pets) < 10:
+                    self.discover_pet()
+                    self.add_memorable_moment(dweller, f"Discovered a pet during expedition!")
+
+                # Add memorable moment for successful expedition
+                self.add_memorable_moment(dweller, f"Successful {exp.destination} expedition (+{loot_caps} caps)")
+
                 if self.current_objective and self.current_objective.objective_type == ObjectiveType.EXODUS:
                     self.current_objective.progress["expeditions_completed"] = \
                         self.current_objective.progress.get("expeditions_completed", 0) + 1
@@ -4546,6 +4570,628 @@ class VaultGame:
         input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
 
     # =================================================================
+    # 🐾 PET SYSTEM
+    # =================================================================
+
+    def discover_pet(self):
+        """Discover a new pet during exploration or events"""
+        species_data = {
+            "dog": {"emoji": "🐕", "bonus": "luck", "rarity_weights": {"common": 60, "rare": 30, "legendary": 10}},
+            "cat": {"emoji": "🐈", "bonus": "happiness", "rarity_weights": {"common": 60, "rare": 30, "legendary": 10}},
+            "parrot": {"emoji": "🦜", "bonus": "exploration", "rarity_weights": {"common": 50, "rare": 35, "legendary": 15}},
+            "rad_scorpion": {"emoji": "🦂", "bonus": "combat", "rarity_weights": {"common": 40, "rare": 40, "legendary": 20}},
+            "molerat": {"emoji": "🐭", "bonus": "production", "rarity_weights": {"common": 55, "rare": 35, "legendary": 10}},
+        }
+
+        species = random.choice(list(species_data.keys()))
+        species_info = species_data[species]
+
+        # Determine rarity
+        rarity_roll = random.randint(1, 100)
+        if rarity_roll <= 10:
+            rarity = "legendary"
+            bonus_value = random.randint(15, 25)
+        elif rarity_roll <= 40:
+            rarity = "rare"
+            bonus_value = random.randint(8, 15)
+        else:
+            rarity = "common"
+            bonus_value = random.randint(3, 8)
+
+        # Generate name
+        pet_names = {
+            "dog": ["Rex", "Buddy", "Max", "Duke", "Shadow", "Rocky", "Zeus"],
+            "cat": ["Whiskers", "Luna", "Felix", "Mittens", "Shadow", "Tiger"],
+            "parrot": ["Polly", "Captain", "Kiwi", "Rio", "Azure", "Mango"],
+            "rad_scorpion": ["Stinger", "Venom", "Spike", "Pincer", "Rad", "Glow"],
+            "molerat": ["Digger", "Tunnel", "Nibbles", "Burrow", "Dusty", "Scout"],
+        }
+
+        available_names = [n for n in pet_names[species] if n not in self.pet_names_used]
+        if not available_names:
+            available_names = [f"{random.choice(pet_names[species])}{random.randint(1,99)}"]
+
+        name = random.choice(available_names)
+        self.pet_names_used.add(name)
+
+        # Create pet
+        pet = Pet(
+            pet_id=f"pet_{len(self.pets)}_{species}",
+            name=name,
+            species=species,
+            rarity=rarity,
+            bonus_type=species_info["bonus"],
+            bonus_value=bonus_value,
+            emoji=species_info["emoji"]
+        )
+
+        self.pets.append(pet)
+
+        # Announcement
+        rarity_colors = {"common": C.DIM, "rare": C.POWER, "legendary": C.LEGENDARY}
+        rarity_stars = {"common": "⭐", "rare": "⭐⭐", "legendary": "⭐⭐⭐"}
+
+        print(f"\n{rarity_colors[rarity]}{C.BOLD}╔═══════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{rarity_colors[rarity]}{C.BOLD}║       🐾 NEW PET DISCOVERED! 🐾                      ║{C.RESET}")
+        print(f"{rarity_colors[rarity]}{C.BOLD}╚═══════════════════════════════════════════════════════╝{C.RESET}\n")
+        print(f"{species_info['emoji']} {C.BOLD}{name}{C.RESET} the {rarity.title()} {species.replace('_', ' ').title()}!")
+        print(f"{rarity_stars[rarity]} Rarity: {rarity.upper()}")
+        print(f"💫 Bonus: +{bonus_value} {species_info['bonus'].title()}")
+        print(f"\n{C.SUCCESS}Pet added to your collection!{C.RESET}")
+
+        # Record in hall of fame
+        self.record_hall_of_fame("pet", f"Discovered {name} the {species}", {
+            "species": species, "rarity": rarity, "bonus": bonus_value
+        })
+
+        input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+
+    def manage_pets_menu(self):
+        """Manage vault pets"""
+        while True:
+            clear_screen()
+            print(f"{C.QUEST}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+            print(f"{C.QUEST}{C.BOLD}║                  🐾 PET MANAGEMENT 🐾                     ║{C.RESET}")
+            print(f"{C.QUEST}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+            if not self.pets:
+                print(f"{C.DIM}No pets discovered yet!{C.RESET}")
+                print(f"\n💡 Pets can be found during:")
+                print(f"  • Wasteland expeditions")
+                print(f"  • Random vault events")
+                print(f"  • Special quest rewards")
+                input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+                return
+
+            print(f"{C.BOLD}Your Pet Collection ({len(self.pets)} total):{C.RESET}\n")
+
+            for i, pet in enumerate(self.pets, 1):
+                rarity_colors = {"common": C.DIM, "rare": C.POWER, "legendary": C.LEGENDARY}
+                color = rarity_colors[pet.rarity]
+
+                assignment = f"Assigned to {pet.assigned_dweller}" if pet.assigned_dweller else "Unassigned"
+                happiness_bar = make_progress_bar(pet.happiness, 100, 10)
+
+                print(f"{color}[{i}] {pet.emoji} {pet.name}{C.RESET}")
+                print(f"    {pet.species.replace('_', ' ').title()} | {pet.rarity.title()} | +{pet.bonus_value} {pet.bonus_type.title()}")
+                print(f"    {assignment} | Happiness: {happiness_bar} {pet.happiness}%")
+                print()
+
+            print(f"\n{C.BOLD}Actions:{C.RESET}")
+            print(f"  [1-{len(self.pets)}] Assign/reassign pet to dweller")
+            print(f"  [B] Back to main menu")
+
+            choice = input(f"\n{C.PROMPT}>{C.RESET} ").strip().lower()
+
+            if choice == 'b':
+                return
+            elif choice.isdigit() and 1 <= int(choice) <= len(self.pets):
+                self._assign_pet_to_dweller(self.pets[int(choice) - 1])
+
+    def _assign_pet_to_dweller(self, pet: Pet):
+        """Assign a pet to a specific dweller"""
+        clear_screen()
+        print(f"{C.BOLD}Assign {pet.emoji} {pet.name} to which dweller?{C.RESET}\n")
+
+        if not self.dwellers:
+            print(f"{C.WARNING}No dwellers available!{C.RESET}")
+            input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+            return
+
+        for i, d in enumerate(self.dwellers[:20], 1):  # Show first 20
+            current_pet = next((p for p in self.pets if p.assigned_dweller == d.name), None)
+            pet_info = f"(has {current_pet.emoji} {current_pet.name})" if current_pet else ""
+            print(f"[{i}] {d.name} - {d.job} {pet_info}")
+
+        print(f"[U] Unassign pet")
+        print(f"[C] Cancel")
+
+        choice = input(f"\n{C.PROMPT}>{C.RESET} ").strip().lower()
+
+        if choice == 'c':
+            return
+        elif choice == 'u':
+            pet.assigned_dweller = None
+            print(f"\n{C.SUCCESS}{pet.emoji} {pet.name} is now unassigned.{C.RESET}")
+            input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+        elif choice.isdigit() and 1 <= int(choice) <= min(len(self.dwellers), 20):
+            dweller = self.dwellers[int(choice) - 1]
+
+            # Unassign any previous pet from this dweller
+            for p in self.pets:
+                if p.assigned_dweller == dweller.name:
+                    p.assigned_dweller = None
+
+            pet.assigned_dweller = dweller.name
+            print(f"\n{C.SUCCESS}{pet.emoji} {pet.name} assigned to {dweller.name}!{C.RESET}")
+            print(f"💫 {dweller.name} now gains +{pet.bonus_value} {pet.bonus_type}!")
+            input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+
+    def apply_pet_bonuses(self, dweller: Dweller) -> Dict[str, int]:
+        """Get bonuses from assigned pet"""
+        bonuses = {}
+        pet = next((p for p in self.pets if p.assigned_dweller == dweller.name), None)
+
+        if pet:
+            bonuses[pet.bonus_type] = pet.bonus_value
+
+        return bonuses
+
+    # =================================================================
+    # 🎯 DAILY CHALLENGES
+    # =================================================================
+
+    def generate_daily_challenges(self):
+        """Generate new daily/weekly challenges"""
+        if self.day == self.last_challenge_day:
+            return  # Already generated for today
+
+        self.last_challenge_day = self.day
+
+        # Generate 1-2 daily challenges
+        daily_count = random.randint(1, 2)
+        for _ in range(daily_count):
+            challenge_type = random.choice([
+                "collect_caps", "produce_power", "produce_water", "produce_food",
+                "assign_dwellers", "build_room", "research", "expedition",
+                "happiness", "birth", "level_up"
+            ])
+
+            challenge_templates = {
+                "collect_caps": ("Capitalist", "Earn {target} caps", "caps", random.randint(500, 2000), 300, 0),
+                "produce_power": ("Power Plant", "Produce {target} power", "power", random.randint(200, 800), 200, 0),
+                "produce_water": ("Water Works", "Produce {target} water", "water", random.randint(200, 800), 200, 0),
+                "produce_food": ("Feast Master", "Produce {target} food", "food", random.randint(200, 800), 200, 0),
+                "assign_dwellers": ("Workforce", "Assign {target} dwellers to rooms", "assignments", random.randint(5, 15), 150, 50),
+                "build_room": ("Builder", "Build {target} new rooms", "rooms", random.randint(1, 3), 400, 100),
+                "research": ("Researcher", "Earn {target} research points", "research", random.randint(100, 500), 250, 100),
+                "expedition": ("Explorer", "Send {target} expeditions", "expeditions", random.randint(2, 5), 300, 100),
+                "happiness": ("Mood Booster", "Reach {target}% average happiness", "happiness", random.randint(70, 90), 200, 0),
+                "birth": ("Baby Boom", "Have {target} children born", "births", random.randint(1, 3), 500, 200),
+                "level_up": ("Training Day", "Level up {target} dwellers", "levels", random.randint(2, 5), 300, 150),
+            }
+
+            title, desc_template, objective, target, caps_reward, research_reward = challenge_templates[challenge_type]
+
+            challenge = DailyChallenge(
+                challenge_id=f"daily_{self.day}_{challenge_type}_{random.randint(1000,9999)}",
+                title=title,
+                description=desc_template.format(target=target),
+                challenge_type="daily",
+                objective=objective,
+                target=target,
+                reward_caps=caps_reward,
+                reward_research=research_reward,
+                expires_day=self.day + 1
+            )
+
+            self.daily_challenges.append(challenge)
+
+        # Generate weekly challenge (every 7 days)
+        if self.day % 7 == 1:
+            weekly_type = random.choice([
+                "legendary_item", "max_tech", "vault_size", "population",
+                "zero_deaths", "max_happiness", "faction_rep"
+            ])
+
+            weekly_templates = {
+                "legendary_item": ("Legend Hunter", "Find {target} legendary items", "legendaries", random.randint(1, 2), 1000, 500),
+                "max_tech": ("Tech Tycoon", "Research {target} technologies", "tech", random.randint(3, 6), 800, 600),
+                "vault_size": ("Mega Vault", "Expand to {target} total rooms", "rooms_total", random.randint(15, 25), 1200, 400),
+                "population": ("Population Boom", "Reach {target} dwellers", "population", random.randint(15, 30), 1500, 300),
+                "zero_deaths": ("Perfect Week", "Survive 7 days with zero deaths", "no_deaths", 7, 2000, 800),
+                "max_happiness": ("Utopia", "Maintain 90%+ happiness for 7 days", "happy_days", 7, 1500, 500),
+                "faction_rep": ("Diplomat", "Reach {target} reputation with any faction", "faction", random.randint(80, 100), 1000, 700),
+            }
+
+            title, desc_template, objective, target, caps_reward, research_reward = weekly_templates[weekly_type]
+
+            challenge = DailyChallenge(
+                challenge_id=f"weekly_{self.day}_{weekly_type}_{random.randint(1000,9999)}",
+                title=f"Weekly: {title}",
+                description=desc_template.format(target=target),
+                challenge_type="weekly",
+                objective=objective,
+                target=target,
+                reward_caps=caps_reward,
+                reward_research=research_reward,
+                expires_day=self.day + 7
+            )
+
+            self.daily_challenges.append(challenge)
+
+        if self.daily_challenges:
+            new_count = sum(1 for c in self.daily_challenges if c.challenge_id.startswith(f"daily_{self.day}") or c.challenge_id.startswith(f"weekly_{self.day}"))
+            if new_count > 0:
+                self.add_event(f"🎯 {new_count} new challenge(s) available!", "QUEST")
+
+    def check_challenge_progress(self):
+        """Update progress on active challenges"""
+        for challenge in self.daily_challenges:
+            if challenge.completed or challenge.expires_day < self.day:
+                continue
+
+            progress = 0
+
+            # Check different objectives
+            if challenge.objective == "caps":
+                # Track caps earned this turn (simplified)
+                progress = challenge.progress
+            elif challenge.objective in ["power", "water", "food"]:
+                # Track production (simplified)
+                progress = challenge.progress
+            elif challenge.objective == "assignments":
+                progress = sum(1 for d in self.dwellers if d.assigned_room_floor is not None)
+            elif challenge.objective == "rooms_total":
+                progress = sum(len([r for r in floor if r]) for floor in self.vault_layout)
+            elif challenge.objective == "population":
+                progress = len(self.dwellers)
+            elif challenge.objective == "happiness":
+                if self.dwellers:
+                    progress = sum(d.happiness for d in self.dwellers) // len(self.dwellers)
+            elif challenge.objective == "legendaries":
+                progress = len(self.legendary_inventory)
+            elif challenge.objective == "tech":
+                progress = len(self.researched_technologies)
+            elif challenge.objective == "faction":
+                progress = max(self.faction_reputations.values()) if self.faction_reputations else 0
+
+            challenge.progress = progress
+
+            # Check completion
+            if challenge.progress >= challenge.target:
+                self.complete_challenge(challenge)
+
+    def complete_challenge(self, challenge: DailyChallenge):
+        """Complete a challenge and grant rewards"""
+        if challenge.completed:
+            return
+
+        challenge.completed = True
+        self.completed_challenges.append(challenge)
+
+        # Grant rewards
+        self.resources.caps += challenge.reward_caps
+        self.resources.research_points += challenge.reward_research
+
+        # Announcement
+        print(f"\n{C.QUEST}{C.BOLD}╔═══════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}║       🎯 CHALLENGE COMPLETED! 🎯                     ║{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}╚═══════════════════════════════════════════════════════╝{C.RESET}\n")
+        print(f"{C.BOLD}{challenge.title}{C.RESET}")
+        print(f"{challenge.description}")
+        print(f"\n{C.SUCCESS}Rewards:{C.RESET}")
+        if challenge.reward_caps > 0:
+            print(f"  💰 +{challenge.reward_caps} caps")
+        if challenge.reward_research > 0:
+            print(f"  🔬 +{challenge.reward_research} research")
+
+        self.add_event(f"🎯 Challenge completed: {challenge.title}!", "QUEST")
+
+        # Record in hall of fame
+        self.record_hall_of_fame("challenge", challenge.title, {
+            "description": challenge.description,
+            "rewards": f"{challenge.reward_caps} caps, {challenge.reward_research} research"
+        })
+
+        input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+
+    def challenges_menu(self):
+        """View active and completed challenges"""
+        clear_screen()
+        print(f"{C.QUEST}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}║                🎯 DAILY CHALLENGES 🎯                     ║{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        # Active challenges
+        active = [c for c in self.daily_challenges if not c.completed and c.expires_day >= self.day]
+
+        if active:
+            print(f"{C.BOLD}🔥 ACTIVE CHALLENGES:{C.RESET}\n")
+            for challenge in active:
+                expires_in = challenge.expires_day - self.day
+                challenge_color = C.QUEST if challenge.challenge_type == "daily" else C.LEGENDARY
+
+                print(f"{challenge_color}{C.BOLD}{challenge.title}{C.RESET}")
+                print(f"  {challenge.description}")
+
+                progress_bar = make_progress_bar(challenge.progress, challenge.target, 30)
+                print(f"  Progress: {progress_bar} {challenge.progress}/{challenge.target}")
+                print(f"  Expires in: {expires_in} day(s)")
+
+                rewards = []
+                if challenge.reward_caps > 0:
+                    rewards.append(f"💰 {challenge.reward_caps}")
+                if challenge.reward_research > 0:
+                    rewards.append(f"🔬 {challenge.reward_research}")
+                print(f"  Rewards: {', '.join(rewards)}")
+                print()
+        else:
+            print(f"{C.DIM}No active challenges. Check back tomorrow!{C.RESET}\n")
+
+        # Completed challenges today
+        completed_today = [c for c in self.completed_challenges if c.expires_day >= self.day - 1]
+        if completed_today:
+            print(f"{C.BOLD}✅ RECENTLY COMPLETED:{C.RESET}\n")
+            for challenge in completed_today[:5]:
+                print(f"  {C.SUCCESS}✓{C.RESET} {challenge.title}")
+
+        # Stats
+        total_completed = len(self.completed_challenges)
+        total_caps_earned = sum(c.reward_caps for c in self.completed_challenges)
+        total_research_earned = sum(c.reward_research for c in self.completed_challenges)
+
+        print(f"\n{C.BOLD}📊 CHALLENGE STATISTICS:{C.RESET}")
+        print(f"  Total Completed: {total_completed}")
+        print(f"  Total Caps Earned: {total_caps_earned}")
+        print(f"  Total Research Earned: {total_research_earned}")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    # =================================================================
+    # 💬 DWELLER STORIES & PERSONALITIES
+    # =================================================================
+
+    def generate_dweller_story(self, dweller: Dweller):
+        """Generate backstory and personality for a dweller"""
+        if dweller.dweller_id in self.dweller_stories:
+            return  # Already has a story
+
+        # Backstory templates
+        origins = [
+            f"Once a {random.choice(['scientist', 'engineer', 'doctor', 'teacher', 'farmer', 'trader', 'soldier', 'artist'])} in the wasteland",
+            f"Born in {random.choice(['Vault 101', 'a small settlement', 'the ruins of D.C.', 'a trading post', 'a hidden bunker'])}",
+            f"Survived {random.choice(['raider attacks', 'super mutant raids', 'deathclaw encounters', 'radiation storms', 'the great famine'])}",
+            f"Traveled from {random.choice(['the Capital Wasteland', 'New Vegas', 'the Commonwealth', 'the West Coast', 'the Midwest'])}",
+        ]
+
+        motivations = [
+            f"seeking {random.choice(['redemption', 'family', 'purpose', 'safety', 'revenge', 'knowledge', 'peace'])}",
+            f"running from {random.choice(['a dark past', 'old enemies', 'painful memories', 'the Brotherhood', 'the Enclave'])}",
+            f"hoping to {random.choice(['rebuild society', 'find love', 'master a skill', 'make amends', 'start fresh'])}",
+        ]
+
+        backstory = f"{random.choice(origins)}, {random.choice(motivations)}."
+
+        # Quirks based on SPECIAL stats
+        quirks = []
+        if dweller.S >= 8:
+            quirks.append(random.choice(["Loves arm wrestling", "Never skips workout day", "Protective of weaker dwellers"]))
+        if dweller.P >= 8:
+            quirks.append(random.choice(["Eagle-eyed observer", "Notices every detail", "Great at finding lost items"]))
+        if dweller.E >= 8:
+            quirks.append(random.choice(["Can outlast anyone", "Never complains", "Iron stomach"]))
+        if dweller.C >= 8:
+            quirks.append(random.choice(["Life of the party", "Makes friends easily", "Natural leader"]))
+        if dweller.I >= 8:
+            quirks.append(random.choice(["Voracious reader", "Loves chess", "Always learning"]))
+        if dweller.A >= 8:
+            quirks.append(random.choice(["Quick reflexes", "Acrobatic", "Nimble fingers"]))
+        if dweller.L >= 8:
+            quirks.append(random.choice(["Lucky at cards", "Finds rare items", "Born under a lucky star"]))
+
+        # Add random quirks
+        general_quirks = [
+            "Hums while working", "Collects bottle caps", "Tells awful jokes",
+            "Meticulous organizer", "Night owl", "Early riser",
+            "Coffee addict", "Sweet tooth", "Vegetarian",
+            "Talks to robots", "Afraid of molerats", "Loves pre-war music",
+        ]
+        quirks.extend(random.sample(general_quirks, random.randint(1, 2)))
+
+        # Dreams and aspirations
+        dreams = [
+            f"Dreams of {random.choice(['seeing the ocean', 'rebuilding America', 'finding Vault 0', 'mastering energy weapons', 'writing a book'])}",
+            f"Wants to {random.choice(['become Overseer someday', 'have a large family', 'discover new technology', 'see the surface thrive', 'be remembered'])}",
+        ]
+
+        # Career path
+        career_paths = {
+            "POWER": "Power Specialist",
+            "WATER": "Water Treatment Expert",
+            "FOOD": "Agricultural Director",
+            "MEDICAL": "Chief Medical Officer",
+            "SCIENCE": "Lead Researcher",
+            "TRAINING": "Master Trainer",
+            "QUARTERS": "Community Organizer",
+        }
+        career = career_paths.get(dweller.job, "Vault Citizen")
+
+        story = DwellerStory(
+            dweller_id=dweller.dweller_id,
+            backstory=backstory,
+            quirks=quirks[:4],  # Keep 3-4 quirks
+            dreams=dreams[:2],
+            memorable_moments=[],
+            career_path=career
+        )
+
+        self.dweller_stories[dweller.dweller_id] = story
+
+    def add_memorable_moment(self, dweller: Dweller, moment: str):
+        """Add a memorable moment to dweller's story"""
+        if dweller.dweller_id not in self.dweller_stories:
+            self.generate_dweller_story(dweller)
+
+        story = self.dweller_stories[dweller.dweller_id]
+        story.memorable_moments.append(f"Day {self.day}: {moment}")
+
+        # Keep only last 10 moments
+        if len(story.memorable_moments) > 10:
+            story.memorable_moments = story.memorable_moments[-10:]
+
+    def show_dweller_story(self, dweller: Dweller):
+        """Display dweller's complete story"""
+        if dweller.dweller_id not in self.dweller_stories:
+            self.generate_dweller_story(dweller)
+
+        story = self.dweller_stories[dweller.dweller_id]
+
+        clear_screen()
+        print(f"{C.QUEST}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}║              💬 DWELLER BIOGRAPHY 💬                      ║{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        print(f"{C.BOLD}📖 {dweller.name}{C.RESET}")
+        print(f"   {story.career_path} • Level {dweller.level}")
+        print(f"\n{C.BOLD}🌟 BACKSTORY:{C.RESET}")
+        print(f"   {story.backstory}")
+
+        if story.quirks:
+            print(f"\n{C.BOLD}✨ PERSONALITY QUIRKS:{C.RESET}")
+            for quirk in story.quirks:
+                print(f"   • {quirk}")
+
+        if story.dreams:
+            print(f"\n{C.BOLD}💭 DREAMS & ASPIRATIONS:{C.RESET}")
+            for dream in story.dreams:
+                print(f"   • {dream}")
+
+        if story.memorable_moments:
+            print(f"\n{C.BOLD}📜 MEMORABLE MOMENTS:{C.RESET}")
+            for moment in story.memorable_moments[-5:]:  # Show last 5
+                print(f"   • {moment}")
+
+        # Pet assignment
+        pet = next((p for p in self.pets if p.assigned_dweller == dweller.name), None)
+        if pet:
+            print(f"\n{C.BOLD}🐾 COMPANION:{C.RESET}")
+            print(f"   {pet.emoji} {pet.name} the {pet.species.replace('_', ' ').title()} (+{pet.bonus_value} {pet.bonus_type})")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    def dweller_stories_menu(self):
+        """Menu to view dweller stories"""
+        while True:
+            clear_screen()
+            print(f"{C.QUEST}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+            print(f"{C.QUEST}{C.BOLD}║              💬 DWELLER BIOGRAPHIES 💬                    ║{C.RESET}")
+            print(f"{C.QUEST}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+            if not self.dwellers:
+                print(f"{C.DIM}No dwellers in your vault!{C.RESET}")
+                input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+                return
+
+            print(f"{C.BOLD}Select a dweller to view their biography:{C.RESET}\n")
+
+            for i, dweller in enumerate(self.dwellers[:20], 1):  # Show first 20
+                has_story = dweller.dweller_id in self.dweller_stories
+                story_icon = "📖" if has_story else "📄"
+                pet = next((p for p in self.pets if p.assigned_dweller == dweller.name), None)
+                pet_info = f" {pet.emoji}" if pet else ""
+
+                print(f"[{i}] {story_icon} {dweller.name} - Lvl {dweller.level} {dweller.job}{pet_info}")
+
+            print(f"\n[B] Back to main menu")
+
+            choice = input(f"\n{C.PROMPT}>{C.RESET} ").strip().lower()
+
+            if choice == 'b':
+                return
+            elif choice.isdigit() and 1 <= int(choice) <= min(len(self.dwellers), 20):
+                dweller = self.dwellers[int(choice) - 1]
+                self.show_dweller_story(dweller)
+
+    # =================================================================
+    # 🏆 HALL OF FAME
+    # =================================================================
+
+    def record_hall_of_fame(self, entry_type: str, title: str, stats: Dict = None):
+        """Record a legendary moment in the Hall of Fame"""
+        if stats is None:
+            stats = {}
+
+        entry = HallOfFameEntry(
+            entry_type=entry_type,
+            title=title,
+            description=f"{title} on Day {self.day}",
+            day_achieved=self.day,
+            stats=stats
+        )
+
+        self.hall_of_fame.append(entry)
+
+        # Keep only last 50 entries
+        if len(self.hall_of_fame) > 50:
+            self.hall_of_fame = self.hall_of_fame[-50:]
+
+    def show_hall_of_fame(self):
+        """Display the Hall of Fame"""
+        clear_screen()
+        print(f"{C.LEGENDARY}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.LEGENDARY}{C.BOLD}║                🏆 HALL OF FAME 🏆                         ║{C.RESET}")
+        print(f"{C.LEGENDARY}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        if not self.hall_of_fame:
+            print(f"{C.DIM}No legendary moments yet... Make history!{C.RESET}")
+            input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+            return
+
+        # Categorize entries
+        categories = {}
+        for entry in self.hall_of_fame:
+            if entry.entry_type not in categories:
+                categories[entry.entry_type] = []
+            categories[entry.entry_type].append(entry)
+
+        # Display by category
+        category_icons = {
+            "achievement": "🏆",
+            "legendary": "⚡",
+            "disaster": "💥",
+            "quest": "🎯",
+            "pet": "🐾",
+            "challenge": "🎖️",
+            "milestone": "🌟",
+            "event": "📅",
+        }
+
+        for cat, entries in sorted(categories.items()):
+            icon = category_icons.get(cat, "✨")
+            print(f"{C.BOLD}{icon} {cat.upper()}:{C.RESET}")
+
+            for entry in entries[-10:]:  # Show last 10 per category
+                print(f"  {C.DIM}Day {entry.day_achieved:3d}{C.RESET} • {entry.title}")
+                if entry.stats:
+                    stats_str = ", ".join(f"{k}: {v}" for k, v in list(entry.stats.items())[:2])
+                    print(f"             {C.DIM}({stats_str}){C.RESET}")
+            print()
+
+        # Statistics
+        total_entries = len(self.hall_of_fame)
+        earliest_day = min(e.day_achieved for e in self.hall_of_fame)
+        latest_day = max(e.day_achieved for e in self.hall_of_fame)
+
+        print(f"{C.BOLD}📊 STATISTICS:{C.RESET}")
+        print(f"  Total Legendary Moments: {total_entries}")
+        print(f"  First Entry: Day {earliest_day}")
+        print(f"  Latest Entry: Day {latest_day}")
+        print(f"  Categories: {len(categories)}")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    # =================================================================
     # GAME LOOP
     # =================================================================
 
@@ -4676,6 +5322,16 @@ class VaultGame:
             elif choice == '9':
                 show_performance_dashboard(self)
 
+            # 🚀 v8.0 ULTIMATE EDITION Features
+            elif choice == 'y':
+                self.manage_pets_menu()
+            elif choice == 'n':
+                self.challenges_menu()
+            elif choice == 'j':
+                self.dweller_stories_menu()
+            elif choice == 'u':
+                self.show_hall_of_fame()
+
             # AI Features
             elif choice == 'a' and AI_ENABLED:
                 print("AI Advisor (from v3.0)")
@@ -4683,7 +5339,7 @@ class VaultGame:
             elif choice == 'w' and AI_ENABLED:
                 print("Talk to Dweller (from v3.0)")
                 input("Press Enter...")
-            
+
             # System
             elif choice == 's':
                 print(f"\n{C.SUCCESS}✓ Game saved!{C.RESET}")
@@ -4704,39 +5360,45 @@ class VaultGame:
             input("Press Enter to exit...")
 
     def show_intro(self):
-        """Show v7.0 intro"""
+        """Show v8.0 ULTIMATE EDITION intro"""
         self.clear_screen()
 
         intro = f"""
 {C.HEADER}{C.BOLD}╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
-║       VAULT 13 - SURVIVAL PROTOCOL v7.0 🌟 THE LIVING VAULT 🌟       ║
+║     VAULT 13 v8.0 🚀 THE ULTIMATE EDITION 🚀                         ║
 ║                                                                      ║
-║          Where Your Vault Truly Comes ALIVE with Emergent Gameplay!  ║
+║        Every Feature. Every System. The Complete Experience.         ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝{C.RESET}
 
-{C.BOLD}v7.0 THE LIVING VAULT - 12 REVOLUTIONARY SYSTEMS:{C.RESET}
+{C.BOLD}{C.LEGENDARY}✨ v8.0 ULTIMATE NEW FEATURES:{C.RESET}
+  🐾 Pet System - Discover and assign pets to dwellers for bonuses!
+  🎯 Daily Challenges - New challenges every day with great rewards
+  💬 Dweller Stories - Deep backstories and memorable moments
+  🏆 Hall of Fame - Record your vault's legendary achievements
 
-{C.BOLD}OPTION A - FULL RPG:{C.RESET}
-  💕 Relationships & Breeding - Families, children, inherited stats
-  🔬 Research & Tech Tree - 20+ technologies to unlock
-  🏛️ Vault Policies - Democracy, Autocracy, or Technocracy
+{C.BOLD}v7.0 THE LIVING VAULT:{C.RESET}
+  ⚡ Rush System - Risk/reward production boosts
+  🎯 Procedural Quests - Auto-generated quest chains
+  💾 Load Game - Continue your saved vault
+  🎬 Demo Mode - Watch the vault run itself
 
-{C.BOLD}OPTION B - DYNAMIC WORLD:{C.RESET}
-  💰 Trading System - Buy/sell with wasteland merchants
-  🏴 Faction System - 5 factions with reputation
-  💀 Major Disasters - Vault-wide catastrophic events
+{C.BOLD}v6.0 GRAND BALL EDITION:{C.RESET}
+  📊 Dashboard & UI - Beautiful visualizations
+  🎓 Tutorial System - Interactive onboarding
+  🏆 Achievements - With animated fireworks!
+  🎮 Easter Eggs - Konami Code, cheat codes, and more!
 
-{C.BOLD}OPTION C - MASSIVE CONTENT:{C.RESET}
-  🏗️ 6 New Room Types - Radio, Workshop, Armory, Garden, Gym, Archives
-  🔧 Crafting System - Craft equipment from materials
-  🌍 Seasonal Calendar - 4 seasons with unique effects
+{C.BOLD}v5.5 & v5.0 CORE SYSTEMS:{C.RESET}
+  💕 Families & Traits • 🔬 Tech Tree • 🏛️ Policies • 💰 Trading
+  🏴 Factions • 🔧 Crafting • 💀 Disasters • 🌍 Seasons
+  ⚡ Legendaries • 🏅 Prestige • 🏗️ 15 Room Types
 
-{C.SUCCESS}Plus ALL v4.0, v3.0, and v2.0 features!{C.RESET}
+{C.LEGENDARY}{C.BOLD}5,800+ lines of pure excellence!{C.RESET}
+{C.SUCCESS}The definitive terminal vault simulator!{C.RESET}
 
-{C.INFO}This is the most advanced vault simulator ever created.{C.RESET}
-{C.INFO}Good luck, Overseer!{C.RESET}
+{C.INFO}Good luck, Overseer! May your vault thrive!{C.RESET}
 """
         print(intro)
         input(f"\n{C.BOLD}Press Enter to begin...{C.RESET}")
