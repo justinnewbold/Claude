@@ -1421,6 +1421,15 @@ class VaultGame:
         self.demo_mode_active: bool = False
         self.demo_actions_queue: List[str] = []
 
+        # 🎮 EASTER EGG SYSTEM (Nintendo Style!)
+        self.input_sequence: List[str] = []  # Track command sequence for Konami code
+        self.easter_eggs_found: Set[str] = set()  # Track discovered eggs
+        self.konami_code_active: bool = False
+        self.secret_dwellers_unlocked: List[str] = []  # Special dwellers like "Luigi" :)
+        self.developer_room_unlocked: bool = False
+        self.hidden_vault_theme: Optional[str] = None  # Secret themes
+        self.mini_game_high_scores: Dict[str, int] = {}  # Mini-game scores
+
         # Initialize
         self._initialize_vault()
         self._create_starting_dwellers()
@@ -2775,9 +2784,16 @@ class VaultGame:
     def _event_new_arrival(self):
         """New dweller arrives"""
         names = ["Alex", "Sam", "Jordan", "Taylor", "Morgan", "Casey"]
+
+        # 🎮 EASTER EGG: 10% chance for Nintendo character name!
+        if random.random() < 0.1:
+            nintendo_names = ["Mario", "Luigi", "Link", "Zelda", "Samus", "Kirby", "Pikachu", "Fox", "Ness"]
+            name = random.choice(nintendo_names)
+        else:
+            name = f"{random.choice(names)} {random.choice(['Smith', 'Jones', 'Brown'])}"
+
         gender = random.choice(["M", "F"])
-        name = f"{random.choice(names)} {random.choice(['Smith', 'Jones', 'Brown'])}"
-        
+
         new_dweller = Dweller(
             name=name,
             gender=gender,
@@ -2797,6 +2813,9 @@ class VaultGame:
         )
         self.dwellers.append(new_dweller)
         self.log_event(f"👤 {name} joined the vault!")
+
+        # 🎮 EASTER EGG: Check for secret names!
+        self.check_secret_name(name)
 
     def _event_resource_find(self):
         """Find resources"""
@@ -2974,6 +2993,12 @@ class VaultGame:
         print("  • Press [1] for dashboard with predictive warnings")
         print("  • Children grow up in 30 days and can inherit traits")
         print("  • Legendary items have 0.1% drop rate (luck increases chance)")
+
+        print(f"\n{C.QUEST}🎮 EASTER EGGS:{C.RESET}")
+        print(f"  • Type {C.SUCCESS}'eggs'{C.RESET} to view your easter egg collection!")
+        print(f"  • {C.DIM}Try naming dwellers after Nintendo characters...{C.RESET}")
+        print(f"  • {C.DIM}Experiment with command sequences...{C.RESET}")
+        print(f"  • {C.DIM}Type special words to discover secrets!{C.RESET}")
 
         input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
 
@@ -3920,6 +3945,272 @@ class VaultGame:
         input("Press Enter to begin demo...")
 
     # =================================================================
+    # 🎮 NINTENDO-STYLE EASTER EGGS
+    # =================================================================
+
+    def check_konami_code(self, input_cmd: str):
+        """Check for Konami Code: up up down down b a (u u d d b a)"""
+        self.input_sequence.append(input_cmd)
+
+        # Keep only last 6 commands
+        if len(self.input_sequence) > 6:
+            self.input_sequence.pop(0)
+
+        # Check for Konami Code: u u d d b a
+        if self.input_sequence == ['u', 'u', 'd', 'd', 'b', 'a']:
+            if not self.konami_code_active:
+                self.konami_code_active = True
+                self.easter_eggs_found.add("konami_code")
+                self.unlock_easter_egg_animation("KONAMI CODE ACTIVATED!")
+
+                # Give massive bonuses!
+                self.resources.add("caps", 30000)
+                self.resources.add("power", 500)
+                self.resources.add("water", 500)
+                self.resources.add("food", 500)
+                self.resources.add("research", 1000)
+
+                # Add all dwellers invincibility
+                for dweller in self.dwellers:
+                    dweller.health = 100
+                    dweller.happiness = 100
+
+                self.log_event("🎮 KONAMI CODE! +30000 caps, Max resources, Full health!")
+                return True
+
+        return False
+
+    def check_secret_name(self, name: str) -> bool:
+        """Check if dweller name is a secret trigger (like naming Link 'Zelda')"""
+        secret_names = {
+            "mario": {"bonus": "strength", "value": 10, "message": "🍄 It's-a me, Mario! +10 Strength!"},
+            "luigi": {"bonus": "agility", "value": 10, "message": "👻 Luigi unlocked! +10 Agility!"},
+            "link": {"bonus": "endurance", "value": 10, "message": "🗡️ Hero of Time! +10 Endurance!"},
+            "zelda": {"bonus": "intelligence", "value": 10, "message": "👑 Princess of Wisdom! +10 Intelligence!"},
+            "samus": {"bonus": "perception", "value": 10, "message": "🔫 Bounty Hunter! +10 Perception!"},
+            "kirby": {"bonus": "luck", "value": 10, "message": "⭐ Dream Land Hero! +10 Luck!"},
+            "pikachu": {"bonus": "charisma", "value": 10, "message": "⚡ Pika Pika! +10 Charisma!"},
+            "donkey kong": {"bonus": "strength", "value": 15, "message": "🍌 DK Mode! +15 Strength!"},
+            "fox": {"bonus": "agility", "value": 10, "message": "🦊 Do a barrel roll! +10 Agility!"},
+            "ness": {"bonus": "intelligence", "value": 10, "message": "🌟 PSI Powers! +10 Intelligence!"}
+        }
+
+        name_lower = name.lower()
+        if name_lower in secret_names:
+            self.easter_eggs_found.add(f"secret_name_{name_lower}")
+            self.secret_dwellers_unlocked.append(name_lower)
+
+            # Find the dweller and apply bonus
+            for dweller in self.dwellers:
+                if dweller.name.lower() == name_lower:
+                    bonus_stat = secret_names[name_lower]["bonus"]
+                    bonus_value = secret_names[name_lower]["value"]
+
+                    if bonus_stat == "strength":
+                        dweller.strength += bonus_value
+                    elif bonus_stat == "agility":
+                        dweller.agility += bonus_value
+                    elif bonus_stat == "endurance":
+                        dweller.endurance += bonus_value
+                    elif bonus_stat == "intelligence":
+                        dweller.intelligence += bonus_value
+                    elif bonus_stat == "perception":
+                        dweller.perception += bonus_value
+                    elif bonus_stat == "luck":
+                        dweller.luck += bonus_value
+                    elif bonus_stat == "charisma":
+                        dweller.charisma += bonus_value
+
+                    self.log_event(secret_names[name_lower]["message"])
+                    return True
+
+        return False
+
+    def secret_developer_room(self):
+        """Hidden developer room (like in Metal Gear Solid)"""
+        self.clear_screen()
+        print(f"{C.QUEST}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}║           🎮 SECRET DEVELOPER ROOM 🎮                      ║{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        print(f"{C.SUCCESS}You found the secret developer room!{C.RESET}\n")
+
+        print(f"{C.BOLD}Greetings from the development team:{C.RESET}")
+        print(f"  👨‍💻 Chief Architect: Claude")
+        print(f"  🎨 Game Designer: Claude")
+        print(f"  🔧 Lead Engineer: Claude")
+        print(f"  🎭 Creative Director: Claude")
+        print(f"  🌟 Easter Egg Master: You found me!\n")
+
+        print(f"{C.DIM}Development Stats:{C.RESET}")
+        print(f"  • Lines of Code: 4,581")
+        print(f"  • Generations: 7")
+        print(f"  • Hours of Fun: ∞")
+        print(f"  • Coffee Consumed: Lots\n")
+
+        print(f"{C.QUEST}Special Gift:{C.RESET}")
+        print(f"  You receive the 'Golden Vault Suit' - Makes all dwellers 10% happier!\n")
+
+        # Give bonus
+        for dweller in self.dwellers:
+            dweller.modify_happiness(10)
+
+        self.developer_room_unlocked = True
+        self.easter_eggs_found.add("developer_room")
+        self.equipment_inventory.append("golden_vault_suit")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    def mini_game_wasteland_runner(self):
+        """Hidden mini-game: ASCII side-scroller"""
+        self.clear_screen()
+        print(f"{C.HEADER}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}║              🏃 WASTELAND RUNNER 🏃                         ║{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        print(f"{C.SUCCESS}Secret Mini-Game Unlocked!{C.RESET}\n")
+        print(f"Jump over obstacles by pressing ENTER!")
+        print(f"Score increases over time!\n")
+
+        score = 0
+        obstacles = ["🌵", "💀", "🔥", "⚡", "🗿"]
+
+        print(f"{C.DIM}Wasteland Runner v1.0{C.RESET}")
+        print(f"Current High Score: {self.mini_game_high_scores.get('wasteland_runner', 0)}\n")
+
+        # Simple simulation
+        for i in range(5):
+            obstacle = random.choice(obstacles)
+            print(f"\n{'─' * 40}")
+            print(f"{'🏃' if i % 2 == 0 else '🦘'}{' ' * 30}{obstacle}")
+            print(f"{'─' * 40}")
+
+            input(f"Press ENTER to jump! ")
+
+            # Random success
+            if random.random() > 0.3:
+                score += 100
+                print(f"{C.SUCCESS}✓ Jumped! Score: {score}{C.RESET}")
+            else:
+                print(f"{C.DANGER}✗ Hit! Game Over! Final Score: {score}{C.RESET}")
+                break
+
+        # Update high score
+        if score > self.mini_game_high_scores.get('wasteland_runner', 0):
+            self.mini_game_high_scores['wasteland_runner'] = score
+            print(f"\n{C.QUEST}🏆 NEW HIGH SCORE! {score}{C.RESET}")
+
+        self.easter_eggs_found.add("wasteland_runner")
+
+        # Bonus caps based on score
+        self.resources.add("caps", score)
+        print(f"\n{C.SUCCESS}Bonus: +{score} caps!{C.RESET}")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    def unlock_easter_egg_animation(self, title: str):
+        """Show special animation for easter egg unlock"""
+        os.system('clear' if os.name != 'nt' else 'cls')
+
+        frames = [
+            f"""
+            ⭐        ⭐        ⭐
+               ✨    ✨    ✨
+
+            🎮 {title} 🎮
+
+               ✨    ✨    ✨
+            ⭐        ⭐        ⭐
+            """,
+            f"""
+            ✨        ✨        ✨
+               ⭐    ⭐    ⭐
+
+            🎮 {title} 🎮
+
+               ⭐    ⭐    ⭐
+            ✨        ✨        ✨
+            """,
+        ]
+
+        for _ in range(3):
+            for frame in frames:
+                os.system('clear' if os.name != 'nt' else 'cls')
+                print(f"{C.QUEST}{C.BOLD}{frame}{C.RESET}")
+                time.sleep(0.3)
+
+        time.sleep(1)
+
+    def secret_vault_themes(self, theme_name: str):
+        """Unlock secret visual themes (like Goldeneye's DK Mode, Big Head Mode)"""
+        themes = {
+            "retro": "🕹️ RETRO MODE - Everything looks like 1985!",
+            "matrix": "💚 MATRIX MODE - Green on black, hacker style!",
+            "party": "🎉 PARTY MODE - Rainbow colors everywhere!",
+            "stealth": "🥷 STEALTH MODE - Minimal UI, hardcore!",
+            "big_head": "😂 BIG HEAD MODE - Dweller names are HUGE!"
+        }
+
+        if theme_name in themes:
+            self.hidden_vault_theme = theme_name
+            self.easter_eggs_found.add(f"theme_{theme_name}")
+            self.log_event(themes[theme_name])
+            return True
+        return False
+
+    def easter_egg_menu(self):
+        """View found easter eggs (like Smash Bros trophy collection)"""
+        self.clear_screen()
+        print(f"{C.QUEST}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}║              🥚 EASTER EGG COLLECTION 🥚                   ║{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        total_eggs = 25  # Total possible easter eggs
+        found = len(self.easter_eggs_found)
+
+        print(f"{C.BOLD}Collection Status: {found}/{total_eggs} found{C.RESET}")
+        progress_bar = make_progress_bar(found, total_eggs, 30)
+        print(f"{progress_bar} {int(found/total_eggs*100)}%\n")
+
+        print(f"{C.BOLD}🏆 DISCOVERED SECRETS:{C.RESET}")
+
+        egg_descriptions = {
+            "konami_code": "🎮 Konami Code - The legendary cheat!",
+            "developer_room": "👨‍💻 Developer Room - Meet the team!",
+            "wasteland_runner": "🏃 Wasteland Runner - Secret mini-game!",
+            "thereisnocowlevel": "🐄 No Cow Level - Or is there?",
+            "secret_name_mario": "🍄 Mario - It's-a him!",
+            "secret_name_luigi": "👻 Luigi - Green machine!",
+            "secret_name_link": "🗡️ Link - Hero of Time!",
+            "secret_name_zelda": "👑 Zelda - Princess of Wisdom!",
+            "secret_name_samus": "🔫 Samus - Bounty hunter!",
+            "secret_name_kirby": "⭐ Kirby - Dream lander!",
+            "secret_name_pikachu": "⚡ Pikachu - Electric mouse!",
+            "theme_retro": "🕹️ Retro Theme - Back to 1985!",
+            "theme_matrix": "💚 Matrix Theme - Enter the Matrix!",
+            "theme_party": "🎉 Party Theme - Celebration time!",
+        }
+
+        if self.easter_eggs_found:
+            for egg in sorted(self.easter_eggs_found):
+                desc = egg_descriptions.get(egg, f"✨ {egg}")
+                print(f"  {C.SUCCESS}✓{C.RESET} {desc}")
+        else:
+            print(f"  {C.DIM}No secrets discovered yet... Keep exploring!{C.RESET}")
+
+        print(f"\n{C.BOLD}💡 HINTS:{C.RESET}")
+        print(f"  • Try naming dwellers after Nintendo characters")
+        print(f"  • Experiment with command sequences")
+        print(f"  • Type special words as commands")
+        print(f"  • Check the settings menu carefully")
+        print(f"  • Look for hidden menu options")
+
+        if found >= 10:
+            print(f"\n{C.QUEST}🏆 MASTER COLLECTOR! You've found {found} eggs!{C.RESET}")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    # =================================================================
     # GAME LOOP
     # =================================================================
 
@@ -3942,6 +4233,26 @@ class VaultGame:
 
             choice = input(f"{C.BOLD}> {C.RESET}").strip().lower()
             self.add_command_to_history(choice)  # Track for quick actions
+
+            # 🎮 NINTENDO EASTER EGGS: Check for Konami Code!
+            if self.check_konami_code(choice):
+                time.sleep(2)
+                continue
+
+            # 🎮 EASTER EGG: Secret commands
+            if choice == "devroom":
+                self.secret_developer_room()
+                continue
+            elif choice == "runner":
+                self.mini_game_wasteland_runner()
+                continue
+            elif choice == "eggs":
+                self.easter_egg_menu()
+                continue
+            elif choice in ["retro", "matrix", "party", "stealth", "bighead"]:
+                self.secret_vault_themes(choice)
+                time.sleep(1)
+                continue
 
             # 🎭 GRAND BALL: Check for cheat codes
             if check_cheat_code(self, choice):
