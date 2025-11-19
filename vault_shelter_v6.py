@@ -2699,9 +2699,19 @@ class VaultGame:
         self._process_rushes()  # Process active rushes
         self._process_quests()  # Update quest progress
 
-        # 5. Random events
-        if random.random() < 0.15:
-            events = [self._event_new_arrival, self._event_resource_find, self._event_skill_gain]
+        # 5. Random events - 🎭 ENHANCED with more variety!
+        if random.random() < 0.20:  # Increased chance from 15% to 20%
+            events = [
+                self._event_new_arrival,
+                self._event_resource_find,
+                self._event_skill_gain,
+                self._event_mystery_box,
+                self._event_inspiration,
+                self._event_celebration,
+                self._event_equipment_find,
+                self._event_dweller_romance,
+                self._event_tech_breakthrough
+            ]
             random.choice(events)()
 
         # 6. Room cooldowns
@@ -2726,6 +2736,9 @@ class VaultGame:
         warnings = self.get_predictive_warnings()
         for warn in warnings[:2]:  # Add top 2 warnings
             self.add_notification("warning", warn, self.day, priority=2)
+
+        # 🏆 ENHANCEMENT: Check for achievements every turn
+        self._check_achievements()
 
         self.log_event(f"=== Day {self.day} ===")
 
@@ -2817,6 +2830,95 @@ class VaultGame:
         # 🎮 EASTER EGG: Check for secret names!
         self.check_secret_name(name)
 
+    # =================================================================
+    # 🏆 ENHANCEMENT: COMPREHENSIVE ACHIEVEMENT CHECKING
+    # =================================================================
+
+    def _check_achievements(self):
+        """Check and unlock achievements automatically"""
+        # Population achievements
+        pop = len(self.dwellers)
+        if pop >= 10:
+            self.unlock_achievement("population_10")
+        if pop >= 25:
+            self.unlock_achievement("population_25")
+        if pop >= 50:
+            self.unlock_achievement("population_50")
+
+        # Baby boom
+        if self.children_born >= 5:
+            self.unlock_achievement("baby_boom")
+
+        # Wealth achievements
+        if self.resources.caps >= 10000:
+            self.unlock_achievement("wealthy")
+        if self.resources.caps >= 50000:
+            self.unlock_achievement("tycoon")
+
+        # Self sufficient
+        if (self.resources.power >= 500 and self.resources.water >= 500 and
+            self.resources.food >= 500):
+            self.unlock_achievement("self_sufficient")
+
+        # Building achievements
+        total_rooms = sum(1 for floor in self.vault_layout for room in floor if room.room_type != RoomType.EMPTY)
+        if total_rooms >= 10:
+            self.unlock_achievement("architect")
+        if total_rooms >= 25:
+            self.unlock_achievement("master_builder")
+
+        # Check for max level room
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.level >= 3:  # Assuming 3 is max
+                    self.unlock_achievement("fully_upgraded")
+                    break
+
+        # Disasters
+        if self.disasters_survived >= 5:
+            self.unlock_achievement("disaster_master")
+
+        # Quests
+        if len(self.completed_v7_quests) >= 5:
+            self.unlock_achievement("quest_master")
+
+        # Faction reputation
+        for faction, rep in self.faction_reputations.items():
+            if rep >= 100:
+                self.unlock_achievement("diplomat")
+                break
+
+        # Happy vault - check if all dwellers have 100 happiness
+        if self.dwellers and all(d.happiness >= 100 for d in self.dwellers):
+            # Track consecutive days (would need a counter, simplified for now)
+            self.unlock_achievement("happy_vault")
+
+        # Easter egg achievements
+        if len(self.easter_eggs_found) >= 5:
+            self.unlock_achievement("egg_hunter")
+        if len(self.easter_eggs_found) >= 10:
+            self.unlock_achievement("master_collector")
+
+        # Nintendo fan
+        if len(self.secret_dwellers_unlocked) >= 3:
+            self.unlock_achievement("nintendo_fan")
+
+        # Konami master
+        if self.konami_code_active:
+            self.unlock_achievement("konami_master")
+
+        # Legendary hoarder
+        if len(self.legendary_inventory) >= 10:
+            self.unlock_achievement("hoarder")
+
+        # Speed runner
+        if pop >= 25 and self.day <= 50:
+            self.unlock_achievement("speed_runner")
+
+    # =================================================================
+    # 🎭 ENHANCEMENT: MORE DYNAMIC EVENTS
+    # =================================================================
+
     def _event_resource_find(self):
         """Find resources"""
         caps = random.randint(30, 80)
@@ -2830,6 +2932,75 @@ class VaultGame:
             stat = random.choice(["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"])
             dweller.modify_stat(stat, 1)
             self.log_event(f"📈 {dweller.name} improved {stat.upper()}!")
+
+    def _event_mystery_box(self):
+        """🎁 Mystery box appears with random reward"""
+        rewards = [
+            ("caps", 500, "💰 500 caps"),
+            ("research", 100, "🔬 100 research"),
+            ("legendary", 1, "⚡ Legendary item"),
+            ("stat_boost", 1, "📈 +2 to all stats for one dweller"),
+            ("happiness", 20, "😊 +20 happiness to all"),
+        ]
+        reward_type, amount, desc = random.choice(rewards)
+
+        if reward_type == "caps":
+            self.resources.add("caps", amount)
+        elif reward_type == "research":
+            self.resources.add("research", amount)
+        elif reward_type == "legendary" and self.dwellers:
+            legendary_id = random.choice(list(LEGENDARY_ITEMS.keys()))
+            if legendary_id not in self.legendary_inventory:
+                self.legendary_inventory.append(legendary_id)
+        elif reward_type == "stat_boost" and self.dwellers:
+            dweller = random.choice(self.dwellers)
+            for stat in ["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"]:
+                dweller.modify_stat(stat, 2)
+            desc = f"📈 {dweller.name} gained +2 to all stats!"
+        elif reward_type == "happiness":
+            for d in self.dwellers:
+                d.modify_happiness(amount)
+
+        self.log_event(f"🎁 MYSTERY BOX! Reward: {desc}")
+
+    def _event_inspiration(self):
+        """💡 Dweller has breakthrough inspiration"""
+        if self.dwellers:
+            dweller = random.choice([d for d in self.dwellers if not d.is_child])
+            self.resources.add("research", 50)
+            dweller.modify_happiness(10)
+            self.log_event(f"💡 {dweller.name} had an inspiration! +50 research, +10 happiness")
+
+    def _event_celebration(self):
+        """🎉 Vault-wide celebration boosts morale"""
+        for d in self.dwellers:
+            d.modify_happiness(5)
+        self.log_event(f"🎉 Vault celebration! Everyone gained +5 happiness!")
+
+    def _event_equipment_find(self):
+        """🔫 Find random equipment in the wasteland"""
+        equipment = ["laser_pistol", "combat_armor", "power_armor", "plasma_rifle", "stealth_suit"]
+        item = random.choice(equipment)
+        self.equipment_inventory.append(item)
+        self.log_event(f"🔫 Found equipment: {item}!")
+
+    def _event_dweller_romance(self):
+        """💕 Two dwellers fall in love"""
+        if len(self.dwellers) >= 2:
+            singles = [d for d in self.dwellers if not d.partner and not d.is_child and d.age >= 18]
+            if len(singles) >= 2:
+                dweller1, dweller2 = random.sample(singles, 2)
+                dweller1.partner = dweller2.name
+                dweller2.partner = dweller1.name
+                dweller1.modify_happiness(15)
+                dweller2.modify_happiness(15)
+                self.log_event(f"💕 {dweller1.name} and {dweller2.name} fell in love!")
+
+    def _event_tech_breakthrough(self):
+        """🔬 Sudden tech breakthrough reduces research time"""
+        if self.current_research:
+            self.resources.add("research", 100)
+            self.log_event(f"🔬 Tech breakthrough! +100 research toward {self.current_research}")
 
     # =================================================================
     # v5.5 NEW FEATURE: PRESTIGE & ACHIEVEMENTS
@@ -2994,7 +3165,8 @@ class VaultGame:
         print("  • Children grow up in 30 days and can inherit traits")
         print("  • Legendary items have 0.1% drop rate (luck increases chance)")
 
-        print(f"\n{C.QUEST}🎮 EASTER EGGS:{C.RESET}")
+        print(f"\n{C.QUEST}🎮 SPECIAL COMMANDS:{C.RESET}")
+        print(f"  • Type {C.SUCCESS}'stats'{C.RESET} for comprehensive vault statistics!")
         print(f"  • Type {C.SUCCESS}'eggs'{C.RESET} to view your easter egg collection!")
         print(f"  • {C.DIM}Try naming dwellers after Nintendo characters...{C.RESET}")
         print(f"  • {C.DIM}Experiment with command sequences...{C.RESET}")
@@ -4158,6 +4330,78 @@ class VaultGame:
             return True
         return False
 
+    # =================================================================
+    # 📊 ENHANCEMENT: COMPREHENSIVE STATS SCREEN
+    # =================================================================
+
+    def stats_screen(self):
+        """Comprehensive statistics tracking"""
+        self.clear_screen()
+        print(f"{C.TECH}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.TECH}{C.BOLD}║              📊 VAULT STATISTICS                           ║{C.RESET}")
+        print(f"{C.TECH}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        # Survival Stats
+        print(f"{C.BOLD}🏛️  SURVIVAL:{C.RESET}")
+        print(f"  Days Survived: {C.SUCCESS}{self.day}{C.RESET}")
+        print(f"  Current Season: {self.current_season.value}")
+        print(f"  Disasters Survived: {self.disasters_survived}")
+        print(f"  Game Over: {'Yes' if self.game_over else 'No'}\n")
+
+        # Population Stats
+        print(f"{C.BOLD}👥 POPULATION:{C.RESET}")
+        total = len(self.dwellers)
+        adults = len([d for d in self.dwellers if not d.is_child])
+        children = len([d for d in self.dwellers if d.is_child])
+        on_exp = len([d for d in self.dwellers if d.on_expedition])
+        print(f"  Total Dwellers: {total}")
+        print(f"  Adults: {adults} | Children: {children}")
+        print(f"  On Expedition: {on_exp}")
+        print(f"  Births: {self.children_born}\n")
+
+        # Vault Stats
+        print(f"{C.BOLD}🏗️  VAULT:{C.RESET}")
+        total_rooms = sum(1 for floor in self.vault_layout for room in floor if room.room_type != RoomType.EMPTY)
+        empty_slots = sum(1 for floor in self.vault_layout for room in floor if room.room_type == RoomType.EMPTY)
+        print(f"  Floors: {len(self.vault_layout)}")
+        print(f"  Built Rooms: {total_rooms}")
+        print(f"  Empty Slots: {empty_slots}\n")
+
+        # Resource Stats
+        print(f"{C.BOLD}💎 RESOURCES:{C.RESET}")
+        print(f"  Caps: {self.resources.caps}")
+        print(f"  Power: {self.resources.power}")
+        print(f"  Water: {self.resources.water}")
+        print(f"  Food: {self.resources.food}")
+        print(f"  Research: {self.resources.research}\n")
+
+        # Progress Stats
+        print(f"{C.BOLD}🎯 PROGRESS:{C.RESET}")
+        print(f"  Technologies: {len(self.researched_tech)}")
+        print(f"  Quests Completed: {len(self.completed_v7_quests)}")
+        print(f"  Expeditions Done: {len([e for e in self.active_expeditions if not e.in_progress])}")
+        print(f"  Legendary Items: {len(self.legendary_inventory)}\n")
+
+        # Achievement Stats
+        print(f"{C.BOLD}🏆 ACHIEVEMENTS:{C.RESET}")
+        total_achievements = len(ACHIEVEMENTS)
+        unlocked = len(self.prestige_data.achievements_unlocked)
+        percent = int((unlocked / total_achievements) * 100) if total_achievements > 0 else 0
+        progress_bar = make_progress_bar(unlocked, total_achievements, 20)
+        print(f"  Unlocked: {unlocked}/{total_achievements} {progress_bar} {percent}%")
+        print(f"  Prestige Points: {self.prestige_data.prestige_points}")
+        print(f"  Easter Eggs Found: {len(self.easter_eggs_found)}/25\n")
+
+        # Fun Stats
+        print(f"{C.BOLD}✨ FUN STATS:{C.RESET}")
+        print(f"  Nintendo Characters: {len(self.secret_dwellers_unlocked)}")
+        print(f"  Konami Code Used: {'Yes! 🎮' if self.konami_code_active else 'Not yet'}")
+        print(f"  Developer Room Found: {'Yes! 👨‍💻' if self.developer_room_unlocked else 'Not yet'}")
+        if self.mini_game_high_scores:
+            print(f"  Mini-Game High Score: {self.mini_game_high_scores.get('wasteland_runner', 0)}")
+
+        input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+
     def easter_egg_menu(self):
         """View found easter eggs (like Smash Bros trophy collection)"""
         self.clear_screen()
@@ -4239,7 +4483,7 @@ class VaultGame:
                 time.sleep(2)
                 continue
 
-            # 🎮 EASTER EGG: Secret commands
+            # 🎮 EASTER EGG & SPECIAL COMMANDS
             if choice == "devroom":
                 self.secret_developer_room()
                 continue
@@ -4248,6 +4492,9 @@ class VaultGame:
                 continue
             elif choice == "eggs":
                 self.easter_egg_menu()
+                continue
+            elif choice == "stats":
+                self.stats_screen()  # 📊 ENHANCEMENT: Comprehensive stats!
                 continue
             elif choice in ["retro", "matrix", "party", "stealth", "bighead"]:
                 self.secret_vault_themes(choice)
@@ -4885,8 +5132,48 @@ PRESTIGE_BONUSES = {
 }
 
 ACHIEVEMENTS = {
+    # Original achievements
     "first_child": {"name": "New Life", "desc": "Have first child", "points": 5},
     "tech_master": {"name": "Tech Master", "desc": "Research all techs", "points": 20},
     "legendary_find": {"name": "Legendary!", "desc": "Find a legendary item", "points": 15},
     "survival_100": {"name": "Centennial", "desc": "Survive 100 days", "points": 10},
+
+    # Population achievements
+    "population_10": {"name": "Growing Community", "desc": "Reach 10 dwellers", "points": 5},
+    "population_25": {"name": "Thriving Vault", "desc": "Reach 25 dwellers", "points": 10},
+    "population_50": {"name": "Major Settlement", "desc": "Reach 50 dwellers", "points": 20},
+    "baby_boom": {"name": "Baby Boom", "desc": "Have 5 children born", "points": 10},
+
+    # Resource achievements
+    "wealthy": {"name": "Wealthy", "desc": "Have 10,000 caps", "points": 10},
+    "tycoon": {"name": "Tycoon", "desc": "Have 50,000 caps", "points": 25},
+    "self_sufficient": {"name": "Self Sufficient", "desc": "Have 500+ of all resources", "points": 15},
+
+    # Building achievements
+    "architect": {"name": "Architect", "desc": "Build 10 rooms", "points": 5},
+    "master_builder": {"name": "Master Builder", "desc": "Build 25 rooms", "points": 15},
+    "fully_upgraded": {"name": "Fully Upgraded", "desc": "Upgrade a room to max level", "points": 10},
+
+    # Combat/Exploration achievements
+    "explorer": {"name": "Explorer", "desc": "Complete 10 expeditions", "points": 10},
+    "wasteland_warrior": {"name": "Wasteland Warrior", "desc": "Complete 25 expeditions", "points": 20},
+    "disaster_master": {"name": "Disaster Master", "desc": "Survive 5 disasters", "points": 15},
+
+    # Special achievements
+    "quest_master": {"name": "Quest Master", "desc": "Complete 5 quests", "points": 15},
+    "diplomat": {"name": "Diplomat", "desc": "Reach 100 rep with any faction", "points": 15},
+    "renaissance_vault": {"name": "Renaissance Vault", "desc": "Have 10+ different room types", "points": 20},
+    "happy_vault": {"name": "Happy Vault", "desc": "100% happiness for 10 days", "points": 15},
+
+    # Easter egg achievements
+    "egg_hunter": {"name": "Egg Hunter", "desc": "Find 5 easter eggs", "points": 10},
+    "master_collector": {"name": "Master Collector", "desc": "Find 10 easter eggs", "points": 20},
+    "konami_master": {"name": "Konami Master", "desc": "Activate the Konami Code", "points": 30},
+    "nintendo_fan": {"name": "Nintendo Fan", "desc": "Have 3 Nintendo character dwellers", "points": 15},
+
+    # Challenge achievements
+    "speed_runner": {"name": "Speed Runner", "desc": "Reach 25 dwellers in 50 days", "points": 25},
+    "ironman": {"name": "Ironman", "desc": "No dweller deaths for 100 days", "points": 30},
+    "hoarder": {"name": "Hoarder", "desc": "Collect 10 legendary items", "points": 25},
 }
+
