@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-VAULT 13 - SURVIVAL PROTOCOL v7.0 🌟 THE LIVING VAULT EDITION 🌟
-Where Your Vault Truly Comes ALIVE with Emergent Gameplay!
+VAULT 13 - SURVIVAL PROTOCOL v8.0 🚀 ULTIMATE EDITION 🚀
+The Most Complete Vault Experience Ever Created!
+
+🚀 v8.0 ULTIMATE - ALL THE FEATURES:
+🐾 Pet System | 🎯 Daily Challenges | 💬 Dweller Stories | 🏰 Defense Mode
+🏆 Hall of Fame | 🎪 Mini-Games | 🎨 ASCII Art | 📜 Enhanced Events
 
 🌟 v7.0 THE LIVING VAULT - 12 REVOLUTIONARY SYSTEMS:
 
@@ -1140,6 +1144,67 @@ class EndgameScenario:
     active: bool = False
     progress: float = 0.0
 
+# =============================================================================
+# 🚀 ULTIMATE UPDATE - NEW DATA STRUCTURES
+# =============================================================================
+
+@dataclass
+class Pet:
+    """Vault pet companion"""
+    pet_id: str
+    name: str
+    species: str  # "dog", "cat", "parrot", "rad_scorpion", "molerat"
+    rarity: str  # "common", "rare", "legendary"
+    bonus_type: str  # "luck", "happiness", "exploration", "combat", "production"
+    bonus_value: int
+    assigned_dweller: Optional[str] = None
+    happiness: int = 100
+    emoji: str = "🐕"
+
+@dataclass
+class DailyChallenge:
+    """Daily/weekly challenges"""
+    challenge_id: str
+    title: str
+    description: str
+    challenge_type: str  # "daily", "weekly"
+    objective: str  # "build_rooms", "earn_caps", "complete_quests", etc.
+    target: int
+    progress: int = 0
+    reward_caps: int = 0
+    reward_research: int = 0
+    expires_day: int = 0
+    completed: bool = False
+
+@dataclass
+class DwellerStory:
+    """Generated backstory and personality"""
+    dweller_id: str
+    backstory: str  # Generated story
+    quirks: List[str] = field(default_factory=list)  # ["loves_coffee", "afraid_of_rats"]
+    dreams: List[str] = field(default_factory=list)  # ["wants_to_explore", "wants_family"]
+    memorable_moments: List[str] = field(default_factory=list)  # Key events
+    nickname: Optional[str] = None
+    career_path: Optional[str] = None  # "Scientist", "Soldier", "Engineer"
+
+@dataclass
+class DefenseWave:
+    """Raider attack wave"""
+    wave_number: int
+    raiders_count: int
+    raider_strength: int
+    rewards: Dict[str, int]
+    completed: bool = False
+
+@dataclass
+class HallOfFameEntry:
+    """Record of legendary moments"""
+    entry_type: str  # "best_dweller", "record", "memorable_death", "greatest_vault"
+    title: str
+    description: str
+    day_achieved: int
+    stats: Dict[str, any] = field(default_factory=dict)
+
 
 # (Continue with AI helpers and game class...)
 # =============================================================================
@@ -1430,6 +1495,32 @@ class VaultGame:
         self.hidden_vault_theme: Optional[str] = None  # Secret themes
         self.mini_game_high_scores: Dict[str, int] = {}  # Mini-game scores
 
+        # 🚀 ULTIMATE UPDATE SYSTEMS
+        # Pet System
+        self.pets: List[Pet] = []
+        self.pet_names_used: Set[str] = set()
+
+        # Daily Challenges
+        self.daily_challenges: List[DailyChallenge] = []
+        self.completed_challenges: List[DailyChallenge] = []
+        self.last_challenge_day: int = 0
+
+        # Dweller Stories
+        self.dweller_stories: Dict[str, DwellerStory] = {}  # dweller_id -> story
+
+        # Defense Mode
+        self.defense_active: bool = False
+        self.defense_waves: List[DefenseWave] = []
+        self.current_defense_wave: int = 0
+        self.defense_victories: int = 0
+
+        # Hall of Fame
+        self.hall_of_fame: List[HallOfFameEntry] = []
+
+        # Vault Customization
+        self.vault_name: str = "Vault 13"
+        self.vault_motto: str = "Together We Thrive"
+
         # Initialize
         self._initialize_vault()
         self._create_starting_dwellers()
@@ -1441,9 +1532,9 @@ class VaultGame:
         # Start with a quest
         self.active_quests.append(generate_quest(self))
 
-        self.log_event("🌟 VAULT 13 v7.0 THE LIVING VAULT EDITION - Welcome, Overseer!")
-        self.log_event("⚡ NEW: 12 Revolutionary Systems! Every feature fully functional!")
-        self.add_notification("welcome", "Welcome to VAULT 13 v7.0! Press ? for help", 1, priority=1)
+        self.log_event("🚀 VAULT 13 v8.0 ULTIMATE EDITION - Welcome, Overseer!")
+        self.log_event("✨ NEW: Pets, Daily Challenges, Defense Mode, Hall of Fame & MORE!")
+        self.add_notification("welcome", "Welcome to VAULT 13 v8.0 ULTIMATE! Press ? for help", 1, priority=1)
 
         # v7.0: Initialize living systems
         self._initialize_v7_systems()
