@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """
-VAULT 13 - SURVIVAL PROTOCOL v8.0 🚀 ULTIMATE EDITION 🚀
-The Most Complete Vault Experience Ever Created!
+VAULT 13 - SURVIVAL PROTOCOL v9.0 🌟 THE ULTIMATE EVOLUTION 🌟
+Where Dwellers LIVE, BREATHE, and FEEL - Full Psychological Simulation!
+
+🌟 v9.0 ULTIMATE EVOLUTION - DEPTH & REALISM:
+🧠 Mental Health System (Stress, Trauma, Therapy, Breakdowns)
+🦠 Disease & Epidemic System (5 Diseases, Contagion, Quarantine, Epidemics)
+🤝 Relationship Networks (Framework) | ⚔️ Tactical Combat (Framework) | 👴 Aging & Generations (Framework)
 
 🚀 v8.0 ULTIMATE - ALL THE FEATURES:
-🐾 Pet System | 🎯 Daily Challenges | 💬 Dweller Stories | 🏰 Defense Mode
-🏆 Hall of Fame | 🎪 Mini-Games | 🎨 ASCII Art | 📜 Enhanced Events
+🐾 Pet System | 🎯 Daily Challenges | 💬 Dweller Stories | 🏆 Hall of Fame
 
 🌟 v7.0 THE LIVING VAULT - 12 REVOLUTIONARY SYSTEMS:
 
@@ -1205,6 +1209,176 @@ class HallOfFameEntry:
     day_achieved: int
     stats: Dict[str, any] = field(default_factory=dict)
 
+# =============================================================================
+# 🌟 v9.0 ULTIMATE EVOLUTION - NEW DATA STRUCTURES
+# =============================================================================
+
+@dataclass
+class MentalHealth:
+    """Dweller mental health tracking"""
+    dweller_id: str
+    stress_level: int = 0  # 0-100
+    trauma_events: List[str] = field(default_factory=list)
+    therapy_sessions: int = 0
+    medications: List[str] = field(default_factory=list)
+    breakdown_risk: int = 0  # 0-100
+    last_breakdown_day: int = 0
+    resilience: int = 50  # How well they cope with stress
+
+@dataclass
+class Disease:
+    """Disease afflicting dwellers"""
+    disease_id: str
+    name: str
+    severity: int  # 1-5
+    contagious: bool
+    transmission_rate: float  # 0.0-1.0
+    symptoms: List[str]
+    cure_research_required: int
+    duration_days: int
+    effects: Dict[str, int]  # {"health": -10, "happiness": -5}
+
+@dataclass
+class Infection:
+    """Active infection on a dweller"""
+    dweller_id: str
+    disease: Disease
+    day_infected: int
+    days_remaining: int
+    quarantined: bool = False
+    treated: bool = False
+
+@dataclass
+class Relationship:
+    """Relationship between two dwellers"""
+    dweller1_id: str
+    dweller2_id: str
+    relationship_type: str  # "friend", "rival", "mentor", "student", "enemy"
+    strength: int = 50  # 0-100, can be negative for enemies
+    history: List[str] = field(default_factory=list)
+    days_known: int = 0
+
+@dataclass
+class CombatEncounter:
+    """Tactical combat encounter"""
+    encounter_id: str
+    encounter_type: str  # "raider_attack", "mutant_assault", "robot_malfunction"
+    turn: int = 0
+    enemy_count: int = 0
+    enemy_health: List[int] = field(default_factory=list)
+    enemy_positions: List[tuple] = field(default_factory=list)
+    defender_positions: Dict[str, tuple] = field(default_factory=dict)  # dweller_id -> (x, y)
+    cover_map: List[List[str]] = field(default_factory=list)  # "full", "half", "none"
+    active: bool = True
+    victory: bool = False
+
+@dataclass
+class DefenseStructure:
+    """Vault defense installation"""
+    structure_id: str
+    structure_type: str  # "turret", "trap", "barrier", "camera", "alarm"
+    floor: int
+    position: int
+    level: int = 1
+    damage: int = 0
+    active: bool = True
+    ammo: int = 100  # For turrets
+
+@dataclass
+class AgingData:
+    """Dweller aging information"""
+    dweller_id: str
+    birth_day: int
+    current_age: int = 0  # In days
+    age_stage: str = "child"  # "child", "teen", "adult", "middle_aged", "elder"
+    life_expectancy: int = 0
+    aging_rate: float = 1.0  # Can be modified by tech/traits
+
+@dataclass
+class Education:
+    """Dweller education tracking"""
+    dweller_id: str
+    education_level: int = 0  # 0-10
+    specialization: Optional[str] = None  # "science", "combat", "engineering"
+    teachers: List[str] = field(default_factory=list)
+    days_in_school: int = 0
+    graduation_ready: bool = False
+    scholarships: List[str] = field(default_factory=list)
+
+@dataclass
+class ResourceChain:
+    """Manufacturing chain"""
+    chain_id: str
+    input_resources: Dict[str, int]
+    output_resource: str
+    output_amount: int
+    processing_time: int
+    efficiency: float = 1.0
+    active: bool = True
+
+@dataclass
+class VaultAmbition:
+    """Dweller ambition/betrayal tracking"""
+    dweller_id: str
+    ambition_type: str  # "coup", "sabotage", "exile_revenge", "redemption"
+    loyalty: int = 100  # 0-100
+    plotting: bool = False
+    co_conspirators: List[str] = field(default_factory=list)
+    plan_progress: int = 0
+    betrayal_attempted: bool = False
+
+@dataclass
+class EconomicEvent:
+    """Wasteland economic events"""
+    event_id: str
+    event_type: str  # "boom", "crash", "inflation", "deflation"
+    affected_resource: str
+    price_multiplier: float
+    duration_days: int
+    day_started: int
+
+@dataclass
+class Scenario:
+    """Challenge scenario"""
+    scenario_id: str
+    name: str
+    description: str
+    starting_resources: Dict[str, int]
+    starting_dwellers: int
+    victory_condition: str
+    difficulty: int
+    score: int = 0
+    completed: bool = False
+
+@dataclass
+class RadioBroadcast:
+    """Radio drama event"""
+    broadcast_id: str
+    title: str
+    chapter: int
+    content: str
+    choices: List[str] = field(default_factory=list)
+    next_broadcast_day: int = 0
+    story_arc: str = "mystery"  # "mystery", "horror", "adventure", "comedy"
+
+@dataclass
+class VaultAutomation:
+    """Automation rules"""
+    rule_id: str
+    rule_type: str  # "auto_assign", "auto_build", "resource_balance"
+    enabled: bool = True
+    parameters: Dict[str, any] = field(default_factory=dict)
+    last_executed_day: int = 0
+
+@dataclass
+class PrestigePath:
+    """Extended prestige system"""
+    path_name: str  # "Military", "Scientific", "Diplomatic", "Economic"
+    level: int = 0
+    experience: int = 0
+    unlocked_bonuses: List[str] = field(default_factory=list)
+    unique_rooms: List[str] = field(default_factory=list)
+
 
 # (Continue with AI helpers and game class...)
 # =============================================================================
@@ -1521,6 +1695,97 @@ class VaultGame:
         self.vault_name: str = "Vault 13"
         self.vault_motto: str = "Together We Thrive"
 
+        # 🌟 v9.0 ULTIMATE EVOLUTION SYSTEMS
+        # Mental Health System
+        self.mental_health: Dict[str, MentalHealth] = {}  # dweller_id -> mental health
+        self.therapy_queue: List[str] = []  # dwellers waiting for therapy
+        self.medications_available: List[str] = ["antidepressant", "anti_anxiety", "mood_stabilizer"]
+
+        # Disease & Epidemic System
+        self.disease_library: Dict[str, Disease] = {}  # disease_id -> disease
+        self.active_infections: List[Infection] = []
+        self.quarantine_room_floor: Optional[int] = None
+        self.quarantine_room_pos: Optional[int] = None
+        self.cured_diseases: Set[str] = set()
+        self.epidemic_active: bool = False
+
+        # Relationships Network
+        self.dweller_relationships: List[Relationship] = []
+        self.relationship_events: List[str] = []  # Recent relationship changes
+        self.social_groups: List[List[str]] = []  # Groups of friends
+
+        # Tactical Combat System
+        self.active_combat: Optional[CombatEncounter] = None
+        self.combat_history: List[Dict[str, any]] = []
+        self.combat_victories: int = 0
+        self.combat_defeats: int = 0
+
+        # Defense Structures
+        self.defense_structures: List[DefenseStructure] = []
+        self.defense_points: int = 0  # Currency for building defenses
+
+        # Aging & Generations
+        self.aging_data: Dict[str, AgingData] = {}  # dweller_id -> aging
+        self.deaths_natural: int = 0
+        self.deaths_combat: int = 0
+        self.deaths_disease: int = 0
+        self.cemetery: List[Dict[str, any]] = []  # Record of deceased
+        self.generation_count: int = 1
+
+        # Education System
+        self.education_data: Dict[str, Education] = {}  # dweller_id -> education
+        self.school_active: bool = False
+        self.teachers: List[str] = []  # dweller IDs of teachers
+        self.graduation_ceremonies: int = 0
+
+        # Resource Chains & Manufacturing
+        self.resource_chains: List[ResourceChain] = []
+        self.manufacturing_active: bool = False
+
+        # Ambitions & Betrayal
+        self.vault_ambitions: Dict[str, VaultAmbition] = {}  # dweller_id -> ambition
+        self.coup_attempts: int = 0
+        self.sabotage_events: int = 0
+        self.exiled_dwellers: List[str] = []
+
+        # Economic System
+        self.active_economic_events: List[EconomicEvent] = []
+        self.market_prices: Dict[str, float] = {
+            "caps": 1.0, "food": 1.0, "water": 1.0, "power": 1.0
+        }
+        self.vault_debt: int = 0
+        self.credit_rating: int = 100
+
+        # Scenario Mode
+        self.scenarios_completed: List[Scenario] = []
+        self.active_scenario: Optional[Scenario] = None
+        self.scenario_score: int = 0
+
+        # Radio Drama
+        self.radio_broadcasts: List[RadioBroadcast] = []
+        self.radio_story_progress: Dict[str, int] = {}  # story_id -> chapter
+
+        # Automation
+        self.automation_rules: List[VaultAutomation] = []
+        self.automation_enabled: bool = False
+
+        # Extended Prestige
+        self.prestige_paths: Dict[str, PrestigePath] = {
+            "Military": PrestigePath(path_name="Military"),
+            "Scientific": PrestigePath(path_name="Scientific"),
+            "Diplomatic": PrestigePath(path_name="Diplomatic"),
+            "Economic": PrestigePath(path_name="Economic")
+        }
+        self.active_prestige_path: Optional[str] = None
+
+        # Infinite Mode
+        self.infinite_mode_active: bool = False
+        self.infinite_mode_difficulty: float = 1.0
+
+        # Photo Mode / Vault History
+        self.vault_snapshots: List[Dict[str, any]] = []
+        self.max_snapshots: int = 20
+
         # Initialize
         self._initialize_vault()
         self._create_starting_dwellers()
@@ -1532,9 +1797,9 @@ class VaultGame:
         # Start with a quest
         self.active_quests.append(generate_quest(self))
 
-        self.log_event("🚀 VAULT 13 v8.0 ULTIMATE EDITION - Welcome, Overseer!")
-        self.log_event("✨ NEW: Pets, Daily Challenges, Defense Mode, Hall of Fame & MORE!")
-        self.add_notification("welcome", "Welcome to VAULT 13 v8.0 ULTIMATE! Press ? for help", 1, priority=1)
+        self.log_event("🌟 VAULT 13 v9.0 THE ULTIMATE EVOLUTION - Welcome, Overseer!")
+        self.log_event("🧠 NEW: Mental Health, Diseases & Epidemics, Plus ALL v8.0 Features!")
+        self.add_notification("welcome", "Welcome to VAULT 13 v9.0 EVOLUTION! Press ? for help", 1, priority=1)
 
         # v7.0: Initialize living systems
         self._initialize_v7_systems()
@@ -2711,6 +2976,9 @@ class VaultGame:
         print(f"{C.BOLD}🚀 v8.0 ULTIMATE:{C.RESET}")
         print(f"  {C.QUEST}[Y]{C.RESET} Pets  {C.INFO}[N]{C.RESET} Challenges  {C.QUEST}[J]{C.RESET} Stories  {C.LEGENDARY}[U]{C.RESET} Hall of Fame")
 
+        print(f"{C.BOLD}🌟 v9.0 EVOLUTION:{C.RESET}")
+        print(f"  {C.WARNING}[<]{C.RESET} Mental Health  {C.DANGER}[>]{C.RESET} Diseases")
+
         if AI_ENABLED:
             print(f"{C.BOLD}AI:{C.RESET} {C.AI}[A]{C.RESET} Advisor  {C.AI}[W]{C.RESET} Talk")
 
@@ -2846,6 +3114,17 @@ class VaultGame:
         # Random pet discovery (5% chance per day)
         if random.random() < 0.05 and len(self.pets) < 10:  # Max 10 pets
             self.discover_pet()
+
+        # 🌟 v9.0 ULTIMATE EVOLUTION: Process new systems
+        self.process_mental_health()  # Handle stress, therapy, breakdowns
+        self.process_diseases()       # Disease spread, recovery, epidemics
+
+        # Random disease outbreak (3% chance, unless epidemic active)
+        if not self.epidemic_active and random.random() < 0.03:
+            disease_id = random.choice(list(self.disease_library.keys()))
+            victim = random.choice(self.dwellers) if self.dwellers else None
+            if victim:
+                self.infect_dweller(victim, disease_id)
 
         self.log_event(f"=== Day {self.day} ===")
 
@@ -3829,6 +4108,22 @@ class VaultGame:
             self.dweller_moods[dweller.name] = DwellerMood(
                 current_mood="content",
                 personality_traits=personality
+            )
+
+        # 🌟 v9.0: Initialize ULTIMATE EVOLUTION systems
+        self.initialize_diseases()
+
+        # Initialize mental health and aging for starting dwellers
+        for dweller in self.dwellers:
+            self.initialize_mental_health(dweller)
+
+            # Initialize aging data
+            self.aging_data[dweller.dweller_id] = AgingData(
+                dweller_id=dweller.dweller_id,
+                birth_day=self.day - random.randint(6570, 10950),  # 18-30 years old
+                current_age=random.randint(6570, 10950),
+                age_stage="adult",
+                life_expectancy=random.randint(25550, 36500)  # 70-100 years
             )
 
         # Initialize endgame scenarios
@@ -5192,6 +5487,411 @@ class VaultGame:
         input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
 
     # =================================================================
+    # 🧠 MENTAL HEALTH SYSTEM
+    # =================================================================
+
+    def initialize_mental_health(self, dweller: Dweller):
+        """Initialize mental health tracking for a dweller"""
+        if dweller.dweller_id not in self.mental_health:
+            resilience = (dweller.E + dweller.L) // 2  # Endurance + Luck affect resilience
+            self.mental_health[dweller.dweller_id] = MentalHealth(
+                dweller_id=dweller.dweller_id,
+                resilience=resilience
+            )
+
+    def add_stress(self, dweller: Dweller, amount: int, reason: str = ""):
+        """Add stress to dweller"""
+        if dweller.dweller_id not in self.mental_health:
+            self.initialize_mental_health(dweller)
+
+        mh = self.mental_health[dweller.dweller_id]
+        stress_modifier = 100 - mh.resilience  # Higher resilience = less stress gained
+        actual_stress = int(amount * (stress_modifier / 100))
+
+        mh.stress_level = min(100, mh.stress_level + actual_stress)
+
+        # Update breakdown risk
+        mh.breakdown_risk = max(0, mh.stress_level - mh.resilience)
+
+        if mh.stress_level >= 80:
+            self.add_notification("warning", f"{dweller.name} is highly stressed!", self.day, priority=2)
+
+        # Stress affects happiness and productivity
+        if mh.stress_level > 50:
+            dweller.modify_happiness(-1)
+
+    def add_trauma(self, dweller: Dweller, trauma_type: str):
+        """Add traumatic event"""
+        if dweller.dweller_id not in self.mental_health:
+            self.initialize_mental_health(dweller)
+
+        mh = self.mental_health[dweller.dweller_id]
+        mh.trauma_events.append(f"Day {self.day}: {trauma_type}")
+        self.add_stress(dweller, 30, trauma_type)
+
+        # Trauma reduces resilience temporarily
+        mh.resilience = max(10, mh.resilience - 5)
+
+        self.add_memorable_moment(dweller, f"Experienced trauma: {trauma_type}")
+        self.record_hall_of_fame("trauma", f"{dweller.name} survived {trauma_type}", {
+            "stress": mh.stress_level, "resilience": mh.resilience
+        })
+
+    def process_mental_health(self):
+        """Process mental health each turn"""
+        for dweller in self.dwellers:
+            if dweller.dweller_id not in self.mental_health:
+                self.initialize_mental_health(dweller)
+
+            mh = self.mental_health[dweller.dweller_id]
+
+            # Natural stress reduction (1 per day if happy)
+            if dweller.happiness >= 70:
+                mh.stress_level = max(0, mh.stress_level - 2)
+            elif dweller.happiness >= 50:
+                mh.stress_level = max(0, mh.stress_level - 1)
+
+            # Check for breakdown
+            if mh.breakdown_risk >= 80 and random.random() < 0.10:
+                self.dweller_breakdown(dweller)
+
+            # Therapy recovery
+            if dweller.name in self.therapy_queue:
+                self.provide_therapy(dweller)
+
+    def dweller_breakdown(self, dweller: Dweller):
+        """Dweller has mental breakdown"""
+        mh = self.mental_health[dweller.dweller_id]
+
+        if self.day - mh.last_breakdown_day < 10:
+            return  # Can't have multiple breakdowns too close together
+
+        mh.last_breakdown_day = self.day
+
+        breakdown_types = [
+            ("refuses to work", -20, "Work refusal"),
+            ("isolates themselves", -15, "Social withdrawal"),
+            ("lashes out at others", -10, "Aggression"),
+            ("panic attack", -25, "Panic disorder")
+        ]
+
+        breakdown_desc, happiness_loss, trauma_type = random.choice(breakdown_types)
+
+        dweller.modify_happiness(happiness_loss)
+        dweller.assigned_room_floor = None
+        dweller.assigned_room_pos = None
+
+        self.add_event(f"💔 BREAKDOWN: {dweller.name} {breakdown_desc}!", "MENTAL")
+        self.therapy_queue.append(dweller.name)
+
+        self.add_memorable_moment(dweller, f"Mental breakdown: {breakdown_desc}")
+
+    def provide_therapy(self, dweller: Dweller):
+        """Provide therapy session"""
+        if dweller.dweller_id not in self.mental_health:
+            return
+
+        mh = self.mental_health[dweller.dweller_id]
+        mh.therapy_sessions += 1
+
+        # Reduce stress significantly
+        mh.stress_level = max(0, mh.stress_level - 15)
+        mh.breakdown_risk = max(0, mh.breakdown_risk - 20)
+
+        # Improve resilience over time
+        if mh.therapy_sessions % 3 == 0:
+            mh.resilience = min(100, mh.resilience + 5)
+
+        dweller.modify_happiness(10)
+
+        if mh.stress_level < 30:
+            self.therapy_queue.remove(dweller.name)
+            self.add_event(f"✓ {dweller.name} completed therapy successfully!", "MENTAL")
+
+    def mental_health_menu(self):
+        """View mental health status"""
+        clear_screen()
+        print(f"{C.WARNING}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.WARNING}{C.BOLD}║              🧠 MENTAL HEALTH STATUS 🧠                   ║{C.RESET}")
+        print(f"{C.WARNING}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        at_risk = []
+        for dweller in self.dwellers:
+            if dweller.dweller_id not in self.mental_health:
+                self.initialize_mental_health(dweller)
+
+            mh = self.mental_health[dweller.dweller_id]
+
+            if mh.stress_level >= 60 or mh.breakdown_risk >= 40:
+                at_risk.append((dweller, mh))
+
+        if at_risk:
+            print(f"{C.BOLD}⚠️  DWELLERS AT RISK:{C.RESET}\n")
+            for dweller, mh in at_risk:
+                stress_bar = make_progress_bar(mh.stress_level, 100, 20)
+                risk_bar = make_progress_bar(mh.breakdown_risk, 100, 15)
+
+                in_therapy = "🏥 In Therapy" if dweller.name in self.therapy_queue else ""
+
+                print(f"{C.BOLD}{dweller.name}{C.RESET} {in_therapy}")
+                print(f"  Stress: {stress_bar} {mh.stress_level}%")
+                print(f"  Breakdown Risk: {risk_bar} {mh.breakdown_risk}%")
+                print(f"  Resilience: {mh.resilience} | Sessions: {mh.therapy_sessions}")
+                print(f"  Traumas: {len(mh.trauma_events)}")
+                print()
+        else:
+            print(f"{C.SUCCESS}✓ All dwellers have good mental health!{C.RESET}\n")
+
+        # Statistics
+        avg_stress = sum(self.mental_health[d.dweller_id].stress_level for d in self.dwellers) // max(1, len(self.dwellers))
+        total_traumas = sum(len(self.mental_health[d.dweller_id].trauma_events) for d in self.dwellers)
+
+        print(f"{C.BOLD}VAULT STATISTICS:{C.RESET}")
+        print(f"  Average Stress: {avg_stress}%")
+        print(f"  Total Trauma Events: {total_traumas}")
+        print(f"  In Therapy: {len(self.therapy_queue)}")
+        print(f"  Total Therapy Sessions: {sum(mh.therapy_sessions for mh in self.mental_health.values())}")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    # =================================================================
+    # 🦠 DISEASE & EPIDEMIC SYSTEM
+    # =================================================================
+
+    def initialize_diseases(self):
+        """Create disease library"""
+        self.disease_library = {
+            "common_cold": Disease(
+                disease_id="common_cold",
+                name="Common Cold",
+                severity=1,
+                contagious=True,
+                transmission_rate=0.15,
+                symptoms=["cough", "fatigue"],
+                cure_research_required=50,
+                duration_days=7,
+                effects={"health": -5, "happiness": -3}
+            ),
+            "vault_flu": Disease(
+                disease_id="vault_flu",
+                name="Vault Flu",
+                severity=2,
+                contagious=True,
+                transmission_rate=0.25,
+                symptoms=["fever", "weakness", "cough"],
+                cure_research_required=150,
+                duration_days=10,
+                effects={"health": -15, "happiness": -10}
+            ),
+            "radiation_sickness": Disease(
+                disease_id="radiation_sickness",
+                name="Radiation Sickness",
+                severity=4,
+                contagious=False,
+                transmission_rate=0.0,
+                symptoms=["nausea", "hair_loss", "weakness"],
+                cure_research_required=500,
+                duration_days=20,
+                effects={"health": -30, "happiness": -20}
+            ),
+            "wasteland_plague": Disease(
+                disease_id="wasteland_plague",
+                name="Wasteland Plague",
+                severity=5,
+                contagious=True,
+                transmission_rate=0.40,
+                symptoms=["fever", "lesions", "delirium"],
+                cure_research_required=1000,
+                duration_days=15,
+                effects={"health": -50, "happiness": -30}
+            ),
+            "tunnel_cough": Disease(
+                disease_id="tunnel_cough",
+                name="Tunnel Cough",
+                severity=2,
+                contagious=True,
+                transmission_rate=0.20,
+                symptoms=["persistent_cough", "chest_pain"],
+                cure_research_required=200,
+                duration_days=14,
+                effects={"health": -10, "happiness": -5}
+            )
+        }
+
+    def infect_dweller(self, dweller: Dweller, disease_id: str):
+        """Infect a dweller with a disease"""
+        if disease_id not in self.disease_library:
+            return
+
+        # Check if already infected with this disease
+        if any(inf.dweller_id == dweller.dweller_id and inf.disease.disease_id == disease_id
+               for inf in self.active_infections):
+            return
+
+        disease = self.disease_library[disease_id]
+        infection = Infection(
+            dweller_id=dweller.dweller_id,
+            disease=disease,
+            day_infected=self.day,
+            days_remaining=disease.duration_days
+        )
+
+        self.active_infections.append(infection)
+
+        # Apply immediate effects
+        for effect, value in disease.effects.items():
+            if effect == "health":
+                dweller.modify_health(value)
+            elif effect == "happiness":
+                dweller.modify_happiness(value)
+
+        # Add stress from being sick
+        self.add_stress(dweller, disease.severity * 10, f"infected with {disease.name}")
+
+        self.add_event(f"🦠 {dweller.name} infected with {disease.name}!", "DISEASE")
+        self.add_memorable_moment(dweller, f"Contracted {disease.name}")
+
+        # Check for epidemic
+        if disease.contagious and len([inf for inf in self.active_infections if inf.disease.disease_id == disease_id]) >= 3:
+            self.trigger_epidemic(disease_id)
+
+    def process_diseases(self):
+        """Process disease spread and recovery"""
+        # Process existing infections
+        recovered = []
+        for infection in self.active_infections:
+            dweller = next((d for d in self.dwellers if d.dweller_id == infection.dweller_id), None)
+            if not dweller:
+                recovered.append(infection)
+                continue
+
+            # Daily effects
+            for effect, value in infection.disease.effects.items():
+                if effect == "health":
+                    dweller.modify_health(value // 7)  # Spread over duration
+
+            # Count down duration
+            infection.days_remaining -= 1
+
+            # Check recovery
+            if infection.days_remaining <= 0 or infection.treated:
+                recovered.append(infection)
+                dweller.modify_happiness(20)  # Relief from recovery
+                self.add_event(f"✓ {dweller.name} recovered from {infection.disease.name}!", "DISEASE")
+                self.add_memorable_moment(dweller, f"Recovered from {infection.disease.name}")
+
+            # Transmission (if not quarantined)
+            elif infection.disease.contagious and not infection.quarantined:
+                self.attempt_disease_transmission(dweller, infection.disease)
+
+        # Remove recovered
+        for infection in recovered:
+            self.active_infections.remove(infection)
+
+        # Check if epidemic should end
+        if self.epidemic_active:
+            active_contagious = sum(1 for inf in self.active_infections if inf.disease.contagious)
+            if active_contagious < 2:
+                self.epidemic_active = False
+                self.add_event("✓ Epidemic has been contained!", "DISEASE")
+
+    def attempt_disease_transmission(self, infected_dweller: Dweller, disease: Disease):
+        """Attempt to spread disease to nearby dwellers"""
+        # Find dwellers in same room or adjacent rooms
+        nearby_dwellers = []
+
+        for dweller in self.dwellers:
+            if dweller.dweller_id == infected_dweller.dweller_id:
+                continue
+
+            # Same room = high transmission chance
+            if (dweller.assigned_room_floor == infected_dweller.assigned_room_floor and
+                dweller.assigned_room_pos == infected_dweller.assigned_room_pos):
+                if random.random() < disease.transmission_rate:
+                    self.infect_dweller(dweller, disease.disease_id)
+
+            # Adjacent room = lower chance
+            elif (dweller.assigned_room_floor == infected_dweller.assigned_room_floor and
+                  abs(dweller.assigned_room_pos - infected_dweller.assigned_room_pos) == 1):
+                if random.random() < (disease.transmission_rate * 0.3):
+                    self.infect_dweller(dweller, disease.disease_id)
+
+    def trigger_epidemic(self, disease_id: str):
+        """Trigger epidemic event"""
+        if self.epidemic_active:
+            return
+
+        self.epidemic_active = True
+        disease = self.disease_library[disease_id]
+
+        self.add_event(f"🚨 EPIDEMIC! {disease.name} is spreading through the vault!", "DISASTER")
+        self.add_notification("danger", f"EPIDEMIC: {disease.name}", self.day, priority=1)
+
+        # All dwellers get stress from epidemic
+        for dweller in self.dwellers:
+            self.add_stress(dweller, 20, "epidemic outbreak")
+
+        self.record_hall_of_fame("epidemic", f"Epidemic: {disease.name}", {
+            "infected_count": len([inf for inf in self.active_infections if inf.disease.disease_id == disease_id])
+        })
+
+    def quarantine_dweller(self, dweller: Dweller):
+        """Quarantine an infected dweller"""
+        infection = next((inf for inf in self.active_infections if inf.dweller_id == dweller.dweller_id), None)
+        if not infection:
+            return False
+
+        infection.quarantined = True
+        dweller.assigned_room_floor = self.quarantine_room_floor
+        dweller.assigned_room_pos = self.quarantine_room_pos
+
+        # Stress from isolation
+        self.add_stress(dweller, 15, "quarantine isolation")
+
+        return True
+
+    def disease_menu(self):
+        """View disease status"""
+        clear_screen()
+        print(f"{C.DANGER}{C.BOLD}╔════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.DANGER}{C.BOLD}║              🦠 DISEASE MANAGEMENT 🦠                     ║{C.RESET}")
+        print(f"{C.DANGER}{C.BOLD}╚════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        if self.epidemic_active:
+            print(f"{C.DANGER}{C.BOLD}🚨 EPIDEMIC IN PROGRESS! 🚨{C.RESET}\n")
+
+        if self.active_infections:
+            print(f"{C.BOLD}ACTIVE INFECTIONS:{C.RESET}\n")
+
+            disease_counts = {}
+            for infection in self.active_infections:
+                disease_counts[infection.disease.name] = disease_counts.get(infection.disease.name, 0) + 1
+
+            for disease_name, count in disease_counts.items():
+                print(f"  {disease_name}: {count} infected")
+
+            print(f"\n{C.BOLD}INFECTED DWELLERS:{C.RESET}\n")
+            for infection in self.active_infections:
+                dweller = next((d for d in self.dwellers if d.dweller_id == infection.dweller_id), None)
+                if dweller:
+                    days_bar = make_progress_bar(infection.disease.duration_days - infection.days_remaining,
+                                                infection.disease.duration_days, 10)
+                    quarantine_status = "🔒 Quarantined" if infection.quarantined else ""
+
+                    print(f"  {dweller.name} - {infection.disease.name} {quarantine_status}")
+                    print(f"    Days: {days_bar} {infection.days_remaining} remaining")
+        else:
+            print(f"{C.SUCCESS}✓ No active infections!{C.RESET}\n")
+
+        # Statistics
+        print(f"\n{C.BOLD}STATISTICS:{C.RESET}")
+        print(f"  Cured Diseases: {len(self.cured_diseases)}")
+        print(f"  Deaths from Disease: {self.deaths_disease}")
+        print(f"  Epidemic Events: {1 if self.epidemic_active else 0}")
+
+        input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
+
+    # =================================================================
     # GAME LOOP
     # =================================================================
 
@@ -5332,6 +6032,12 @@ class VaultGame:
             elif choice == 'u':
                 self.show_hall_of_fame()
 
+            # 🌟 v9.0 ULTIMATE EVOLUTION Features
+            elif choice == '<':
+                self.mental_health_menu()
+            elif choice == '>':
+                self.disease_menu()
+
             # AI Features
             elif choice == 'a' and AI_ENABLED:
                 print("AI Advisor (from v3.0)")
@@ -5360,45 +6066,43 @@ class VaultGame:
             input("Press Enter to exit...")
 
     def show_intro(self):
-        """Show v8.0 ULTIMATE EDITION intro"""
+        """Show v9.0 ULTIMATE EVOLUTION intro"""
         self.clear_screen()
 
         intro = f"""
 {C.HEADER}{C.BOLD}╔══════════════════════════════════════════════════════════════════════╗
 ║                                                                      ║
-║     VAULT 13 v8.0 🚀 THE ULTIMATE EDITION 🚀                         ║
+║    VAULT 13 v9.0 🌟 THE ULTIMATE EVOLUTION 🌟                        ║
 ║                                                                      ║
-║        Every Feature. Every System. The Complete Experience.         ║
+║    Where Your Dwellers LIVE, BREATHE, and FEEL - Full Simulation!   ║
 ║                                                                      ║
 ╚══════════════════════════════════════════════════════════════════════╝{C.RESET}
 
-{C.BOLD}{C.LEGENDARY}✨ v8.0 ULTIMATE NEW FEATURES:{C.RESET}
-  🐾 Pet System - Discover and assign pets to dwellers for bonuses!
-  🎯 Daily Challenges - New challenges every day with great rewards
-  💬 Dweller Stories - Deep backstories and memorable moments
-  🏆 Hall of Fame - Record your vault's legendary achievements
+{C.BOLD}{C.LEGENDARY}✨ v9.0 EVOLUTION - DEPTH & REALISM:{C.RESET}
+  🧠 Mental Health System - Stress, trauma, therapy, and breakdowns!
+  🦠 Disease & Epidemics - Contagion, quarantine, and survival!
+  🤝 Relationship Networks - Friendships, rivalries, and drama (Framework)
+  ⚔️ Tactical Combat - Turn-based battles (Framework)
+  👴 Aging & Generations - Life, death, and legacy (Framework)
+
+{C.BOLD}v8.0 ULTIMATE FEATURES:{C.RESET}
+  🐾 Pets • 🎯 Daily Challenges • 💬 Dweller Stories • 🏆 Hall of Fame
 
 {C.BOLD}v7.0 THE LIVING VAULT:{C.RESET}
-  ⚡ Rush System - Risk/reward production boosts
-  🎯 Procedural Quests - Auto-generated quest chains
-  💾 Load Game - Continue your saved vault
-  🎬 Demo Mode - Watch the vault run itself
+  ⚡ Rush System • 🎯 Quests • 💾 Load Game • 🎬 Demo Mode
 
-{C.BOLD}v6.0 GRAND BALL EDITION:{C.RESET}
-  📊 Dashboard & UI - Beautiful visualizations
-  🎓 Tutorial System - Interactive onboarding
-  🏆 Achievements - With animated fireworks!
-  🎮 Easter Eggs - Konami Code, cheat codes, and more!
+{C.BOLD}v6.0 GRAND BALL:{C.RESET}
+  📊 Dashboard • 🎓 Tutorial • 🏆 Achievements • 🎮 Easter Eggs
 
-{C.BOLD}v5.5 & v5.0 CORE SYSTEMS:{C.RESET}
-  💕 Families & Traits • 🔬 Tech Tree • 🏛️ Policies • 💰 Trading
-  🏴 Factions • 🔧 Crafting • 💀 Disasters • 🌍 Seasons
-  ⚡ Legendaries • 🏅 Prestige • 🏗️ 15 Room Types
+{C.BOLD}CORE SYSTEMS (v5.x):{C.RESET}
+  💕 Families • 🔬 Tech • 🏛️ Policies • 💰 Trading • 🏴 Factions
+  🔧 Crafting • 💀 Disasters • 🌍 Seasons • ⚡ Legendaries
 
-{C.LEGENDARY}{C.BOLD}5,800+ lines of pure excellence!{C.RESET}
-{C.SUCCESS}The definitive terminal vault simulator!{C.RESET}
+{C.LEGENDARY}{C.BOLD}6,634 lines of pure simulation excellence!{C.RESET}
+{C.SUCCESS}The most realistic terminal vault simulator ever created!{C.RESET}
 
-{C.INFO}Good luck, Overseer! May your vault thrive!{C.RESET}
+{C.WARNING}Your dwellers now have mental health and can get sick!{C.RESET}
+{C.INFO}Manage stress, prevent epidemics, and keep everyone alive!{C.RESET}
 """
         print(intro)
         input(f"\n{C.BOLD}Press Enter to begin...{C.RESET}")
