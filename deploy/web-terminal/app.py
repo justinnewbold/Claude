@@ -68,7 +68,8 @@ def index():
     """Show game selection page"""
     games = [
         # MAIN GAMES
-        {'id': 'vault_shelter_v4', 'name': '🏛️ VAULT 13 v4.0 ULTIMATE - Quest/Explore/Skills (NEW!)', 'file': 'vault_shelter_v4.py'},
+        {'id': 'vault_shelter_v5', 'name': '🏛️ VAULT 13 v5.0 MEGA - 9 Systems! Families/Tech/Trading/Factions (🔥NEW!)', 'file': 'vault_shelter_v5.py'},
+        {'id': 'vault_shelter_v4', 'name': '🏛️ VAULT 13 v4.0 ULTIMATE - Quest/Explore/Skills', 'file': 'vault_shelter_v4.py'},
         {'id': 'vault_shelter_ai', 'name': '🏛️ VAULT 13 v3.0 AI Edition - With AI Advisor', 'file': 'vault_shelter_ai.py'},
         {'id': 'vault_shelter', 'name': '🏛️ VAULT 13 v2.0 - Survival Protocol', 'file': 'vault_shelter.py'},
 
