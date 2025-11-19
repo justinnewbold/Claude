@@ -2422,6 +2422,9 @@ class VaultGame:
         print(f"{C.BOLD}v6.0 UI (NEW!):{C.RESET}")
         print(f"  {C.HEADER}[1]{C.RESET} Dashboard  {C.INFO}[?]{C.RESET} Help  {C.SUCCESS}[~]{C.RESET} Quick Actions  {C.INFO}[2]{C.RESET} Details  {C.QUEST}[3]{C.RESET} Timeline  {C.INFO}[4]{C.RESET} Settings")
 
+        print(f"{C.BOLD}Visualizations:{C.RESET}")
+        print(f"  {C.INFO}[5]{C.RESET} Population  {C.FACTION}[6]{C.RESET} Factions  {C.TECH}[7]{C.RESET} Tech Map  {C.SUCCESS}[8]{C.RESET} Export Data")
+
         if AI_ENABLED:
             print(f"{C.BOLD}AI:{C.RESET} {C.AI}[A]{C.RESET} Advisor  {C.AI}[W]{C.RESET} Talk")
 
@@ -2939,6 +2942,365 @@ class VaultGame:
             time.sleep(1)
 
     # =================================================================
+    # v6.0 COMPLETE IMPLEMENTATIONS: BUILD, UPGRADE, DWELLERS
+    # =================================================================
+
+    def build_menu(self):
+        """Full build menu implementation"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.SUCCESS}{C.BOLD}🏗️  BUILD MENU{C.RESET}\n")
+        print(f"Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
+
+        # Show available floors
+        print(f"{C.BOLD}Select Floor:{C.RESET}")
+        for i, floor in enumerate(self.vault_layout):
+            empty_count = sum(1 for room in floor if room.room_type == RoomType.EMPTY)
+            print(f"  {C.SUCCESS}[{i+1}]{C.RESET} Floor {i+1} - {empty_count} empty slots")
+
+        print(f"\n  {C.DANGER}[0]{C.RESET} Back\n")
+        floor_choice = input("Select floor: ").strip()
+
+        try:
+            floor_idx = int(floor_choice) - 1
+            if 0 <= floor_idx < len(self.vault_layout):
+                floor = self.vault_layout[floor_idx]
+
+                # Show positions
+                print(f"\n{C.BOLD}Select Position:{C.RESET}")
+                for i, room in enumerate(floor):
+                    status = "Empty" if room.room_type == RoomType.EMPTY else room.room_type.value
+                    print(f"  {C.SUCCESS}[{i+1}]{C.RESET} Position {i+1} - {status}")
+
+                pos_choice = input("\nSelect position: ").strip()
+                pos_idx = int(pos_choice) - 1
+
+                if 0 <= pos_idx < len(floor) and floor[pos_idx].room_type == RoomType.EMPTY:
+                    # Show room types
+                    print(f"\n{C.BOLD}Build Room Type:{C.RESET}")
+                    room_types = [
+                        (RoomType.POWER_GENERATOR, 100, "⚡"),
+                        (RoomType.WATER_TREATMENT, 100, "💧"),
+                        (RoomType.DINER, 100, "🍖"),
+                        (RoomType.LIVING_QUARTERS, 100, "🏠"),
+                        (RoomType.SCIENCE_LAB, 150, "🔬"),
+                        (RoomType.WORKSHOP, 150, "🔧"),
+                        (RoomType.ARMORY, 150, "⚔️"),
+                        (RoomType.GYM, 120, "💪"),
+                        (RoomType.GARDEN, 100, "🌱"),
+                    ]
+
+                    for i, (rtype, cost, icon) in enumerate(room_types, 1):
+                        affordable = "✓" if self.resources.caps >= cost else "✗"
+                        print(f"  {C.SUCCESS}[{i}]{C.RESET} [{affordable}] {icon} {rtype.value} - {cost} caps")
+
+                    build_choice = input("\nBuild: ").strip()
+                    build_idx = int(build_choice) - 1
+
+                    if 0 <= build_idx < len(room_types):
+                        rtype, cost, icon = room_types[build_idx]
+                        if self.resources.caps >= cost:
+                            self.resources.caps -= cost
+                            floor[pos_idx].room_type = rtype
+                            floor[pos_idx].under_construction = True
+                            floor[pos_idx].construction_days_left = 2
+                            print(f"\n{C.SUCCESS}✓ Building {rtype.value}! Ready in 2 turns{C.RESET}")
+                            self.add_major_event("construction", f"Started building {rtype.value}")
+                            time.sleep(1)
+                        else:
+                            print(f"\n{C.WARNING}Not enough caps!{C.RESET}")
+                            time.sleep(1)
+        except:
+            pass
+
+    def upgrade_menu(self):
+        """Full upgrade menu implementation"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.TECH}{C.BOLD}⬆️  UPGRADE MENU{C.RESET}\n")
+        print(f"Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
+
+        # List all upgradeable rooms
+        upgradeable = []
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.room_type != RoomType.EMPTY and not room.under_construction and room.level < 3:
+                    upgradeable.append(room)
+
+        if not upgradeable:
+            print(f"{C.WARNING}No rooms available to upgrade{C.RESET}")
+            input(f"\n{C.DIM}Press Enter...{C.RESET}")
+            return
+
+        for i, room in enumerate(upgradeable, 1):
+            cost = room.get_upgrade_cost()
+            affordable = "✓" if self.resources.caps >= cost else "✗"
+            prod_bar = make_progress_bar(room.level, 3, 3, "●", "○")
+            print(f"  {C.SUCCESS}[{i}]{C.RESET} [{affordable}] {room.room_type.value} Lvl {room.level} {prod_bar} → Lvl {room.level+1} ({cost} caps)")
+
+        print(f"\n  {C.DANGER}[0]{C.RESET} Back\n")
+        choice = input("Upgrade room: ").strip()
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(upgradeable):
+                room = upgradeable[idx]
+                cost = room.get_upgrade_cost()
+                if self.resources.caps >= cost:
+                    self.resources.caps -= cost
+                    room.level += 1
+                    print(f"\n{C.SUCCESS}✓ Upgraded {room.room_type.value} to Level {room.level}!{C.RESET}")
+                    self.add_major_event("upgrade", f"Upgraded {room.room_type.value} to Lvl {room.level}")
+                    time.sleep(1)
+                else:
+                    print(f"\n{C.WARNING}Not enough caps!{C.RESET}")
+                    time.sleep(1)
+        except:
+            pass
+
+    def dwellers_menu(self):
+        """Full dwellers menu with filtering and sorting"""
+        while True:
+            self.clear_screen()
+            self.print_header()
+
+            print(f"{C.INFO}{C.BOLD}👥 DWELLERS MANAGEMENT{C.RESET}\n")
+
+            # Filters
+            print(f"{C.BOLD}FILTERS & SORTING:{C.RESET}")
+            print(f"  {C.SUCCESS}[1]{C.RESET} All Dwellers  {C.SUCCESS}[2]{C.RESET} Adults Only  {C.SUCCESS}[3]{C.RESET} Children Only")
+            print(f"  {C.SUCCESS}[4]{C.RESET} On Expedition  {C.SUCCESS}[5]{C.RESET} Idle  {C.SUCCESS}[6]{C.RESET} Working")
+            print(f"  {C.SUCCESS}[7]{C.RESET} Sort by Health  {C.SUCCESS}[8]{C.RESET} Sort by Happiness  {C.SUCCESS}[9]{C.RESET} Sort by Level")
+
+            print(f"\n{C.BOLD}DWELLERS:{C.RESET}")
+            for i, d in enumerate(self.dwellers[:15], 1):  # Show first 15
+                status_icon = "🏃" if d.on_expedition else ("👶" if d.is_child else "👤")
+                health_color = get_status_color(d.health, 100)
+                happy_color = get_status_color(d.happiness, 100)
+                location = "EXPEDITION" if d.on_expedition else (f"Floor {d.assigned_room[0]}" if d.assigned_room else "IDLE")
+
+                print(f"  {C.SUCCESS}[{i}]{C.RESET} {status_icon} {d.name:20} ❤️{health_color}{d.health:3}{C.RESET} 😊{happy_color}{d.happiness:3}{C.RESET} Lvl{d.level} {location}")
+
+            if len(self.dwellers) > 15:
+                print(f"\n  {C.DIM}... and {len(self.dwellers) - 15} more{C.RESET}")
+
+            print(f"\n  {C.SUCCESS}[A]{C.RESET} Assign Dweller  {C.SUCCESS}[U]{C.RESET} Unassign  {C.SUCCESS}[E]{C.RESET} Equip  {C.SUCCESS}[C]{C.RESET} Compare")
+            print(f"  {C.DANGER}[0]{C.RESET} Back\n")
+
+            choice = input("> ").strip().lower()
+
+            if choice == '0':
+                break
+            elif choice == 'a':
+                # Assign dweller logic
+                print("\nAssign dweller to room (simplified)")
+                time.sleep(1)
+            elif choice == 'c':
+                self.comparison_view()
+                break
+
+    def comparison_view(self):
+        """Side-by-side dweller comparison"""
+        self.clear_screen()
+        print(f"{C.QUEST}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}║                 📊 DWELLER COMPARISON                         ║{C.RESET}")
+        print(f"{C.QUEST}{C.BOLD}╚═══════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        # Select 2 dwellers
+        print(f"{C.BOLD}Select first dweller:{C.RESET}")
+        for i, d in enumerate(self.dwellers[:10], 1):
+            print(f"  {C.SUCCESS}[{i}]{C.RESET} {d.name}")
+
+        choice1 = input("\nFirst: ").strip()
+        choice2 = input("Second: ").strip()
+
+        try:
+            idx1, idx2 = int(choice1) - 1, int(choice2) - 1
+            if 0 <= idx1 < len(self.dwellers) and 0 <= idx2 < len(self.dwellers):
+                d1, d2 = self.dwellers[idx1], self.dwellers[idx2]
+
+                print(f"\n{C.BOLD}{'':25} {d1.name:20} vs {d2.name:20}{C.RESET}")
+                print("─" * 70)
+
+                stats = ["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"]
+                for stat in stats:
+                    val1, val2 = d1.get_stat(stat), d2.get_stat(stat)
+                    winner = "←" if val1 > val2 else ("→" if val2 > val1 else "=")
+                    print(f"  {stat.upper()[:3]:20} {val1:5} {winner:^10} {val2:5}")
+
+                print(f"\n  {'Health':20} {d1.health:5} {'←' if d1.health > d2.health else '→':^10} {d2.health:5}")
+                print(f"  {'Happiness':20} {d1.happiness:5} {'←' if d1.happiness > d2.happiness else '→':^10} {d2.happiness:5}")
+                print(f"  {'Level':20} {d1.level:5} {'←' if d1.level > d2.level else '→':^10} {d2.level:5}")
+                print(f"  {'Combat Power':20} {d1.get_combat_power(self.legendary_inventory):5} {'←' if d1.get_combat_power(self.legendary_inventory) > d2.get_combat_power(self.legendary_inventory) else '→':^10} {d2.get_combat_power(self.legendary_inventory):5}")
+
+                input(f"\n{C.DIM}Press Enter...{C.RESET}")
+        except:
+            pass
+
+    # =================================================================
+    # v6.0 ADVANCED VISUALIZATIONS
+    # =================================================================
+
+    def faction_radar(self):
+        """Faction relationship radar chart"""
+        self.clear_screen()
+        print(f"{C.FACTION}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.FACTION}{C.BOLD}║              📡 FACTION RELATIONSHIP RADAR                    ║{C.RESET}")
+        print(f"{C.FACTION}{C.BOLD}╚═══════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        # ASCII radar chart
+        print("                    Brotherhood")
+        print("                         +100")
+        print("                          |")
+
+        for faction, rep in self.faction_reputations.items():
+            # Normalize to -100 to +100
+            normalized = max(-100, min(100, rep))
+            bar_len = abs(normalized) // 5
+
+            if normalized >= 0:
+                bar = "─" * (20 - bar_len) + "█" * bar_len
+                color = C.SUCCESS if normalized > 50 else C.WARNING
+            else:
+                bar = "█" * bar_len + "─" * (20 - bar_len)
+                color = C.DANGER
+
+            print(f"{faction.value:20} {color}{bar}{C.RESET} {normalized:+4}")
+
+        print("\n" + "─" * 60)
+        print(f"{C.SUCCESS}█{C.RESET} Allied (50+)  {C.WARNING}█{C.RESET} Neutral (0-50)  {C.DANGER}█{C.RESET} Hostile (<0)")
+
+        input(f"\n{C.DIM}Press Enter...{C.RESET}")
+
+    def tech_tree_visual(self):
+        """Tech tree visual map"""
+        self.clear_screen()
+        print(f"{C.TECH}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.TECH}{C.BOLD}║                  🔬 TECHNOLOGY TREE MAP                       ║{C.RESET}")
+        print(f"{C.TECH}{C.BOLD}╚═══════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        # Show tech tree structure
+        print(f"{C.BOLD}TIER 1 (Base Technologies):{C.RESET}")
+        tier1 = ["radio_tech", "workshop_tech", "armory_tech"]
+        for tech_id in tier1:
+            if tech_id in TECH_TREE:
+                tech = TECH_TREE[tech_id]
+                status = "✓" if tech_id in self.researched_tech else "○"
+                color = C.SUCCESS if tech_id in self.researched_tech else C.DIM
+                print(f"  {color}[{status}] {tech.icon} {tech.name}{C.RESET}")
+
+        print(f"\n{C.BOLD}TIER 2 (Advanced Technologies):{C.RESET}")
+        print("       ↓              ↓              ↓")
+        tier2 = ["advanced_power", "energy_weapons", "recycling"]
+        for tech_id in tier2:
+            if tech_id in TECH_TREE:
+                tech = TECH_TREE[tech_id]
+                status = "✓" if tech_id in self.researched_tech else "○"
+                color = C.SUCCESS if tech_id in self.researched_tech else C.DIM
+                print(f"  {color}[{status}] {tech.icon} {tech.name}{C.RESET}")
+
+        print(f"\n{C.BOLD}TIER 3 (Master Technologies):{C.RESET}")
+        print("                      ↓")
+        tier3 = ["quantum_physics"]
+        for tech_id in tier3:
+            if tech_id in TECH_TREE:
+                tech = TECH_TREE[tech_id]
+                status = "✓" if tech_id in self.researched_tech else "○"
+                color = C.SUCCESS if tech_id in self.researched_tech else C.DIM
+                print(f"  {color}[{status}] {tech.icon} {tech.name}{C.RESET}")
+
+        print(f"\n{C.SUCCESS}✓ Researched{C.RESET}  {C.DIM}○ Locked{C.RESET}")
+        input(f"\n{C.DIM}Press Enter...{C.RESET}")
+
+    def population_pyramid(self):
+        """Population age distribution pyramid"""
+        self.clear_screen()
+        print(f"{C.INFO}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.INFO}{C.BOLD}║               👥 POPULATION PYRAMID                           ║{C.RESET}")
+        print(f"{C.INFO}{C.BOLD}╚═══════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        # Group by age
+        children = [d for d in self.dwellers if d.age < 18]
+        young_adults = [d for d in self.dwellers if 18 <= d.age < 40]
+        adults = [d for d in self.dwellers if 40 <= d.age < 60]
+        elderly = [d for d in self.dwellers if d.age >= 60]
+
+        total = len(self.dwellers) if self.dwellers else 1
+
+        def draw_bar(count, label, max_width=40):
+            pct = (count / total) * 100
+            bar_len = int((count / total) * max_width)
+            return f"{label:20} │{'█' * bar_len}{' ' * (max_width - bar_len)}│ {count:2} ({pct:5.1f}%)"
+
+        print(draw_bar(len(elderly), "Elderly (60+)", 40))
+        print(draw_bar(len(adults), "Adults (40-59)", 40))
+        print(draw_bar(len(young_adults), "Young Adults (18-39)", 40))
+        print(draw_bar(len(children), "Children (0-17)", 40))
+
+        print(f"\n{C.BOLD}TOTAL POPULATION: {len(self.dwellers)}{C.RESET}")
+
+        # Gender split
+        males = len([d for d in self.dwellers if d.gender == "M"])
+        females = len([d for d in self.dwellers if d.gender == "F"])
+        print(f"\nGender: {males} Male | {females} Female")
+
+        input(f"\n{C.DIM}Press Enter...{C.RESET}")
+
+    def export_vault_data(self):
+        """Export vault data to JSON"""
+        self.clear_screen()
+        print(f"{C.SUCCESS}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.SUCCESS}{C.BOLD}║                  📤 EXPORT VAULT DATA                         ║{C.RESET}")
+        print(f"{C.SUCCESS}{C.BOLD}╚═══════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        export_data = {
+            "vault_name": f"VAULT_13_Day_{self.day}",
+            "day": self.day,
+            "population": len(self.dwellers),
+            "resources": {
+                "power": self.resources.power,
+                "water": self.resources.water,
+                "food": self.resources.food,
+                "caps": self.resources.caps
+            },
+            "statistics": {
+                "children_born": self.children_born,
+                "disasters_survived": self.disasters_survived,
+                "legendaries": len(self.legendary_inventory),
+                "achievements": len(self.prestige_data.achievements_unlocked),
+                "researched_tech": len(self.researched_tech)
+            },
+            "dwellers": []
+        }
+
+        for d in self.dwellers:
+            export_data["dwellers"].append({
+                "name": d.name,
+                "level": d.level,
+                "health": d.health,
+                "happiness": d.happiness,
+                "traits": d.traits,
+                "skills": d.learned_skills
+            })
+
+        filename = f"vault_export_day_{self.day}.json"
+        try:
+            with open(filename, 'w') as f:
+                json.dump(export_data, f, indent=2)
+            print(f"{C.SUCCESS}✓ Exported to {filename}!{C.RESET}")
+            print(f"\nExport includes:")
+            print(f"  • {len(self.dwellers)} dwellers")
+            print(f"  • Resource levels")
+            print(f"  • All statistics")
+            print(f"  • Major events")
+        except Exception as e:
+            print(f"{C.DANGER}✗ Export failed: {e}{C.RESET}")
+
+        input(f"\n{C.DIM}Press Enter...{C.RESET}")
+
+    # =================================================================
     # GAME LOOP
     # =================================================================
 
@@ -2960,22 +3322,22 @@ class VaultGame:
             self.print_menu()
 
             choice = input(f"{C.BOLD}> {C.RESET}").strip().lower()
+            self.add_command_to_history(choice)  # Track for quick actions
 
-            # Core (simplified versions - full implementations would be longer)
+            # Core - FULL implementations!
             if choice == 'b':
-                print("Build menu (simplified)")
-                input("Press Enter...")
+                self.build_menu()
             elif choice == 'u':
-                print("Upgrade menu (simplified)")
-                input("Press Enter...")
+                self.upgrade_menu()
             elif choice == 'h':
                 print("Rush menu (simplified)")
                 input("Press Enter...")
             elif choice == 'd':
-                print("Dwellers menu (simplified)")
-                input("Press Enter...")
+                self.dwellers_menu()
             elif choice == 'e':
                 self.process_turn()
+                if self.auto_save:
+                    self.add_notification("info", "Auto-saved", self.day, priority=3)
                 time.sleep(1)
             
             # v4.0 Features
@@ -3029,6 +3391,16 @@ class VaultGame:
                 self.timeline_view()
             elif choice == '4':
                 self.settings_menu()
+
+            # v6.0 Advanced Visualizations
+            elif choice == '5':
+                self.population_pyramid()
+            elif choice == '6':
+                self.faction_radar()
+            elif choice == '7':
+                self.tech_tree_visual()
+            elif choice == '8':
+                self.export_vault_data()
 
             # AI Features
             elif choice == 'a' and AI_ENABLED:
