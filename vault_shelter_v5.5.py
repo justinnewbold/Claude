@@ -555,28 +555,54 @@ class Dweller:
     partner: Optional[str] = None
     pregnant: bool = False
     due_day: Optional[int] = None
+    # NEW v5.5: Traits
+    traits: List[str] = field(default_factory=list)
 
     def get_stat(self, stat_name: str) -> int:
-        """Get SPECIAL stat with equipment bonuses"""
+        """Get SPECIAL stat with equipment and trait bonuses"""
         base_stat = getattr(self, stat_name.lower(), 5)
         bonus = 0
+        # Equipment bonuses
         if self.outfit and self.outfit in EQUIPMENT_LIBRARY:
             outfit = EQUIPMENT_LIBRARY[self.outfit]
             bonus += outfit.stat_bonus.get(stat_name.lower(), 0)
-        return min(10, base_stat + bonus)
+        # v5.5: Trait bonuses
+        for trait_id in self.traits:
+            if trait_id in TRAIT_LIBRARY:
+                trait = TRAIT_LIBRARY[trait_id]
+                bonus += trait.effects.get(stat_name.lower(), 0)
+        return max(1, min(10, base_stat + bonus))
 
-    def get_combat_power(self) -> int:
-        """Combat power with skills"""
+    def get_combat_power(self, legendary_inventory: List[str] = None) -> int:
+        """Combat power with skills and legendary bonuses"""
         weapon_damage = 0
         if self.weapon and self.weapon in EQUIPMENT_LIBRARY:
             weapon_damage = EQUIPMENT_LIBRARY[self.weapon].damage
 
         base_power = self.get_stat("strength") + weapon_damage
 
+        # Skill bonuses
         if "sharp_shooter" in self.learned_skills:
             base_power = int(base_power * (1 + SKILL_LIBRARY["sharp_shooter"].bonus_value))
         if "tank" in self.learned_skills:
             base_power = int(base_power * 1.2)
+
+        # v5.5: Legendary equipment bonuses
+        if legendary_inventory:
+            for legendary_id in legendary_inventory:
+                if legendary_id in LEGENDARY_ITEMS:
+                    legendary = LEGENDARY_ITEMS[legendary_id]
+                    # Check if dweller is using the base item
+                    if self.weapon == legendary.base_item or self.outfit == legendary.base_item:
+                        damage_mult = legendary.power_effect.get("damage_mult", 1.0)
+                        base_power = int(base_power * damage_mult)
+
+        # Trait combat bonuses
+        for trait_id in self.traits:
+            if trait_id in TRAIT_LIBRARY:
+                trait = TRAIT_LIBRARY[trait_id]
+                combat_mult = trait.effects.get("combat_mult", 1.0)
+                base_power = int(base_power * combat_mult)
 
         return base_power
 
@@ -987,6 +1013,33 @@ Generate a witty, Fallout-themed comment. No quotes."""
 
 # (Continuing with massive game class - this will be the largest class yet!)
 # =============================================================================
+# v5.5 HELPER FUNCTIONS
+# =============================================================================
+
+def inherit_traits(parent1_traits: List[str], parent2_traits: List[str]) -> List[str]:
+    """Inherit traits from parents with mutation chance"""
+    inherited = []
+
+    # Inherit from parents (50% chance for each inheritable trait)
+    for trait_id in parent1_traits + parent2_traits:
+        if trait_id in TRAIT_LIBRARY:
+            trait = TRAIT_LIBRARY[trait_id]
+            if trait.inheritable and random.random() < 0.5:
+                if trait_id not in inherited:
+                    inherited.append(trait_id)
+
+    # 5% chance for random mutation
+    if random.random() < 0.05:
+        mutation_traits = [t for t, data in TRAIT_LIBRARY.items()
+                          if data.trait_type == TraitType.MUTATION]
+        if mutation_traits:
+            mutation = random.choice(mutation_traits)
+            if mutation not in inherited:
+                inherited.append(mutation)
+
+    return inherited
+
+# =============================================================================
 # VAULT GAME CLASS v5.0 MEGA EDITION
 # =============================================================================
 
@@ -1046,7 +1099,13 @@ class VaultGame:
         self.current_season: Season = Season.SPRING
         self.season_day: int = 0  # day within season
         self.days_per_season: int = 25
-        
+
+        # NEW v5.5 Features
+        self.legendary_inventory: List[str] = []  # Legendary item IDs
+        self.vault_expansion = VaultExpansion()
+        self.quest_chains: List[QuestChain] = []
+        self.prestige_data = PrestigeData()
+
         # Initialize
         self._initialize_vault()
         self._create_starting_dwellers()
@@ -1057,8 +1116,9 @@ class VaultGame:
         
         # Start with a quest
         self.active_quests.append(generate_quest(self))
-        
-        self.log_event("🏛️ VAULT 13 v5.0 MEGA - Welcome, Overseer!")
+
+        self.log_event("🏛️ VAULT 13 v5.5 ULTIMATE MEGA PLUS - Welcome, Overseer!")
+        self.log_event("🆕 NEW: Traits, Vault Expansion, Legendary Items, Prestige!")
 
     def _initialize_vault(self):
         """Create initial vault"""
@@ -1303,13 +1363,22 @@ class VaultGame:
         # Clamp stats
         for stat in ["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"]:
             setattr(child, stat, max(1, min(10, getattr(child, stat))))
-        
+
+        # v5.5: Inherit traits from parents
+        child.traits = inherit_traits(mother.traits, partner.traits)
+
         self.dwellers.append(child)
         mother.pregnant = False
         mother.due_day = None
         self.children_born += 1
-        
-        self.log_event(f"🎉 {mother.name} gave birth to {child_name}!")
+
+        # Log birth with traits
+        trait_msg = ""
+        if child.traits:
+            trait_names = [TRAIT_LIBRARY[t].name for t in child.traits if t in TRAIT_LIBRARY]
+            if trait_names:
+                trait_msg = f" with traits: {', '.join(trait_names)}"
+        self.log_event(f"🎉 {mother.name} gave birth to {child_name}!{trait_msg}")
 
     # =================================================================
     # v5.0 NEW FEATURE: RESEARCH & TECH TREE
@@ -1524,6 +1593,82 @@ class VaultGame:
                 else:
                     bonuses[key] = bonuses.get(key, 0) + value
         return bonuses
+
+    # =================================================================
+    # v5.5 NEW FEATURE: VAULT EXPANSION
+    # =================================================================
+
+    def vault_expansion_menu(self):
+        """Manage vault expansion - floors and room merging"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.TECH}{C.BOLD}🏗️ VAULT EXPANSION{C.RESET}\n")
+        print(f"Current Floors: {C.INFO}{self.vault_expansion.current_floors}/{self.vault_expansion.max_floors}{C.RESET}")
+        print(f"Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
+
+        print(f"{C.BOLD}Options:{C.RESET}")
+
+        # Unlock new floor
+        next_floor_cost = int(self.vault_expansion.floor_unlock_cost *
+                             (self.vault_expansion.floor_unlock_cost_multiplier **
+                              (self.vault_expansion.current_floors - 3)))
+        can_unlock = self.vault_expansion.current_floors < self.vault_expansion.max_floors
+        unlock_status = "✓" if (can_unlock and self.resources.caps >= next_floor_cost) else "✗"
+        print(f"  {C.SUCCESS}[1]{C.RESET} [{unlock_status}] Unlock New Floor ({next_floor_cost} caps)")
+
+        # Merge rooms (simplified - just track that rooms can be merged)
+        print(f"  {C.SUCCESS}[2]{C.RESET} Merge Rooms (500 caps) - Creates Mega Room")
+        print(f"  {C.SUCCESS}[3]{C.RESET} View Merged Rooms")
+
+        print(f"  {C.DANGER}[0]{C.RESET} Back\n")
+
+        choice = input("Select option: ").strip()
+
+        if choice == "1":
+            if can_unlock and self.resources.caps >= next_floor_cost:
+                self.resources.caps -= next_floor_cost
+                self.vault_expansion.current_floors += 1
+                # Add new floor to layout
+                new_floor = []
+                for pos in range(3):
+                    new_floor.append(Room(RoomType.EMPTY, self.vault_expansion.current_floors - 1, pos))
+                self.vault_layout.append(new_floor)
+                self.log_event(f"🏗️ Unlocked Floor {self.vault_expansion.current_floors}!")
+                print(f"\n{C.SUCCESS}✓ Floor {self.vault_expansion.current_floors} unlocked!{C.RESET}")
+            else:
+                print(f"\n{C.WARNING}Cannot unlock floor (need {next_floor_cost} caps){C.RESET}")
+
+        elif choice == "2":
+            # Simplified room merging - just mark it
+            if self.resources.caps >= self.vault_expansion.merge_cost:
+                print("\nSelect room to merge (enter floor,position like '0,0'):")
+                room_input = input("> ").strip()
+                try:
+                    floor, pos = map(int, room_input.split(','))
+                    if (floor, pos, 1) not in self.vault_expansion.merged_rooms:
+                        self.vault_expansion.merged_rooms.append((floor, pos, 1))
+                        self.resources.caps -= self.vault_expansion.merge_cost
+                        print(f"\n{C.SUCCESS}✓ Room merged! +50% production{C.RESET}")
+                    else:
+                        print(f"\n{C.WARNING}Room already merged{C.RESET}")
+                except:
+                    print(f"\n{C.DANGER}Invalid input{C.RESET}")
+            else:
+                print(f"\n{C.WARNING}Need {self.vault_expansion.merge_cost} caps{C.RESET}")
+
+        elif choice == "3":
+            print(f"\n{C.BOLD}Merged Rooms:{C.RESET}")
+            if self.vault_expansion.merged_rooms:
+                for floor, pos, _ in self.vault_expansion.merged_rooms:
+                    room = self.vault_layout[floor][pos]
+                    print(f"  Floor {floor}, Pos {pos}: {room.room_type.value} (+50% production)")
+            else:
+                print(f"{C.DIM}No merged rooms yet{C.RESET}")
+            input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+            return self.vault_expansion_menu()
+
+        input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
 
     # =================================================================
     # v5.0 NEW FEATURE: TRADING SYSTEM
@@ -1921,15 +2066,16 @@ class VaultGame:
         os.system('clear' if os.name != 'nt' else 'cls')
 
     def print_header(self):
-        """Print game header with v5.0 info"""
+        """Print game header with v5.5 info"""
         ai_status = f"{C.AI}🤖{C.RESET}" if AI_ENABLED else f"{C.DIM}🤖{C.RESET}"
         gov_icon = "🏛️" if self.government else ""
         season_icons = {Season.SPRING: "🌸", Season.SUMMER: "☀️", Season.FALL: "🍂", Season.WINTER: "❄️"}
         season_icon = season_icons.get(self.current_season, "")
-        
+        legendary_icon = "⚡" if self.legendary_inventory else ""
+
         print(f"\n{C.HEADER}{C.BOLD}╔══════════════════════════════════════════════════════════════════════╗{C.RESET}")
-        print(f"{C.HEADER}{C.BOLD}║          VAULT 13 v5.0 MEGA EDITION                                  ║{C.RESET}")
-        print(f"{C.HEADER}{C.BOLD}║  DAY {self.day:4d}  {season_icon} {ai_status} {gov_icon}                                              ║{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}║          VAULT 13 v5.5 ULTIMATE MEGA PLUS                            ║{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}║  DAY {self.day:4d}  {season_icon} {ai_status} {gov_icon} {legendary_icon}                                           ║{C.RESET}")
         print(f"{C.HEADER}{C.BOLD}╚══════════════════════════════════════════════════════════════════════╝{C.RESET}\n")
 
     def print_resources(self):
@@ -2050,11 +2196,14 @@ class VaultGame:
         print(f"  {C.QUEST}[Q]{C.RESET} Quests  {C.QUEST}[X]{C.RESET} Expeditions  {C.SKILL}[K]{C.RESET} Skills  {C.INFO}[O]{C.RESET} Objectives")
         
         print(f"{C.BOLD}v5.0 NEW:{C.RESET}")
-        print(f"  {C.BOLD}[F]{C.RESET} Families  {C.TECH}[T]{C.RESET} Tech  {C.POLICY}[P]{C.RESET} Policy  {C.TRADE}[M]{C.RESET} Merchant  {C.FACTION}[L]{C.RESET} Factions  {C.BOLD}[C]{C.RESET} Craft")
-        
+        print(f"  {C.BOLD}[F]{C.RESET} Families  {C.TECH}[T]{C.RESET} Tech  {C.POLICY}[P]{C.RESET} Policy  {C.TRADE}[M]{C.RESET} Merchant  {C.FACTION}[L]{C.RESET} Factions  {C.BOLD}[C]{C.RESET} Craft  {C.DANGER}[I]{C.RESET} Disaster")
+
+        print(f"{C.BOLD}v5.5 ULTIMATE:{C.RESET}")
+        print(f"  {C.TECH}[V]{C.RESET} Vault Expansion  {C.QUEST}[G]{C.RESET} Legendary Items  {C.INFO}[R]{C.RESET} Prestige/Achievements")
+
         if AI_ENABLED:
             print(f"{C.BOLD}AI:{C.RESET} {C.AI}[A]{C.RESET} Advisor  {C.AI}[W]{C.RESET} Talk")
-        
+
         print(f"  {C.SUCCESS}[S]{C.RESET} Save  {C.DANGER}[Z]{C.RESET} Quit\n")
 
     # =================================================================
@@ -2171,7 +2320,19 @@ class VaultGame:
                     equip = random.choice(list(EQUIPMENT_LIBRARY.keys()))
                     if equip not in self.equipment_inventory:
                         self.equipment_inventory.append(equip)
-                
+
+                # v5.5: Legendary drop chance (0.1% base, boosted by luck)
+                legendary_chance = 0.001 + (dweller.luck * 0.0001)
+                if random.random() < legendary_chance:
+                    legendary_id = random.choice(list(LEGENDARY_ITEMS.keys()))
+                    if legendary_id not in self.legendary_inventory:
+                        self.legendary_inventory.append(legendary_id)
+                        legendary = LEGENDARY_ITEMS[legendary_id]
+                        self.log_event(f"⚡ LEGENDARY! {dweller.name} found {legendary.icon} {legendary.name}!")
+                        # Achievement
+                        if "legendary_find" not in self.prestige_data.achievements_unlocked:
+                            self.prestige_data.achievements_unlocked.append("legendary_find")
+
                 self.log_event(f"✓ {dweller.name} returned (+{loot_caps} caps)")
                 dweller.modify_happiness(10)
                 
@@ -2224,6 +2385,69 @@ class VaultGame:
             stat = random.choice(["strength", "perception", "endurance", "charisma", "intelligence", "agility", "luck"])
             dweller.modify_stat(stat, 1)
             self.log_event(f"📈 {dweller.name} improved {stat.upper()}!")
+
+    # =================================================================
+    # v5.5 NEW FEATURE: PRESTIGE & ACHIEVEMENTS
+    # =================================================================
+
+    def prestige_menu(self):
+        """View achievements and prestige bonuses"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.QUEST}{C.BOLD}🏆 PRESTIGE & ACHIEVEMENTS{C.RESET}\n")
+        print(f"Prestige Level: {C.INFO}{self.prestige_data.prestige_level}{C.RESET}")
+        print(f"Prestige Points: {C.INFO}{self.prestige_data.prestige_points}{C.RESET}")
+        print(f"Vaults Completed: {C.INFO}{self.prestige_data.total_vaults_completed}{C.RESET}\n")
+
+        # Show achievements
+        print(f"{C.BOLD}Achievements Unlocked:{C.RESET}")
+        if self.prestige_data.achievements_unlocked:
+            for ach_id in self.prestige_data.achievements_unlocked:
+                if ach_id in ACHIEVEMENTS:
+                    ach = ACHIEVEMENTS[ach_id]
+                    print(f"  ✓ {ach['name']} - {ach['desc']} (+{ach['points']} pts)")
+        else:
+            print(f"{C.DIM}No achievements yet{C.RESET}")
+
+        print(f"\n{C.BOLD}Available Achievements:{C.RESET}")
+        for ach_id, ach in ACHIEVEMENTS.items():
+            if ach_id not in self.prestige_data.achievements_unlocked:
+                print(f"  ☐ {ach['name']} - {ach['desc']} (+{ach['points']} pts)")
+
+        # Check for new achievements
+        if self.children_born >= 1 and "first_child" not in self.prestige_data.achievements_unlocked:
+            self.prestige_data.achievements_unlocked.append("first_child")
+            self.prestige_data.prestige_points += ACHIEVEMENTS["first_child"]["points"]
+            print(f"\n{C.SUCCESS}🏆 ACHIEVEMENT UNLOCKED: First Child!{C.RESET}")
+
+        if self.day >= 100 and "survival_100" not in self.prestige_data.achievements_unlocked:
+            self.prestige_data.achievements_unlocked.append("survival_100")
+            self.prestige_data.prestige_points += ACHIEVEMENTS["survival_100"]["points"]
+            print(f"\n{C.SUCCESS}🏆 ACHIEVEMENT UNLOCKED: Centennial!{C.RESET}")
+
+        input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+
+    def legendary_inventory_menu(self):
+        """View legendary equipment"""
+        self.clear_screen()
+        self.print_header()
+
+        print(f"{C.QUEST}{C.BOLD}⚡ LEGENDARY EQUIPMENT{C.RESET}\n")
+
+        if self.legendary_inventory:
+            for legendary_id in self.legendary_inventory:
+                if legendary_id in LEGENDARY_ITEMS:
+                    leg = LEGENDARY_ITEMS[legendary_id]
+                    print(f"  {leg.icon} {C.QUEST}{leg.name}{C.RESET} [{leg.rarity.value}]")
+                    print(f"     Base: {leg.base_item}")
+                    print(f"     Power: {leg.special_power}")
+                    print(f"     {C.DIM}{leg.lore}{C.RESET}\n")
+        else:
+            print(f"{C.DIM}No legendary items found yet...{C.RESET}")
+            print(f"{C.DIM}Keep exploring the wasteland!{C.RESET}\n")
+
+        input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
 
     # =================================================================
     # GAME LOOP
@@ -2294,7 +2518,15 @@ class VaultGame:
                 self.crafting_menu()
             elif choice == 'i':
                 self.disaster_menu()
-            
+
+            # v5.5 NEW Features
+            elif choice == 'v':
+                self.vault_expansion_menu()
+            elif choice == 'g':
+                self.legendary_inventory_menu()
+            elif choice == 'r':
+                self.prestige_menu()
+
             # AI Features
             elif choice == 'a' and AI_ENABLED:
                 print("AI Advisor (from v3.0)")
@@ -2375,3 +2607,133 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# =============================================================================
+# v5.5 NEW: ADDITIONAL ENUMS AND CLASSES
+# =============================================================================
+
+class TraitType(Enum):
+    """Trait categories"""
+    GENETIC = "Genetic"
+    MUTATION = "Mutation"
+    LEARNED = "Learned"
+    NEGATIVE = "Negative"
+
+class EquipmentRarity(Enum):
+    """Equipment rarity"""
+    COMMON = "Common"
+    UNCOMMON = "Uncommon"
+    RARE = "Rare"
+    EPIC = "Epic"
+    LEGENDARY = "Legendary"
+
+@dataclass
+class DwellerTrait:
+    """A trait affecting dweller"""
+    name: str
+    description: str
+    trait_type: TraitType
+    effects: Dict[str, any]
+    inheritable: bool = False
+    icon: str = "✨"
+    rarity: int = 1
+
+@dataclass
+class LegendaryItem:
+    """Legendary equipment"""
+    name: str
+    base_item: str
+    rarity: EquipmentRarity
+    special_power: str
+    power_effect: Dict[str, any]
+    lore: str
+    icon: str = "⚡"
+
+@dataclass
+class QuestChain:
+    """Multi-quest storyline"""
+    chain_id: str
+    name: str
+    description: str
+    quests: List[str]
+    current_quest_index: int = 0
+    completed: bool = False
+    unlocked: bool = False
+    unlock_requirement: Optional[Dict[str, any]] = None
+    final_reward: Dict[str, any] = field(default_factory=dict)
+
+@dataclass
+class VaultExpansion:
+    """Vault expansion data"""
+    max_floors: int = 15
+    current_floors: int = 3
+    floor_unlock_cost: int = 1000
+    floor_unlock_cost_multiplier: float = 1.5
+    merged_rooms: List[Tuple[int, int, int]] = field(default_factory=list)
+    merge_cost: int = 500
+
+@dataclass
+class PrestigeData:
+    """Meta progression"""
+    prestige_level: int = 0
+    prestige_points: int = 0
+    legacy_bonuses: List[str] = field(default_factory=list)
+    achievements_unlocked: List[str] = field(default_factory=list)
+    total_vaults_completed: int = 0
+    best_day_survived: int = 0
+
+# Trait Library
+TRAIT_LIBRARY = {
+    "genius": DwellerTrait("Genius", "+3 INT, faster XP", TraitType.GENETIC, 
+                          {"intelligence": 3, "xp_mult": 1.5}, inheritable=True, icon="🧠", rarity=3),
+    "athletic": DwellerTrait("Athletic", "+2 STR/AGI/END", TraitType.GENETIC,
+                            {"strength": 2, "agility": 2, "endurance": 1}, inheritable=True, icon="💪", rarity=2),
+    "charismatic": DwellerTrait("Natural Leader", "+3 CHA", TraitType.GENETIC,
+                               {"charisma": 3}, inheritable=True, icon="👑", rarity=2),
+    "lucky": DwellerTrait("Born Lucky", "+2 LCK, better expeditions", TraitType.GENETIC,
+                         {"luck": 2, "expedition_success": 1.2}, inheritable=True, icon="🍀", rarity=3),
+    "rad_resistant": DwellerTrait("Rad Resistant", "Immune to radiation", TraitType.MUTATION,
+                                 {"rad_immunity": True}, inheritable=False, icon="☢️", rarity=4),
+    "regeneration": DwellerTrait("Fast Healing", "+5 HP/turn", TraitType.MUTATION,
+                                {"health_regen": 5}, inheritable=False, icon="💚", rarity=5),
+    "veteran": DwellerTrait("Combat Veteran", "+20% combat", TraitType.LEARNED,
+                           {"combat_mult": 1.2}, inheritable=False, icon="🎖️", rarity=2),
+    "frail": DwellerTrait("Frail", "-2 END", TraitType.NEGATIVE,
+                         {"endurance": -2}, inheritable=True, icon="💔", rarity=1),
+}
+
+# Legendary Items
+LEGENDARY_ITEMS = {
+    "excalibur": LegendaryItem("Excalibur", "plasma_gun", EquipmentRarity.LEGENDARY,
+                              "2x damage, always hits", {"damage_mult": 2.0}, 
+                              "The legendary sword reforged.", icon="⚔️"),
+    "vault_elite_armor": LegendaryItem("Vault-Tec Elite", "power_armor", EquipmentRarity.LEGENDARY,
+                                      "+5 all stats, rad immune", {"all_stats": 5, "rad_immunity": True},
+                                      "Prototype armor from secret facility.", icon="🛡️"),
+    "lucky_charm": LegendaryItem("Rabbit's Foot", "vault_suit", EquipmentRarity.EPIC,
+                                "+10 LCK, 3x crits", {"luck": 10, "crit_mult": 3.0},
+                                "Pre-war good luck charm.", icon="🍀"),
+}
+
+# Quest Chains
+QUEST_CHAINS = {
+    "brotherhood_path": QuestChain("brotherhood_path", "Path of the Brotherhood",
+                                  "Help the Brotherhood find technology.",
+                                  quests=["bos_1", "bos_2", "bos_3"],
+                                  unlock_requirement={"day": 30},
+                                  final_reward={"legendary": "vault_elite_armor", "caps": 5000}),
+}
+
+# Prestige Bonuses
+PRESTIGE_BONUSES = {
+    "wealthy_start": {"name": "Wealthy Start", "desc": "+500 starting caps", "cost": 10, "effect": {"starting_caps": 500}},
+    "skilled_dwellers": {"name": "Skilled Start", "desc": "Dwellers start with 1 skill", "cost": 15, "effect": {"starting_skills": 1}},
+    "tech_advantage": {"name": "Tech Advantage", "desc": "3 starting techs", "cost": 20, "effect": {"starting_tech": 3}},
+}
+
+ACHIEVEMENTS = {
+    "first_child": {"name": "New Life", "desc": "Have first child", "points": 5},
+    "tech_master": {"name": "Tech Master", "desc": "Research all techs", "points": 20},
+    "legendary_find": {"name": "Legendary!", "desc": "Find a legendary item", "points": 15},
+    "survival_100": {"name": "Centennial", "desc": "Survive 100 days", "points": 10},
+}
