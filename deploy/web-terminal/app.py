@@ -67,8 +67,10 @@ terminals = {}
 def index():
     """Show game selection page"""
     games = [
-        # MAIN GAME
-        {'id': 'vault_shelter', 'name': '🏛️ VAULT 13 - Survival Protocol (MAIN GAME)', 'file': 'vault_shelter.py'},
+        # MAIN GAMES
+        {'id': 'vault_shelter_v4', 'name': '🏛️ VAULT 13 v4.0 ULTIMATE - Quest/Explore/Skills (NEW!)', 'file': 'vault_shelter_v4.py'},
+        {'id': 'vault_shelter_ai', 'name': '🏛️ VAULT 13 v3.0 AI Edition - With AI Advisor', 'file': 'vault_shelter_ai.py'},
+        {'id': 'vault_shelter', 'name': '🏛️ VAULT 13 v2.0 - Survival Protocol', 'file': 'vault_shelter.py'},
 
         # MINI GAMES - Philosophical & Computational Thought Experiments
         {'id': 'echo_chambers', 'name': 'Echo Chambers', 'file': 'echo_chambers.py'},
