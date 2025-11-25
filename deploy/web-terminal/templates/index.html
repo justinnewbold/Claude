@@ -2,11 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="{{ app_name }}">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="msapplication-TileColor" content="#0a0a0f">
+    <meta name="format-detection" content="telephone=no">
+
     <title>{{ app_name }} - Game Collection</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/icon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-180.png">
+
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #00ff88;
@@ -22,12 +41,28 @@
             --text: #e0e8f0;
             --text-dim: #8090a0;
             --glow: 0 0 20px rgba(0, 255, 136, 0.3);
+
+            /* Safe area insets for notched phones */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+
+            /* Touch-friendly sizes */
+            --touch-target: 44px;
+            --touch-target-lg: 56px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior-y: contain;
         }
 
         body {
@@ -35,7 +70,14 @@
             background: var(--bg-dark);
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
             overflow-x: hidden;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            padding-left: var(--safe-left);
+            padding-right: var(--safe-right);
+            /* Smooth scrolling */
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Animated background */
@@ -53,6 +95,7 @@
                 linear-gradient(180deg, #0a0a0f 0%, #0f1520 50%, #0a0a0f 100%);
         }
 
+        /* Reduce scanlines on mobile for performance */
         .scanlines {
             position: fixed;
             top: 0;
@@ -68,27 +111,49 @@
                 rgba(0, 0, 0, 0.1) 2px,
                 rgba(0, 0, 0, 0.1) 4px
             );
-            opacity: 0.3;
+            opacity: 0.2;
+        }
+
+        @media (max-width: 768px) {
+            .scanlines {
+                opacity: 0.1; /* Lighter on mobile */
+            }
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
             position: relative;
             z-index: 1;
+            /* Bottom padding for mobile nav */
+            padding-bottom: calc(80px + var(--safe-bottom));
         }
 
-        /* Header */
+        @media (min-width: 768px) {
+            .container {
+                padding: 2rem;
+                padding-bottom: 2rem;
+            }
+        }
+
+        /* Header - Mobile First */
         header {
             text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem 0;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        @media (min-width: 768px) {
+            header {
+                margin-bottom: 3rem;
+                padding: 2rem 0;
+            }
         }
 
         .logo {
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2rem, 5vw, 4rem);
+            font-size: 1.5rem;
             font-weight: 900;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--primary) 100%);
             background-size: 200% auto;
@@ -96,8 +161,15 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: shine 3s linear infinite;
-            text-shadow: var(--glow);
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
+            line-height: 1.3;
+        }
+
+        @media (min-width: 768px) {
+            .logo {
+                font-size: clamp(2rem, 5vw, 4rem);
+                letter-spacing: 0.1em;
+            }
         }
 
         @keyframes shine {
@@ -108,80 +180,135 @@
             display: inline-block;
             background: linear-gradient(135deg, var(--accent), var(--danger));
             color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.6rem;
             font-weight: 700;
-            margin-left: 1rem;
-            animation: pulse 2s infinite;
+            margin-left: 0.5rem;
+            vertical-align: middle;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @media (min-width: 768px) {
+            .version-badge {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+                border-radius: 20px;
+                margin-left: 1rem;
+            }
         }
 
         .subtitle {
             color: var(--text-dim);
-            font-size: 1rem;
-            margin-top: 1rem;
-            letter-spacing: 0.2em;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
-        /* Stats Bar */
+        @media (min-width: 768px) {
+            .subtitle {
+                font-size: 1rem;
+                margin-top: 1rem;
+                letter-spacing: 0.2em;
+            }
+        }
+
+        /* Stats Bar - Horizontal scroll on mobile */
         .stats-bar {
             display: flex;
             justify-content: center;
-            gap: 3rem;
-            margin: 2rem 0;
-            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            padding: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .stats-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .stats-bar {
+                gap: 3rem;
+                margin: 2rem 0;
+            }
         }
 
         .stat {
             text-align: center;
+            flex-shrink: 0;
         }
 
         .stat-value {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary);
-            text-shadow: var(--glow);
+        }
+
+        @media (min-width: 768px) {
+            .stat-value {
+                font-size: 2rem;
+            }
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.6rem;
             color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
         }
 
-        /* Search & Filter */
+        @media (min-width: 768px) {
+            .stat-label {
+                font-size: 0.75rem;
+                letter-spacing: 0.1em;
+            }
+        }
+
+        /* Search & Filter - Mobile optimized */
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .controls {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
         }
 
         .search-box {
             position: relative;
-            flex: 1;
-            max-width: 400px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .search-box {
+                flex: 1;
+                max-width: 400px;
+            }
         }
 
         .search-box input {
             width: 100%;
-            padding: 0.8rem 1rem 0.8rem 3rem;
+            padding: 0.9rem 1rem 0.9rem 3rem;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             color: var(--text);
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 16px; /* Prevents zoom on iOS */
             transition: all 0.3s ease;
+            min-height: var(--touch-target);
         }
 
         .search-box input:focus {
@@ -191,25 +318,48 @@
         }
 
         .search-box::before {
-            content: "⌕";
+            content: "🔍";
             position: absolute;
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-dim);
-            font-size: 1.2rem;
+            font-size: 1rem;
+        }
+
+        /* Filter buttons - Horizontal scroll on mobile */
+        .filter-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.25rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .filter-container::-webkit-scrollbar {
+            display: none;
         }
 
         .filter-btn {
-            padding: 0.8rem 1.5rem;
+            padding: 0.7rem 1rem;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 20px;
             color: var(--text-dim);
             font-family: inherit;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-height: var(--touch-target);
+            /* Touch feedback */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .filter-btn:active {
+            transform: scale(0.95);
         }
 
         .filter-btn:hover, .filter-btn.active {
@@ -220,55 +370,97 @@
 
         /* Category Sections */
         .category {
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .category {
+                margin-bottom: 3rem;
+            }
         }
 
         .category-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--border);
         }
 
         .category-icon {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        @media (min-width: 768px) {
+            .category-icon {
+                font-size: 1.5rem;
+            }
         }
 
         .category-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: var(--secondary);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
+        }
+
+        @media (min-width: 768px) {
+            .category-title {
+                font-size: 1.2rem;
+                letter-spacing: 0.1em;
+            }
         }
 
         .category-count {
             background: var(--bg-card);
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.65rem;
             color: var(--text-dim);
         }
 
-        /* Games Grid */
+        /* Games Grid - Mobile First */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
+        @media (min-width: 480px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 900px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        /* Game Card - Touch optimized */
         .game-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
+            border-radius: 16px;
+            padding: 1rem;
+            transition: all 0.2s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            /* Touch feedback */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .game-card {
+                padding: 1.5rem;
+            }
         }
 
         .game-card::before {
@@ -283,78 +475,115 @@
             transition: transform 0.3s ease;
         }
 
-        .game-card:hover {
-            transform: translateY(-5px);
+        .game-card:active {
+            transform: scale(0.98);
             background: var(--bg-card-hover);
-            border-color: var(--primary);
-            box-shadow: var(--glow), 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .game-card:hover::before {
-            transform: scaleX(1);
+        @media (hover: hover) {
+            .game-card:hover {
+                transform: translateY(-5px);
+                background: var(--bg-card-hover);
+                border-color: var(--primary);
+                box-shadow: var(--glow), 0 10px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            .game-card:hover::before {
+                transform: scaleX(1);
+            }
         }
 
         .game-card.featured {
-            grid-column: span 2;
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, var(--bg-card) 100%);
         }
 
-        @media (max-width: 768px) {
+        @media (min-width: 900px) {
             .game-card.featured {
-                grid-column: span 1;
+                grid-column: span 2;
             }
         }
 
         .game-header {
             display: flex;
             align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
         .game-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             line-height: 1;
+        }
+
+        @media (min-width: 768px) {
+            .game-icon {
+                font-size: 2.5rem;
+            }
         }
 
         .game-info {
             flex: 1;
+            min-width: 0; /* Allow text truncation */
         }
 
         .game-title {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.2rem;
+            /* Text truncation */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .game-title {
+                font-size: 1.1rem;
+                white-space: normal;
+            }
         }
 
         .game-version {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--primary);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
         }
 
         .game-description {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--text-dim);
-            line-height: 1.5;
-            margin-bottom: 1rem;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            /* Limit to 2 lines on mobile */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .game-description {
+                font-size: 0.85rem;
+                line-height: 1.5;
+                -webkit-line-clamp: 3;
+            }
         }
 
         .game-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
         }
 
         .tag {
-            padding: 0.2rem 0.6rem;
+            padding: 0.15rem 0.5rem;
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.3);
             border-radius: 4px;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             color: var(--secondary);
             text-transform: uppercase;
         }
@@ -368,27 +597,36 @@
         .play-button {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1rem;
             background: linear-gradient(135deg, var(--primary-dim), var(--primary));
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             color: var(--bg-dark);
             font-family: inherit;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-decoration: none;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            min-height: var(--touch-target);
+            min-width: 100px;
         }
 
-        .play-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (hover: hover) {
+            .play-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+            }
         }
 
         .game-status {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-dim);
         }
 
@@ -403,50 +641,113 @@
         /* Featured Badge */
         .featured-badge {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
+            top: 0.75rem;
+            right: 0.75rem;
             background: linear-gradient(135deg, var(--warning), var(--accent));
             color: var(--bg-dark);
-            padding: 0.3rem 0.8rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 4px;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
         }
 
+        /* Mobile Bottom Navigation */
+        .mobile-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            padding: 0.5rem;
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            z-index: 1001;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-nav {
+                display: none;
+            }
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.65rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            min-width: var(--touch-target);
+            min-height: var(--touch-target);
+            justify-content: center;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+
         /* Footer */
         footer {
-            margin-top: 4rem;
-            padding: 2rem 0;
+            margin-top: 2rem;
+            padding: 1.5rem 0;
             text-align: center;
             border-top: 1px solid var(--border);
         }
 
+        @media (min-width: 768px) {
+            footer {
+                margin-top: 4rem;
+                padding: 2rem 0;
+            }
+        }
+
         .footer-content {
             color: var(--text-dim);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .footer-content {
+                font-size: 0.85rem;
+            }
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 2rem;
-            margin-top: 1rem;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
         }
 
         .footer-links a {
             color: var(--secondary);
             text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: var(--primary);
+            padding: 0.5rem;
+            min-height: var(--touch-target);
+            display: flex;
+            align-items: center;
         }
 
         /* Animations */
         .fade-in {
-            animation: fadeIn 0.5s ease forwards;
+            animation: fadeIn 0.4s ease forwards;
             opacity: 0;
         }
 
@@ -454,25 +755,138 @@
             to { opacity: 1; }
         }
 
-        .game-card:nth-child(1) { animation-delay: 0.1s; }
-        .game-card:nth-child(2) { animation-delay: 0.15s; }
-        .game-card:nth-child(3) { animation-delay: 0.2s; }
-        .game-card:nth-child(4) { animation-delay: 0.25s; }
-        .game-card:nth-child(5) { animation-delay: 0.3s; }
-        .game-card:nth-child(6) { animation-delay: 0.35s; }
+        .game-card:nth-child(1) { animation-delay: 0.05s; }
+        .game-card:nth-child(2) { animation-delay: 0.1s; }
+        .game-card:nth-child(3) { animation-delay: 0.15s; }
+        .game-card:nth-child(4) { animation-delay: 0.2s; }
+        .game-card:nth-child(5) { animation-delay: 0.25s; }
+        .game-card:nth-child(6) { animation-delay: 0.3s; }
 
-        /* Responsive */
-        @media (max-width: 600px) {
-            .container {
-                padding: 1rem;
+        /* Pull to refresh indicator */
+        .pull-indicator {
+            position: fixed;
+            top: var(--safe-top);
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            z-index: 1002;
+            transition: transform 0.3s ease;
+        }
+
+        .pull-indicator.visible {
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        /* Install prompt */
+        .install-prompt {
+            display: none;
+            position: fixed;
+            bottom: calc(70px + var(--safe-bottom));
+            left: 1rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem;
+            z-index: 1003;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        @media (min-width: 768px) {
+            .install-prompt {
+                left: auto;
+                right: 2rem;
+                bottom: 2rem;
+                max-width: 350px;
+            }
+        }
+
+        .install-prompt-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .install-prompt-icon {
+            font-size: 2rem;
+        }
+
+        .install-prompt-text h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .install-prompt-text p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .install-prompt-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .install-btn {
+            flex: 1;
+            padding: 0.7rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: var(--touch-target);
+        }
+
+        .install-btn.primary {
+            background: var(--primary);
+            border: none;
+            color: var(--bg-dark);
+        }
+
+        .install-btn.secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        /* Landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            header {
+                padding: 0.5rem 0;
+                margin-bottom: 1rem;
             }
 
             .stats-bar {
-                gap: 1.5rem;
+                margin: 0.5rem 0;
             }
 
-            .games-grid {
-                grid-template-columns: 1fr;
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .subtitle {
+                display: none;
             }
         }
     </style>
@@ -480,6 +894,10 @@
 <body>
     <div class="bg-animation"></div>
     <div class="scanlines"></div>
+
+    <div class="pull-indicator" id="pullIndicator">
+        ↓ Pull to refresh
+    </div>
 
     <div class="container">
         <header>
@@ -492,10 +910,10 @@
             <div class="stats-bar">
                 <div class="stat">
                     <div class="stat-value" id="total-games">{{ games|length }}</div>
-                    <div class="stat-label">Total Games</div>
+                    <div class="stat-label">Games</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value" id="categories-count">8</div>
+                    <div class="stat-value" id="categories-count">5</div>
                     <div class="stat-label">Categories</div>
                 </div>
                 <div class="stat">
@@ -509,11 +927,14 @@
             <div class="search-box">
                 <input type="text" id="search" placeholder="Search games..." autocomplete="off">
             </div>
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="main">Main</button>
-            <button class="filter-btn" data-filter="quantum">Quantum</button>
-            <button class="filter-btn" data-filter="philosophy">Philosophy</button>
-            <button class="filter-btn" data-filter="logic">Logic</button>
+            <div class="filter-container">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="main">Main</button>
+                <button class="filter-btn" data-filter="quantum">Quantum</button>
+                <button class="filter-btn" data-filter="philosophy">Philosophy</button>
+                <button class="filter-btn" data-filter="logic">Logic</button>
+                <button class="filter-btn" data-filter="other">Other</button>
+            </div>
         </div>
 
         <!-- Main Games Category -->
@@ -543,14 +964,13 @@
                     <div class="game-tags">
                         <span class="tag">Simulation</span>
                         <span class="tag">Strategy</span>
-                        <span class="tag">Survival</span>
                     </div>
                     <div class="game-footer">
-                        <a href="/play/{{ game.file }}" class="play-button">
-                            ▶ Play Now
+                        <a href="/play/{{ game.file }}" class="play-button" onclick="event.stopPropagation()">
+                            ▶ Play
                         </a>
                         <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
-                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                            {% if game.available %}● Ready{% else %}○ Soon{% endif %}
                         </span>
                     </div>
                 </div>
@@ -563,7 +983,6 @@
             <div class="category-header">
                 <span class="category-icon">⚛️</span>
                 <h2 class="category-title">Quantum & Physics</h2>
-                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Quantum & Physics')|list|length }}</span>
             </div>
             <div class="games-grid">
                 {% for game in games if game.category == 'Quantum & Physics' or game.category == 'Physics Simulations' %}
@@ -591,12 +1010,11 @@
                     <p class="game-description">{{ game.description }}</p>
                     <div class="game-tags">
                         <span class="tag">Physics</span>
-                        <span class="tag">Experimental</span>
                     </div>
                     <div class="game-footer">
-                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <a href="/play/{{ game.file }}" class="play-button" onclick="event.stopPropagation()">▶ Play</a>
                         <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
-                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                            {% if game.available %}● Ready{% else %}○ Soon{% endif %}
                         </span>
                     </div>
                 </div>
@@ -608,8 +1026,7 @@
         <div class="category" data-category="philosophy">
             <div class="category-header">
                 <span class="category-icon">🧠</span>
-                <h2 class="category-title">Philosophy & Decision Theory</h2>
-                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Philosophy of Mind')|list|length + games|selectattr('category', 'equalto', 'Decision Theory')|list|length }}</span>
+                <h2 class="category-title">Philosophy & Decision</h2>
             </div>
             <div class="games-grid">
                 {% for game in games if game.category == 'Philosophy of Mind' or game.category == 'Decision Theory' %}
@@ -639,12 +1056,11 @@
                     <p class="game-description">{{ game.description }}</p>
                     <div class="game-tags">
                         <span class="tag">Philosophy</span>
-                        <span class="tag">Thought Experiment</span>
                     </div>
                     <div class="game-footer">
-                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <a href="/play/{{ game.file }}" class="play-button" onclick="event.stopPropagation()">▶ Play</a>
                         <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
-                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                            {% if game.available %}● Ready{% else %}○ Soon{% endif %}
                         </span>
                     </div>
                 </div>
@@ -657,7 +1073,6 @@
             <div class="category-header">
                 <span class="category-icon">💻</span>
                 <h2 class="category-title">Computation & Logic</h2>
-                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Computation & Logic')|list|length + games|selectattr('category', 'equalto', 'Logic & Mathematics')|list|length }}</span>
             </div>
             <div class="games-grid">
                 {% for game in games if game.category == 'Computation & Logic' or game.category == 'Logic & Mathematics' %}
@@ -685,12 +1100,11 @@
                     <p class="game-description">{{ game.description }}</p>
                     <div class="game-tags">
                         <span class="tag">Logic</span>
-                        <span class="tag">Computation</span>
                     </div>
                     <div class="game-footer">
-                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <a href="/play/{{ game.file }}" class="play-button" onclick="event.stopPropagation()">▶ Play</a>
                         <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
-                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                            {% if game.available %}● Ready{% else %}○ Soon{% endif %}
                         </span>
                     </div>
                 </div>
@@ -703,7 +1117,6 @@
             <div class="category-header">
                 <span class="category-icon">🎲</span>
                 <h2 class="category-title">Other Experiments</h2>
-                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Other Experiments')|list|length }}</span>
             </div>
             <div class="games-grid">
                 {% for game in games if game.category == 'Other Experiments' %}
@@ -718,9 +1131,6 @@
                             {% elif 'boltzmann' in game.id %}🧠
                             {% elif 'simulation' in game.id %}🖥️
                             {% elif 'doomsday' in game.id %}☄️
-                            {% elif 'munchhausen' in game.id %}🤔
-                            {% elif 'braess' in game.id %}🛣️
-                            {% elif 'categorizer' in game.id %}📁
                             {% else %}🎲{% endif %}
                         </span>
                         <div class="game-info">
@@ -733,9 +1143,9 @@
                         <span class="tag">Experimental</span>
                     </div>
                     <div class="game-footer">
-                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <a href="/play/{{ game.file }}" class="play-button" onclick="event.stopPropagation()">▶ Play</a>
                         <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
-                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                            {% if game.available %}● Ready{% else %}○ Soon{% endif %}
                         </span>
                     </div>
                 </div>
@@ -745,14 +1155,53 @@
 
         <footer>
             <div class="footer-content">
-                <p>Built with curiosity, creativity, and a desire to explore the nature of reality.</p>
+                <p>Built with curiosity and creativity</p>
                 <div class="footer-links">
-                    <a href="#">Documentation</a>
+                    <a href="#">Docs</a>
                     <a href="#">GitHub</a>
                     <a href="#">About</a>
                 </div>
             </div>
         </footer>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <a href="#" class="nav-item active" data-filter="all">
+            <span class="nav-icon">🎮</span>
+            <span>All</span>
+        </a>
+        <a href="#" class="nav-item" data-filter="main">
+            <span class="nav-icon">🏠</span>
+            <span>Main</span>
+        </a>
+        <a href="#" class="nav-item" data-filter="quantum">
+            <span class="nav-icon">⚛️</span>
+            <span>Physics</span>
+        </a>
+        <a href="#" class="nav-item" data-filter="philosophy">
+            <span class="nav-icon">🧠</span>
+            <span>Mind</span>
+        </a>
+        <a href="#" class="nav-item" data-filter="logic">
+            <span class="nav-icon">💻</span>
+            <span>Logic</span>
+        </a>
+    </nav>
+
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <div class="install-prompt-content">
+            <span class="install-prompt-icon">📱</span>
+            <div class="install-prompt-text">
+                <h4>Install App</h4>
+                <p>Add to your home screen for the best experience</p>
+            </div>
+        </div>
+        <div class="install-prompt-buttons">
+            <button class="install-btn secondary" id="installLater">Later</button>
+            <button class="install-btn primary" id="installNow">Install</button>
+        </div>
     </div>
 
     <script>
@@ -761,6 +1210,7 @@
         const gameCards = document.querySelectorAll('.game-card');
         const categories = document.querySelectorAll('.category');
         const filterBtns = document.querySelectorAll('.filter-btn');
+        const navItems = document.querySelectorAll('.nav-item');
 
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
@@ -771,7 +1221,6 @@
                 card.style.display = matches ? '' : 'none';
             });
 
-            // Hide empty categories
             categories.forEach(cat => {
                 const visibleCards = cat.querySelectorAll('.game-card:not([style*="display: none"])');
                 cat.style.display = visibleCards.length > 0 ? '' : 'none';
@@ -779,30 +1228,115 @@
         });
 
         // Filter functionality
+        function setFilter(filter) {
+            // Update filter buttons
+            filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+            navItems.forEach(n => n.classList.toggle('active', n.dataset.filter === filter));
+
+            if (filter === 'all') {
+                categories.forEach(cat => cat.style.display = '');
+                gameCards.forEach(card => card.style.display = '');
+            } else {
+                categories.forEach(cat => {
+                    cat.style.display = cat.dataset.category === filter ? '' : 'none';
+                });
+            }
+
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.dataset.filter;
+            btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+        });
 
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                if (filter === 'all') {
-                    categories.forEach(cat => cat.style.display = '');
-                    gameCards.forEach(card => card.style.display = '');
-                } else {
-                    categories.forEach(cat => {
-                        cat.style.display = cat.dataset.category === filter ? '' : 'none';
-                    });
-                }
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                setFilter(item.dataset.filter);
             });
         });
 
-        // Count unique categories
+        // Count categories
         const uniqueCategories = new Set();
         document.querySelectorAll('.category').forEach(cat => {
             uniqueCategories.add(cat.dataset.category);
         });
         document.getElementById('categories-count').textContent = uniqueCategories.size;
+
+        // PWA Install prompt
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installNow = document.getElementById('installNow');
+        const installLater = document.getElementById('installLater');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show prompt after a delay
+            setTimeout(() => {
+                if (!localStorage.getItem('installPromptDismissed')) {
+                    installPrompt.classList.add('show');
+                }
+            }, 3000);
+        });
+
+        installNow.addEventListener('click', async () => {
+            installPrompt.classList.remove('show');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+        });
+
+        installLater.addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+            localStorage.setItem('installPromptDismissed', 'true');
+        });
+
+        // Pull to refresh (visual only - actual refresh handled by browser)
+        let touchStartY = 0;
+        const pullIndicator = document.getElementById('pullIndicator');
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const scrollTop = window.scrollY;
+
+            if (scrollTop === 0 && touchY > touchStartY + 50) {
+                pullIndicator.classList.add('visible');
+            } else {
+                pullIndicator.classList.remove('visible');
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            pullIndicator.classList.remove('visible');
+        });
+
+        // Prevent double-tap zoom on buttons
+        document.querySelectorAll('button, .play-button, .game-card').forEach(el => {
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                el.click();
+            });
+        });
+
+        // Haptic feedback (if supported)
+        function hapticFeedback() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(10);
+            }
+        }
+
+        document.querySelectorAll('.game-card, .filter-btn, .nav-item').forEach(el => {
+            el.addEventListener('touchstart', hapticFeedback, { passive: true });
+        });
     </script>
 </body>
 </html>

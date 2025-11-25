@@ -2,10 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="format-detection" content="telephone=no">
+
     <title>{{ game_file }} - {{ app_name }}</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #00ff88;
@@ -16,39 +24,61 @@
             --border: rgba(0, 255, 136, 0.2);
             --text: #e0e8f0;
             --text-dim: #6a7a8a;
+
+            /* Safe area insets */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+
+            /* Touch targets */
+            --touch-target: 44px;
+            --key-size: 36px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
         }
 
         body {
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
             background: var(--bg-dark);
             color: var(--text);
-            overflow: hidden;
-            height: 100vh;
+            touch-action: none;
         }
 
         /* Main Layout */
         .app-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: 100%;
+            height: 100dvh;
+            padding-top: var(--safe-top);
         }
 
-        /* Top Bar */
+        /* Top Bar - Compact for mobile */
         .top-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.75rem;
+            padding-left: calc(0.75rem + var(--safe-left));
+            padding-right: calc(0.75rem + var(--safe-right));
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
-            min-height: 48px;
+            min-height: 44px;
             z-index: 100;
+            flex-shrink: 0;
         }
 
         .top-bar.hidden {
@@ -58,35 +88,43 @@
         .top-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
         .back-button {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 0.8rem;
+            justify-content: center;
+            width: var(--touch-target);
+            height: var(--touch-target);
             background: transparent;
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             color: var(--text-dim);
-            font-family: inherit;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 1.2rem;
             text-decoration: none;
+            transition: all 0.2s ease;
         }
 
-        .back-button:hover {
+        .back-button:active {
             background: rgba(0, 255, 136, 0.1);
             border-color: var(--primary);
-            color: var(--primary);
         }
 
         .game-title {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--text);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 480px) {
+            .game-title {
+                max-width: none;
+            }
         }
 
         .game-title span {
@@ -102,16 +140,16 @@
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.3rem 0.8rem;
+            gap: 0.4rem;
+            padding: 0.25rem 0.6rem;
             background: rgba(0, 255, 136, 0.1);
-            border-radius: 20px;
-            font-size: 0.75rem;
+            border-radius: 16px;
+            font-size: 0.7rem;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: var(--primary);
             animation: pulse 2s infinite;
@@ -130,7 +168,7 @@
         .top-right {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         /* Control Buttons */
@@ -138,27 +176,37 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
+            width: var(--touch-target);
+            height: var(--touch-target);
             background: transparent;
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             color: var(--text-dim);
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 1rem;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        .control-btn:hover {
+        .control-btn:active {
             background: rgba(0, 255, 136, 0.1);
             border-color: var(--primary);
             color: var(--primary);
+            transform: scale(0.95);
         }
 
         .control-btn.active {
             background: var(--primary);
             color: var(--bg-dark);
             border-color: var(--primary);
+        }
+
+        /* Hide some controls on mobile */
+        @media (max-width: 480px) {
+            .hide-mobile {
+                display: none;
+            }
         }
 
         /* Dropdown Menu */
@@ -173,7 +221,7 @@
             margin-top: 0.5rem;
             background: var(--bg-panel);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 0.5rem;
             min-width: 180px;
             display: none;
@@ -189,27 +237,22 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem 0.8rem;
-            border-radius: 4px;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-dim);
             transition: all 0.2s ease;
+            min-height: var(--touch-target);
         }
 
-        .dropdown-item:hover {
+        .dropdown-item:active {
             background: rgba(0, 255, 136, 0.1);
             color: var(--text);
         }
 
         .dropdown-item.active {
             color: var(--primary);
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0.5rem 0;
         }
 
         .dropdown-label {
@@ -230,16 +273,16 @@
 
         .font-slider input[type="range"] {
             flex: 1;
-            height: 4px;
+            height: 6px;
             background: var(--border);
-            border-radius: 2px;
+            border-radius: 3px;
             -webkit-appearance: none;
         }
 
         .font-slider input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 20px;
+            height: 20px;
             background: var(--primary);
             border-radius: 50%;
             cursor: pointer;
@@ -248,16 +291,19 @@
         .font-size-value {
             font-size: 0.75rem;
             color: var(--primary);
-            min-width: 30px;
+            min-width: 35px;
             text-align: right;
         }
 
         /* Terminal Container */
         #terminal-container {
             flex: 1;
-            padding: 10px;
+            padding: 4px;
+            padding-left: calc(4px + var(--safe-left));
+            padding-right: calc(4px + var(--safe-right));
             background: #000;
             overflow: hidden;
+            min-height: 0;
         }
 
         #terminal-container.fullscreen {
@@ -283,9 +329,150 @@
         .theme-solarized #terminal-container { background: #002b36; }
         .theme-matrix #terminal-container { background: #0d0d0d; }
 
-        /* Bottom Bar */
-        .bottom-bar {
+        /* Mobile Virtual Keyboard */
+        .virtual-keyboard {
+            display: none;
+            flex-direction: column;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            padding: 0.5rem;
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            padding-left: calc(0.5rem + var(--safe-left));
+            padding-right: calc(0.5rem + var(--safe-right));
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .virtual-keyboard.show {
             display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .virtual-keyboard {
+                display: flex;
+            }
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .key {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: var(--key-size);
+            height: var(--key-size);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            padding: 0 0.5rem;
+        }
+
+        .key:active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            transform: scale(0.95);
+        }
+
+        .key.special {
+            background: rgba(0, 255, 136, 0.15);
+            min-width: 50px;
+        }
+
+        .key.wide {
+            min-width: 70px;
+        }
+
+        .key.extra-wide {
+            flex: 1;
+            max-width: 200px;
+        }
+
+        /* Quick Actions Row */
+        .quick-actions {
+            display: flex;
+            gap: 0.3rem;
+            overflow-x: auto;
+            padding-bottom: 0.3rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            padding: 0 0.75rem;
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .quick-btn:active {
+            background: var(--secondary);
+            color: var(--bg-dark);
+        }
+
+        /* Keyboard Toggle Button */
+        .keyboard-toggle {
+            position: fixed;
+            bottom: calc(10px + var(--safe-bottom));
+            right: calc(10px + var(--safe-right));
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border: none;
+            border-radius: 50%;
+            color: var(--bg-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .keyboard-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .keyboard-toggle.hidden {
+                display: none;
+            }
+        }
+
+        .keyboard-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Bottom Bar - Only on desktop */
+        .bottom-bar {
+            display: none;
             align-items: center;
             justify-content: space-between;
             padding: 0.4rem 1rem;
@@ -294,19 +481,17 @@
             min-height: 36px;
         }
 
+        @media (min-width: 769px) {
+            .bottom-bar {
+                display: flex;
+            }
+        }
+
         .bottom-bar.hidden {
             display: none;
         }
 
-        .bottom-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.75rem;
-            color: var(--text-dim);
-        }
-
-        .bottom-right {
+        .bottom-left, .bottom-right {
             display: flex;
             align-items: center;
             gap: 1rem;
@@ -350,8 +535,8 @@
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
@@ -365,21 +550,21 @@
         .loading-text {
             margin-top: 1rem;
             color: var(--text-dim);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        /* Notification Toast */
+        /* Toast Notification */
         .toast {
             position: fixed;
-            bottom: 60px;
+            bottom: calc(80px + var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%) translateY(100px);
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 0.8rem 1.5rem;
+            padding: 0.7rem 1.2rem;
             color: var(--text);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             z-index: 10001;
             opacity: 0;
             transition: all 0.3s ease;
@@ -390,43 +575,63 @@
             opacity: 1;
         }
 
-        .toast.success {
-            border-color: var(--primary);
-        }
+        .toast.success { border-color: var(--primary); }
+        .toast.error { border-color: var(--accent); }
 
-        .toast.error {
-            border-color: var(--accent);
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
+        /* Landscape mode adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
             .top-bar {
-                flex-wrap: wrap;
-                gap: 0.5rem;
+                min-height: 36px;
+                padding: 0.25rem 0.5rem;
             }
 
-            .game-title {
-                display: none;
+            .control-btn {
+                width: 36px;
+                height: 36px;
             }
 
-            .bottom-bar .shortcut {
-                display: none;
+            .virtual-keyboard {
+                padding: 0.25rem;
             }
+
+            .key {
+                height: 28px;
+                min-width: 28px;
+                font-size: 0.75rem;
+            }
+
+            .quick-actions {
+                padding-bottom: 0.2rem;
+            }
+
+            .quick-btn {
+                height: 26px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Hidden native keyboard helper */
+        .native-input {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body class="theme-dark">
     <div class="loading-overlay" id="loading">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Initializing terminal...</div>
+        <div class="loading-text">Loading game...</div>
     </div>
+
+    <!-- Hidden input for native keyboard -->
+    <input type="text" class="native-input" id="nativeInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
     <div class="app-container">
         <div class="top-bar" id="topBar">
             <div class="top-left">
-                <a href="/" class="back-button">
-                    ← Back
-                </a>
+                <a href="/" class="back-button">←</a>
                 <div class="game-title">
                     <span>▶</span> {{ game_file }}
                 </div>
@@ -435,50 +640,34 @@
             <div class="top-center">
                 <div class="status-indicator">
                     <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">Connecting...</span>
+                    <span id="statusText">...</span>
                 </div>
             </div>
 
             <div class="top-right">
-                <!-- Font Size -->
-                <div class="dropdown">
-                    <button class="control-btn" id="fontBtn" title="Font Size">
-                        Aa
-                    </button>
-                    <div class="dropdown-menu" id="fontMenu">
+                <!-- Settings dropdown -->
+                <div class="dropdown hide-mobile">
+                    <button class="control-btn" id="settingsBtn" title="Settings">⚙</button>
+                    <div class="dropdown-menu" id="settingsMenu">
                         <div class="dropdown-label">Font Size</div>
                         <div class="font-slider">
-                            <input type="range" id="fontSlider" min="10" max="24" value="14">
-                            <span class="font-size-value" id="fontValue">14px</span>
+                            <input type="range" id="fontSlider" min="10" max="20" value="12">
+                            <span class="font-size-value" id="fontValue">12px</span>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Theme -->
-                <div class="dropdown">
-                    <button class="control-btn" id="themeBtn" title="Theme">
-                        🎨
-                    </button>
-                    <div class="dropdown-menu" id="themeMenu">
-                        <div class="dropdown-label">Terminal Theme</div>
-                        <div class="dropdown-item active" data-theme="dark">Dark (Default)</div>
+                        <div class="dropdown-label">Theme</div>
+                        <div class="dropdown-item active" data-theme="dark">Dark</div>
                         <div class="dropdown-item" data-theme="monokai">Monokai</div>
                         <div class="dropdown-item" data-theme="dracula">Dracula</div>
                         <div class="dropdown-item" data-theme="nord">Nord</div>
-                        <div class="dropdown-item" data-theme="solarized">Solarized Dark</div>
                         <div class="dropdown-item" data-theme="matrix">Matrix</div>
                     </div>
                 </div>
 
                 <!-- Fullscreen -->
-                <button class="control-btn" id="fullscreenBtn" title="Fullscreen (F11)">
-                    ⛶
-                </button>
+                <button class="control-btn hide-mobile" id="fullscreenBtn" title="Fullscreen">⛶</button>
 
                 <!-- Restart -->
-                <button class="control-btn" id="restartBtn" title="Restart Game">
-                    ↻
-                </button>
+                <button class="control-btn" id="restartBtn" title="Restart">↻</button>
             </div>
         </div>
 
@@ -486,6 +675,85 @@
             <div id="terminal"></div>
         </div>
 
+        <!-- Virtual Keyboard for Mobile -->
+        <div class="virtual-keyboard" id="virtualKeyboard">
+            <!-- Quick Actions -->
+            <div class="quick-actions" id="quickActions">
+                <button class="quick-btn" data-cmd="1">1. Menu</button>
+                <button class="quick-btn" data-cmd="2">2. Build</button>
+                <button class="quick-btn" data-cmd="3">3. Dwellers</button>
+                <button class="quick-btn" data-cmd="y">Yes</button>
+                <button class="quick-btn" data-cmd="n">No</button>
+                <button class="quick-btn" data-cmd="q">Quit</button>
+                <button class="quick-btn" data-cmd="s">Save</button>
+                <button class="quick-btn" data-cmd="h">Help</button>
+            </div>
+
+            <!-- Number Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="1">1</button>
+                <button class="key" data-key="2">2</button>
+                <button class="key" data-key="3">3</button>
+                <button class="key" data-key="4">4</button>
+                <button class="key" data-key="5">5</button>
+                <button class="key" data-key="6">6</button>
+                <button class="key" data-key="7">7</button>
+                <button class="key" data-key="8">8</button>
+                <button class="key" data-key="9">9</button>
+                <button class="key" data-key="0">0</button>
+            </div>
+
+            <!-- QWERTY Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="q">Q</button>
+                <button class="key" data-key="w">W</button>
+                <button class="key" data-key="e">E</button>
+                <button class="key" data-key="r">R</button>
+                <button class="key" data-key="t">T</button>
+                <button class="key" data-key="y">Y</button>
+                <button class="key" data-key="u">U</button>
+                <button class="key" data-key="i">I</button>
+                <button class="key" data-key="o">O</button>
+                <button class="key" data-key="p">P</button>
+            </div>
+
+            <!-- ASDF Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="a">A</button>
+                <button class="key" data-key="s">S</button>
+                <button class="key" data-key="d">D</button>
+                <button class="key" data-key="f">F</button>
+                <button class="key" data-key="g">G</button>
+                <button class="key" data-key="h">H</button>
+                <button class="key" data-key="j">J</button>
+                <button class="key" data-key="k">K</button>
+                <button class="key" data-key="l">L</button>
+            </div>
+
+            <!-- ZXCV Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="z">Z</button>
+                <button class="key" data-key="x">X</button>
+                <button class="key" data-key="c">C</button>
+                <button class="key" data-key="v">V</button>
+                <button class="key" data-key="b">B</button>
+                <button class="key" data-key="n">N</button>
+                <button class="key" data-key="m">M</button>
+                <button class="key special" data-key="Backspace">⌫</button>
+            </div>
+
+            <!-- Special Keys Row -->
+            <div class="keyboard-row">
+                <button class="key special" data-key="ArrowUp">↑</button>
+                <button class="key special" data-key="ArrowDown">↓</button>
+                <button class="key special" data-key="ArrowLeft">←</button>
+                <button class="key special" data-key="ArrowRight">→</button>
+                <button class="key extra-wide" data-key=" ">Space</button>
+                <button class="key special wide" data-key="Enter">Enter</button>
+            </div>
+        </div>
+
+        <!-- Bottom Bar (Desktop only) -->
         <div class="bottom-bar" id="bottomBar">
             <div class="bottom-left">
                 <span id="dimensions">80×24</span>
@@ -495,17 +763,18 @@
             <div class="bottom-right">
                 <span class="shortcut"><kbd>F11</kbd> Fullscreen</span>
                 <span class="shortcut"><kbd>Ctrl+R</kbd> Restart</span>
-                <span class="shortcut"><kbd>Esc</kbd> Exit Fullscreen</span>
             </div>
         </div>
     </div>
+
+    <!-- Keyboard Toggle Button (Mobile) -->
+    <button class="keyboard-toggle" id="keyboardToggle">⌨</button>
 
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links@0.9.0/lib/xterm-addon-web-links.js"></script>
 
     <script>
         // Theme definitions
@@ -546,15 +815,7 @@
                 blue: '#66d9ef',
                 magenta: '#ae81ff',
                 cyan: '#a1efe4',
-                white: '#f8f8f2',
-                brightBlack: '#75715e',
-                brightRed: '#f92672',
-                brightGreen: '#a6e22e',
-                brightYellow: '#f4bf75',
-                brightBlue: '#66d9ef',
-                brightMagenta: '#ae81ff',
-                brightCyan: '#a1efe4',
-                brightWhite: '#f9f8f5'
+                white: '#f8f8f2'
             },
             dracula: {
                 background: '#282a36',
@@ -569,15 +830,7 @@
                 blue: '#bd93f9',
                 magenta: '#ff79c6',
                 cyan: '#8be9fd',
-                white: '#f8f8f2',
-                brightBlack: '#6272a4',
-                brightRed: '#ff6e6e',
-                brightGreen: '#69ff94',
-                brightYellow: '#ffffa5',
-                brightBlue: '#d6acff',
-                brightMagenta: '#ff92df',
-                brightCyan: '#a4ffff',
-                brightWhite: '#ffffff'
+                white: '#f8f8f2'
             },
             nord: {
                 background: '#2e3440',
@@ -592,38 +845,7 @@
                 blue: '#81a1c1',
                 magenta: '#b48ead',
                 cyan: '#88c0d0',
-                white: '#e5e9f0',
-                brightBlack: '#4c566a',
-                brightRed: '#bf616a',
-                brightGreen: '#a3be8c',
-                brightYellow: '#ebcb8b',
-                brightBlue: '#81a1c1',
-                brightMagenta: '#b48ead',
-                brightCyan: '#8fbcbb',
-                brightWhite: '#eceff4'
-            },
-            solarized: {
-                background: '#002b36',
-                foreground: '#839496',
-                cursor: '#839496',
-                cursorAccent: '#002b36',
-                selection: 'rgba(7, 54, 66, 0.5)',
-                black: '#073642',
-                red: '#dc322f',
-                green: '#859900',
-                yellow: '#b58900',
-                blue: '#268bd2',
-                magenta: '#d33682',
-                cyan: '#2aa198',
-                white: '#eee8d5',
-                brightBlack: '#002b36',
-                brightRed: '#cb4b16',
-                brightGreen: '#586e75',
-                brightYellow: '#657b83',
-                brightBlue: '#839496',
-                brightMagenta: '#6c71c4',
-                brightCyan: '#93a1a1',
-                brightWhite: '#fdf6e3'
+                white: '#e5e9f0'
             },
             matrix: {
                 background: '#0d0d0d',
@@ -638,139 +860,243 @@
                 blue: '#00ff00',
                 magenta: '#00ff00',
                 cyan: '#00ff00',
-                white: '#00ff00',
-                brightBlack: '#003300',
-                brightRed: '#00ff00',
-                brightGreen: '#00ff00',
-                brightYellow: '#00ff00',
-                brightBlue: '#00ff00',
-                brightMagenta: '#00ff00',
-                brightCyan: '#00ff00',
-                brightWhite: '#00ff00'
+                white: '#00ff00'
             }
         };
 
+        // Detect mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                        window.innerWidth <= 768;
+
         let currentTheme = 'dark';
-        let currentFontSize = 14;
+        let currentFontSize = isMobile ? 11 : 14;
         let isFullscreen = false;
         let gameStartTime = Date.now();
+        let keyboardVisible = isMobile;
 
         // Initialize xterm.js
         const term = new Terminal({
             cursorBlink: true,
             fontSize: currentFontSize,
-            fontFamily: "'JetBrains Mono', 'Fira Code', 'Monaco', monospace",
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
             theme: themes[currentTheme],
-            scrollback: 10000,
+            scrollback: 5000,
             convertEol: true,
-            allowProposedApi: true
+            allowProposedApi: true,
+            // Mobile optimizations
+            screenReaderMode: false,
+            scrollOnUserInput: true
         });
 
         const fitAddon = new FitAddon.FitAddon();
-        const webLinksAddon = new WebLinksAddon.WebLinksAddon();
-
         term.loadAddon(fitAddon);
-        term.loadAddon(webLinksAddon);
         term.open(document.getElementById('terminal'));
-        fitAddon.fit();
 
-        // Update dimensions display
-        function updateDimensions() {
-            document.getElementById('dimensions').textContent = `${term.cols}×${term.rows}`;
-        }
-        updateDimensions();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
+        // Initial fit
+        setTimeout(() => {
             fitAddon.fit();
             updateDimensions();
-            if (socket.connected) {
-                socket.emit('resize', {
-                    cols: term.cols,
-                    rows: term.rows
-                });
+        }, 100);
+
+        function updateDimensions() {
+            const dims = document.getElementById('dimensions');
+            if (dims) {
+                dims.textContent = `${term.cols}×${term.rows}`;
             }
+        }
+
+        // Handle resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                fitAddon.fit();
+                updateDimensions();
+                if (socket && socket.connected) {
+                    socket.emit('resize', { cols: term.cols, rows: term.rows });
+                }
+            }, 100);
         });
 
-        // Initialize Socket.IO
+        // Socket.IO connection
         const socket = io();
         const gameFile = '{{ game_file }}';
 
         socket.on('connect', () => {
             document.getElementById('statusDot').classList.remove('disconnected');
-            document.getElementById('statusText').textContent = 'Connected';
+            document.getElementById('statusText').textContent = 'OK';
             document.getElementById('loading').classList.add('hidden');
-            showToast('Game started', 'success');
+            showToast('Connected', 'success');
             socket.emit('start', { game_file: gameFile });
         });
 
         socket.on('disconnect', () => {
             document.getElementById('statusDot').classList.add('disconnected');
-            document.getElementById('statusText').textContent = 'Disconnected';
-            showToast('Connection lost', 'error');
+            document.getElementById('statusText').textContent = 'Lost';
+            showToast('Disconnected', 'error');
         });
 
         socket.on('output', (data) => {
             term.write(data.output);
         });
 
-        // Send keyboard input to server
+        // Terminal input (desktop)
         term.onData((data) => {
             socket.emit('input', { input: data });
         });
 
-        // Handle paste
-        term.onPaste((data) => {
-            socket.emit('input', { input: data });
-        });
+        // Virtual Keyboard
+        const virtualKeyboard = document.getElementById('virtualKeyboard');
+        const keyboardToggle = document.getElementById('keyboardToggle');
 
-        // Dropdown menus
-        document.querySelectorAll('.dropdown').forEach(dropdown => {
-            const btn = dropdown.querySelector('.control-btn');
-            const menu = dropdown.querySelector('.dropdown-menu');
+        // Key mapping for special keys
+        const keyMap = {
+            'ArrowUp': '\x1b[A',
+            'ArrowDown': '\x1b[B',
+            'ArrowRight': '\x1b[C',
+            'ArrowLeft': '\x1b[D',
+            'Enter': '\r',
+            'Backspace': '\x7f',
+            ' ': ' '
+        };
 
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.dropdown-menu').forEach(m => {
-                    if (m !== menu) m.classList.remove('show');
-                });
-                menu.classList.toggle('show');
+        // Virtual keyboard key handler
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                hapticFeedback();
+            }, { passive: false });
+
+            key.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const keyValue = key.dataset.key;
+                const mapped = keyMap[keyValue] || keyValue.toLowerCase();
+                socket.emit('input', { input: mapped });
+            }, { passive: false });
+
+            // Also support click for testing on desktop
+            key.addEventListener('click', (e) => {
+                e.preventDefault();
+                const keyValue = key.dataset.key;
+                const mapped = keyMap[keyValue] || keyValue.toLowerCase();
+                socket.emit('input', { input: mapped });
             });
         });
 
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        // Quick action buttons
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                hapticFeedback();
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const cmd = btn.dataset.cmd;
+                socket.emit('input', { input: cmd + '\r' });
+            }, { passive: false });
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const cmd = btn.dataset.cmd;
+                socket.emit('input', { input: cmd + '\r' });
+            });
         });
 
-        // Font size slider
+        // Keyboard toggle
+        keyboardToggle.addEventListener('click', () => {
+            keyboardVisible = !keyboardVisible;
+            virtualKeyboard.classList.toggle('show', keyboardVisible);
+            keyboardToggle.classList.toggle('hidden', keyboardVisible);
+
+            setTimeout(() => {
+                fitAddon.fit();
+                updateDimensions();
+            }, 100);
+        });
+
+        // Initialize keyboard state
+        if (isMobile) {
+            virtualKeyboard.classList.add('show');
+            keyboardToggle.classList.add('hidden');
+        }
+
+        // Native keyboard option (tap terminal to show)
+        const nativeInput = document.getElementById('nativeInput');
+        const terminalContainer = document.getElementById('terminal-container');
+
+        terminalContainer.addEventListener('click', () => {
+            if (isMobile && !keyboardVisible) {
+                nativeInput.focus();
+            } else {
+                term.focus();
+            }
+        });
+
+        nativeInput.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value) {
+                socket.emit('input', { input: value });
+                e.target.value = '';
+            }
+        });
+
+        nativeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                socket.emit('input', { input: '\r' });
+            } else if (e.key === 'Backspace') {
+                socket.emit('input', { input: '\x7f' });
+            }
+        });
+
+        // Settings dropdown
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsMenu = document.getElementById('settingsMenu');
+
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                settingsMenu.classList.toggle('show');
+            });
+        }
+
+        document.addEventListener('click', () => {
+            if (settingsMenu) settingsMenu.classList.remove('show');
+        });
+
+        // Font size
         const fontSlider = document.getElementById('fontSlider');
         const fontValue = document.getElementById('fontValue');
 
-        fontSlider.addEventListener('input', (e) => {
-            currentFontSize = parseInt(e.target.value);
+        if (fontSlider) {
+            fontSlider.value = currentFontSize;
             fontValue.textContent = `${currentFontSize}px`;
-            term.options.fontSize = currentFontSize;
-            fitAddon.fit();
-            updateDimensions();
-            localStorage.setItem('terminalFontSize', currentFontSize);
-        });
+
+            fontSlider.addEventListener('input', (e) => {
+                currentFontSize = parseInt(e.target.value);
+                fontValue.textContent = `${currentFontSize}px`;
+                term.options.fontSize = currentFontSize;
+                fitAddon.fit();
+                updateDimensions();
+                localStorage.setItem('terminalFontSize', currentFontSize);
+            });
+        }
 
         // Load saved font size
         const savedFontSize = localStorage.getItem('terminalFontSize');
         if (savedFontSize) {
             currentFontSize = parseInt(savedFontSize);
-            fontSlider.value = currentFontSize;
-            fontValue.textContent = `${currentFontSize}px`;
+            if (fontSlider) fontSlider.value = currentFontSize;
+            if (fontValue) fontValue.textContent = `${currentFontSize}px`;
             term.options.fontSize = currentFontSize;
         }
 
         // Theme selection
-        document.querySelectorAll('#themeMenu .dropdown-item').forEach(item => {
+        document.querySelectorAll('[data-theme]').forEach(item => {
             item.addEventListener('click', () => {
                 const theme = item.dataset.theme;
                 setTheme(theme);
-
-                document.querySelectorAll('#themeMenu .dropdown-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('[data-theme]').forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
             });
         });
@@ -786,14 +1112,13 @@
         const savedTheme = localStorage.getItem('terminalTheme');
         if (savedTheme && themes[savedTheme]) {
             setTheme(savedTheme);
-            document.querySelectorAll('#themeMenu .dropdown-item').forEach(item => {
+            document.querySelectorAll('[data-theme]').forEach(item => {
                 item.classList.toggle('active', item.dataset.theme === savedTheme);
             });
         }
 
         // Fullscreen
         const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const terminalContainer = document.getElementById('terminal-container');
         const topBar = document.getElementById('topBar');
         const bottomBar = document.getElementById('bottomBar');
 
@@ -804,7 +1129,8 @@
                 terminalContainer.classList.add('fullscreen');
                 topBar.classList.add('hidden');
                 bottomBar.classList.add('hidden');
-                fullscreenBtn.classList.add('active');
+                virtualKeyboard.classList.remove('show');
+                keyboardToggle.classList.remove('hidden');
 
                 if (document.documentElement.requestFullscreen) {
                     document.documentElement.requestFullscreen();
@@ -813,7 +1139,10 @@
                 terminalContainer.classList.remove('fullscreen');
                 topBar.classList.remove('hidden');
                 bottomBar.classList.remove('hidden');
-                fullscreenBtn.classList.remove('active');
+                if (isMobile) {
+                    virtualKeyboard.classList.add('show');
+                    keyboardToggle.classList.add('hidden');
+                }
 
                 if (document.exitFullscreen) {
                     document.exitFullscreen().catch(() => {});
@@ -826,7 +1155,9 @@
             }, 100);
         }
 
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+        }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F11') {
@@ -848,7 +1179,10 @@
                 terminalContainer.classList.remove('fullscreen');
                 topBar.classList.remove('hidden');
                 bottomBar.classList.remove('hidden');
-                fullscreenBtn.classList.remove('active');
+                if (isMobile) {
+                    virtualKeyboard.classList.add('show');
+                    keyboardToggle.classList.add('hidden');
+                }
                 setTimeout(() => {
                     fitAddon.fit();
                     updateDimensions();
@@ -856,47 +1190,65 @@
             }
         });
 
-        // Restart game
+        // Restart
         const restartBtn = document.getElementById('restartBtn');
 
         function restartGame() {
             term.clear();
             gameStartTime = Date.now();
             socket.emit('start', { game_file: gameFile });
-            showToast('Game restarted', 'success');
+            showToast('Restarted', 'success');
         }
 
         restartBtn.addEventListener('click', restartGame);
 
-        // Toast notifications
+        // Toast
         function showToast(message, type = '') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = `toast ${type} show`;
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
+            setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // Game time counter
+        // Game timer
         function updateGameTime() {
             const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
             const minutes = Math.floor(elapsed / 60);
             const seconds = elapsed % 60;
-            document.getElementById('gameTime').textContent =
-                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timeEl = document.getElementById('gameTime');
+            if (timeEl) {
+                timeEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
         setInterval(updateGameTime, 1000);
 
-        // Focus terminal on click
-        document.getElementById('terminal-container').addEventListener('click', () => {
-            term.focus();
-        });
+        // Haptic feedback
+        function hapticFeedback() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(10);
+            }
+        }
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Prevent pinch zoom
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        document.addEventListener('gestureend', (e) => e.preventDefault());
 
         // Initial focus
         setTimeout(() => {
-            term.focus();
+            if (!isMobile) {
+                term.focus();
+            }
         }, 500);
     </script>
 </body>

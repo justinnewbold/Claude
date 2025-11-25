@@ -51,7 +51,7 @@ except ImportError:
 # FLASK APPLICATION SETUP
 # =============================================================================
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'vault13-secret-key-change-in-production')
 
 # Configure SocketIO with appropriate async mode
