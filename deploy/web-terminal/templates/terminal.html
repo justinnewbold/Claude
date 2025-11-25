@@ -2,10 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ game_file }} - {{ app_name }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #00d4ff;
+            --accent: #ff6b35;
+            --bg-dark: #0a0a0f;
+            --bg-panel: #12151c;
+            --border: rgba(0, 255, 136, 0.2);
+            --text: #e0e8f0;
+            --text-dim: #6a7a8a;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,19 +25,249 @@
         }
 
         body {
-            font-family: 'Monaco', 'Courier New', monospace;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--bg-dark);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            min-height: 48px;
+            z-index: 100;
+        }
+
+        .top-bar.hidden {
+            display: none;
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .game-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .game-title span {
+            color: var(--primary);
+        }
+
+        .top-center {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background: var(--accent);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Control Buttons */
+        .control-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border-color: var(--primary);
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            min-width: 180px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--text);
+        }
+
+        .dropdown-item.active {
+            color: var(--primary);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.5rem 0;
+        }
+
+        .dropdown-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            padding: 0.3rem 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Font Size Slider */
+        .font-slider {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.8rem;
+        }
+
+        .font-slider input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            -webkit-appearance: none;
+        }
+
+        .font-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .font-size-value {
+            font-size: 0.75rem;
+            color: var(--primary);
+            min-width: 30px;
+            text-align: right;
+        }
+
+        /* Terminal Container */
+        #terminal-container {
+            flex: 1;
+            padding: 10px;
             background: #000;
-            color: #e0e0e0;
             overflow: hidden;
         }
 
-        #terminal-container {
-            position: absolute;
+        #terminal-container.fullscreen {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 40px;
-            padding: 10px;
+            bottom: 0;
+            padding: 0;
+            z-index: 9999;
         }
 
         #terminal {
@@ -33,61 +275,242 @@
             height: 100%;
         }
 
-        .controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: #1a1a1a;
+        /* Themes */
+        .theme-dark #terminal-container { background: #000000; }
+        .theme-monokai #terminal-container { background: #272822; }
+        .theme-dracula #terminal-container { background: #282a36; }
+        .theme-nord #terminal-container { background: #2e3440; }
+        .theme-solarized #terminal-container { background: #002b36; }
+        .theme-matrix #terminal-container { background: #0d0d0d; }
+
+        /* Bottom Bar */
+        .bottom-bar {
             display: flex;
             align-items: center;
-            padding: 0 1rem;
-            gap: 1rem;
-            border-top: 1px solid #333;
+            justify-content: space-between;
+            padding: 0.4rem 1rem;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            min-height: 36px;
         }
 
-        .back-button {
-            padding: 0.5rem 1rem;
-            background: #667eea;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
+        .bottom-bar.hidden {
+            display: none;
+        }
+
+        .bottom-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .bottom-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .shortcut kbd {
+            padding: 0.15rem 0.4rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 0.7rem;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--text-dim);
             font-size: 0.9rem;
         }
 
-        .back-button:hover {
-            background: #764ba2;
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            color: var(--text);
+            font-size: 0.85rem;
+            z-index: 10001;
+            opacity: 0;
+            transition: all 0.3s ease;
         }
 
-        .status {
-            color: #888;
-            font-size: 0.85rem;
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--primary);
+        }
+
+        .toast.error {
+            border-color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .top-bar {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .game-title {
+                display: none;
+            }
+
+            .bottom-bar .shortcut {
+                display: none;
+            }
         }
     </style>
 </head>
-<body>
-    <div id="terminal-container">
-        <div id="terminal"></div>
+<body class="theme-dark">
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing terminal...</div>
     </div>
 
-    <div class="controls">
-        <button class="back-button" onclick="location.href='/'">← Back to Games</button>
-        <span class="status" id="status">Connecting...</span>
+    <div class="app-container">
+        <div class="top-bar" id="topBar">
+            <div class="top-left">
+                <a href="/" class="back-button">
+                    ← Back
+                </a>
+                <div class="game-title">
+                    <span>▶</span> {{ game_file }}
+                </div>
+            </div>
+
+            <div class="top-center">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Connecting...</span>
+                </div>
+            </div>
+
+            <div class="top-right">
+                <!-- Font Size -->
+                <div class="dropdown">
+                    <button class="control-btn" id="fontBtn" title="Font Size">
+                        Aa
+                    </button>
+                    <div class="dropdown-menu" id="fontMenu">
+                        <div class="dropdown-label">Font Size</div>
+                        <div class="font-slider">
+                            <input type="range" id="fontSlider" min="10" max="24" value="14">
+                            <span class="font-size-value" id="fontValue">14px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme -->
+                <div class="dropdown">
+                    <button class="control-btn" id="themeBtn" title="Theme">
+                        🎨
+                    </button>
+                    <div class="dropdown-menu" id="themeMenu">
+                        <div class="dropdown-label">Terminal Theme</div>
+                        <div class="dropdown-item active" data-theme="dark">Dark (Default)</div>
+                        <div class="dropdown-item" data-theme="monokai">Monokai</div>
+                        <div class="dropdown-item" data-theme="dracula">Dracula</div>
+                        <div class="dropdown-item" data-theme="nord">Nord</div>
+                        <div class="dropdown-item" data-theme="solarized">Solarized Dark</div>
+                        <div class="dropdown-item" data-theme="matrix">Matrix</div>
+                    </div>
+                </div>
+
+                <!-- Fullscreen -->
+                <button class="control-btn" id="fullscreenBtn" title="Fullscreen (F11)">
+                    ⛶
+                </button>
+
+                <!-- Restart -->
+                <button class="control-btn" id="restartBtn" title="Restart Game">
+                    ↻
+                </button>
+            </div>
+        </div>
+
+        <div id="terminal-container">
+            <div id="terminal"></div>
+        </div>
+
+        <div class="bottom-bar" id="bottomBar">
+            <div class="bottom-left">
+                <span id="dimensions">80×24</span>
+                <span>•</span>
+                <span id="gameTime">0:00</span>
+            </div>
+            <div class="bottom-right">
+                <span class="shortcut"><kbd>F11</kbd> Fullscreen</span>
+                <span class="shortcut"><kbd>Ctrl+R</kbd> Restart</span>
+                <span class="shortcut"><kbd>Esc</kbd> Exit Fullscreen</span>
+            </div>
+        </div>
     </div>
+
+    <div class="toast" id="toast"></div>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-web-links@0.9.0/lib/xterm-addon-web-links.js"></script>
 
     <script>
-        // Initialize xterm.js
-        const term = new Terminal({
-            cursorBlink: true,
-            fontSize: 14,
-            fontFamily: 'Monaco, Courier New, monospace',
-            theme: {
+        // Theme definitions
+        const themes = {
+            dark: {
                 background: '#000000',
                 foreground: '#ffffff',
                 cursor: '#ffffff',
@@ -109,17 +532,158 @@
                 brightMagenta: '#c678dd',
                 brightCyan: '#56b6c2',
                 brightWhite: '#ffffff'
+            },
+            monokai: {
+                background: '#272822',
+                foreground: '#f8f8f2',
+                cursor: '#f8f8f2',
+                cursorAccent: '#272822',
+                selection: 'rgba(73, 72, 62, 0.5)',
+                black: '#272822',
+                red: '#f92672',
+                green: '#a6e22e',
+                yellow: '#f4bf75',
+                blue: '#66d9ef',
+                magenta: '#ae81ff',
+                cyan: '#a1efe4',
+                white: '#f8f8f2',
+                brightBlack: '#75715e',
+                brightRed: '#f92672',
+                brightGreen: '#a6e22e',
+                brightYellow: '#f4bf75',
+                brightBlue: '#66d9ef',
+                brightMagenta: '#ae81ff',
+                brightCyan: '#a1efe4',
+                brightWhite: '#f9f8f5'
+            },
+            dracula: {
+                background: '#282a36',
+                foreground: '#f8f8f2',
+                cursor: '#f8f8f2',
+                cursorAccent: '#282a36',
+                selection: 'rgba(68, 71, 90, 0.5)',
+                black: '#21222c',
+                red: '#ff5555',
+                green: '#50fa7b',
+                yellow: '#f1fa8c',
+                blue: '#bd93f9',
+                magenta: '#ff79c6',
+                cyan: '#8be9fd',
+                white: '#f8f8f2',
+                brightBlack: '#6272a4',
+                brightRed: '#ff6e6e',
+                brightGreen: '#69ff94',
+                brightYellow: '#ffffa5',
+                brightBlue: '#d6acff',
+                brightMagenta: '#ff92df',
+                brightCyan: '#a4ffff',
+                brightWhite: '#ffffff'
+            },
+            nord: {
+                background: '#2e3440',
+                foreground: '#d8dee9',
+                cursor: '#d8dee9',
+                cursorAccent: '#2e3440',
+                selection: 'rgba(67, 76, 94, 0.5)',
+                black: '#3b4252',
+                red: '#bf616a',
+                green: '#a3be8c',
+                yellow: '#ebcb8b',
+                blue: '#81a1c1',
+                magenta: '#b48ead',
+                cyan: '#88c0d0',
+                white: '#e5e9f0',
+                brightBlack: '#4c566a',
+                brightRed: '#bf616a',
+                brightGreen: '#a3be8c',
+                brightYellow: '#ebcb8b',
+                brightBlue: '#81a1c1',
+                brightMagenta: '#b48ead',
+                brightCyan: '#8fbcbb',
+                brightWhite: '#eceff4'
+            },
+            solarized: {
+                background: '#002b36',
+                foreground: '#839496',
+                cursor: '#839496',
+                cursorAccent: '#002b36',
+                selection: 'rgba(7, 54, 66, 0.5)',
+                black: '#073642',
+                red: '#dc322f',
+                green: '#859900',
+                yellow: '#b58900',
+                blue: '#268bd2',
+                magenta: '#d33682',
+                cyan: '#2aa198',
+                white: '#eee8d5',
+                brightBlack: '#002b36',
+                brightRed: '#cb4b16',
+                brightGreen: '#586e75',
+                brightYellow: '#657b83',
+                brightBlue: '#839496',
+                brightMagenta: '#6c71c4',
+                brightCyan: '#93a1a1',
+                brightWhite: '#fdf6e3'
+            },
+            matrix: {
+                background: '#0d0d0d',
+                foreground: '#00ff00',
+                cursor: '#00ff00',
+                cursorAccent: '#0d0d0d',
+                selection: 'rgba(0, 255, 0, 0.2)',
+                black: '#0d0d0d',
+                red: '#00ff00',
+                green: '#00ff00',
+                yellow: '#00ff00',
+                blue: '#00ff00',
+                magenta: '#00ff00',
+                cyan: '#00ff00',
+                white: '#00ff00',
+                brightBlack: '#003300',
+                brightRed: '#00ff00',
+                brightGreen: '#00ff00',
+                brightYellow: '#00ff00',
+                brightBlue: '#00ff00',
+                brightMagenta: '#00ff00',
+                brightCyan: '#00ff00',
+                brightWhite: '#00ff00'
             }
+        };
+
+        let currentTheme = 'dark';
+        let currentFontSize = 14;
+        let isFullscreen = false;
+        let gameStartTime = Date.now();
+
+        // Initialize xterm.js
+        const term = new Terminal({
+            cursorBlink: true,
+            fontSize: currentFontSize,
+            fontFamily: "'JetBrains Mono', 'Fira Code', 'Monaco', monospace",
+            theme: themes[currentTheme],
+            scrollback: 10000,
+            convertEol: true,
+            allowProposedApi: true
         });
 
         const fitAddon = new FitAddon.FitAddon();
+        const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+
         term.loadAddon(fitAddon);
+        term.loadAddon(webLinksAddon);
         term.open(document.getElementById('terminal'));
         fitAddon.fit();
+
+        // Update dimensions display
+        function updateDimensions() {
+            document.getElementById('dimensions').textContent = `${term.cols}×${term.rows}`;
+        }
+        updateDimensions();
 
         // Handle window resize
         window.addEventListener('resize', () => {
             fitAddon.fit();
+            updateDimensions();
             if (socket.connected) {
                 socket.emit('resize', {
                     cols: term.cols,
@@ -133,13 +697,17 @@
         const gameFile = '{{ game_file }}';
 
         socket.on('connect', () => {
-            document.getElementById('status').textContent = 'Connected';
-            // Start the game
+            document.getElementById('statusDot').classList.remove('disconnected');
+            document.getElementById('statusText').textContent = 'Connected';
+            document.getElementById('loading').classList.add('hidden');
+            showToast('Game started', 'success');
             socket.emit('start', { game_file: gameFile });
         });
 
         socket.on('disconnect', () => {
-            document.getElementById('status').textContent = 'Disconnected';
+            document.getElementById('statusDot').classList.add('disconnected');
+            document.getElementById('statusText').textContent = 'Disconnected';
+            showToast('Connection lost', 'error');
         });
 
         socket.on('output', (data) => {
@@ -155,6 +723,181 @@
         term.onPaste((data) => {
             socket.emit('input', { input: data });
         });
+
+        // Dropdown menus
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            const btn = dropdown.querySelector('.control-btn');
+            const menu = dropdown.querySelector('.dropdown-menu');
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.dropdown-menu').forEach(m => {
+                    if (m !== menu) m.classList.remove('show');
+                });
+                menu.classList.toggle('show');
+            });
+        });
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        });
+
+        // Font size slider
+        const fontSlider = document.getElementById('fontSlider');
+        const fontValue = document.getElementById('fontValue');
+
+        fontSlider.addEventListener('input', (e) => {
+            currentFontSize = parseInt(e.target.value);
+            fontValue.textContent = `${currentFontSize}px`;
+            term.options.fontSize = currentFontSize;
+            fitAddon.fit();
+            updateDimensions();
+            localStorage.setItem('terminalFontSize', currentFontSize);
+        });
+
+        // Load saved font size
+        const savedFontSize = localStorage.getItem('terminalFontSize');
+        if (savedFontSize) {
+            currentFontSize = parseInt(savedFontSize);
+            fontSlider.value = currentFontSize;
+            fontValue.textContent = `${currentFontSize}px`;
+            term.options.fontSize = currentFontSize;
+        }
+
+        // Theme selection
+        document.querySelectorAll('#themeMenu .dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const theme = item.dataset.theme;
+                setTheme(theme);
+
+                document.querySelectorAll('#themeMenu .dropdown-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.body.className = `theme-${theme}`;
+            term.options.theme = themes[theme];
+            localStorage.setItem('terminalTheme', theme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('terminalTheme');
+        if (savedTheme && themes[savedTheme]) {
+            setTheme(savedTheme);
+            document.querySelectorAll('#themeMenu .dropdown-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.theme === savedTheme);
+            });
+        }
+
+        // Fullscreen
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const terminalContainer = document.getElementById('terminal-container');
+        const topBar = document.getElementById('topBar');
+        const bottomBar = document.getElementById('bottomBar');
+
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+
+            if (isFullscreen) {
+                terminalContainer.classList.add('fullscreen');
+                topBar.classList.add('hidden');
+                bottomBar.classList.add('hidden');
+                fullscreenBtn.classList.add('active');
+
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            } else {
+                terminalContainer.classList.remove('fullscreen');
+                topBar.classList.remove('hidden');
+                bottomBar.classList.remove('hidden');
+                fullscreenBtn.classList.remove('active');
+
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+
+            setTimeout(() => {
+                fitAddon.fit();
+                updateDimensions();
+            }, 100);
+        }
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+            if (e.key === 'Escape' && isFullscreen) {
+                toggleFullscreen();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                restartGame();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && isFullscreen) {
+                isFullscreen = false;
+                terminalContainer.classList.remove('fullscreen');
+                topBar.classList.remove('hidden');
+                bottomBar.classList.remove('hidden');
+                fullscreenBtn.classList.remove('active');
+                setTimeout(() => {
+                    fitAddon.fit();
+                    updateDimensions();
+                }, 100);
+            }
+        });
+
+        // Restart game
+        const restartBtn = document.getElementById('restartBtn');
+
+        function restartGame() {
+            term.clear();
+            gameStartTime = Date.now();
+            socket.emit('start', { game_file: gameFile });
+            showToast('Game restarted', 'success');
+        }
+
+        restartBtn.addEventListener('click', restartGame);
+
+        // Toast notifications
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Game time counter
+        function updateGameTime() {
+            const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('gameTime').textContent =
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        setInterval(updateGameTime, 1000);
+
+        // Focus terminal on click
+        document.getElementById('terminal-container').addEventListener('click', () => {
+            term.focus();
+        });
+
+        // Initial focus
+        setTimeout(() => {
+            term.focus();
+        }, 500);
     </script>
 </body>
 </html>

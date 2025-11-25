@@ -3,8 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Innovative Game Collection</title>
+    <title>{{ app_name }} - Game Collection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #00ff88;
+            --primary-dim: #00cc6a;
+            --secondary: #00d4ff;
+            --accent: #ff6b35;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 25, 35, 0.9);
+            --bg-card-hover: rgba(30, 40, 55, 0.95);
+            --border: rgba(0, 255, 136, 0.2);
+            --text: #e0e8f0;
+            --text-dim: #8090a0;
+            --glow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,126 +31,778 @@
         }
 
         body {
-            font-family: 'Monaco', 'Courier New', monospace;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #e0e0e0;
+            font-family: 'JetBrains Mono', 'Monaco', monospace;
+            background: var(--bg-dark);
+            color: var(--text);
             min-height: 100vh;
-            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a0f 0%, #0f1520 50%, #0a0a0f 100%);
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            opacity: 0.3;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Header */
         header {
             text-align: center;
             margin-bottom: 3rem;
+            padding: 2rem 0;
         }
 
-        h1 {
-            font-size: 3rem;
-            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--primary) 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+            background-clip: text;
+            animation: shine 3s linear infinite;
+            text-shadow: var(--glow);
+            letter-spacing: 0.1em;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent), var(--danger));
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .subtitle {
-            color: #888;
-            font-size: 1.1rem;
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-top: 1rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
         }
 
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: var(--glow);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Search & Filter */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+
+        .search-box::before {
+            content: "⌕";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1.2rem;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Category Sections */
+        .category {
+            margin-bottom: 3rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+        }
+
+        .category-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .category-count {
+            background: var(--bg-card);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* Games Grid */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 1.5rem;
         }
 
         .game-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1.5rem;
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
 
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            border-color: rgba(102, 126, 234, 0.5);
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            box-shadow: var(--glow), 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .game-card h2 {
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
-            color: #667eea;
+        .game-card:hover::before {
+            transform: scaleX(1);
         }
 
-        .game-card .icon {
-            font-size: 2rem;
+        .game-card.featured {
+            grid-column: span 2;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, var(--bg-card) 100%);
+        }
+
+        @media (max-width: 768px) {
+            .game-card.featured {
+                grid-column: span 1;
+            }
+        }
+
+        .game-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
 
+        .game-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+
+        .game-info {
+            flex: 1;
+        }
+
+        .game-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+
+        .game-version {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .game-description {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .game-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            padding: 0.2rem 0.6rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--secondary);
+            text-transform: uppercase;
+        }
+
+        .game-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .play-button {
-            display: inline-block;
-            margin-top: 1rem;
-            padding: 0.5rem 1.5rem;
-            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, var(--primary-dim), var(--primary));
             border: none;
             border-radius: 6px;
-            color: white;
+            color: var(--bg-dark);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
             text-decoration: none;
-            font-weight: bold;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .play-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
         }
 
+        .game-status {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .game-status.available {
+            color: var(--primary);
+        }
+
+        .game-status.unavailable {
+            color: var(--danger);
+        }
+
+        /* Featured Badge */
+        .featured-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, var(--warning), var(--accent));
+            color: var(--bg-dark);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Footer */
         footer {
             margin-top: 4rem;
+            padding: 2rem 0;
             text-align: center;
-            color: #666;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-content {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .game-card:nth-child(2) { animation-delay: 0.15s; }
+        .game-card:nth-child(3) { animation-delay: 0.2s; }
+        .game-card:nth-child(4) { animation-delay: 0.25s; }
+        .game-card:nth-child(5) { animation-delay: 0.3s; }
+        .game-card:nth-child(6) { animation-delay: 0.35s; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .stats-bar {
+                gap: 1.5rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animation"></div>
+    <div class="scanlines"></div>
+
     <div class="container">
         <header>
-            <h1>🎮 INNOVATIVE GAME COLLECTION</h1>
-            <p class="subtitle">Ten unique experimental games exploring consciousness, reality, and computation</p>
+            <h1 class="logo">
+                ⚡ {{ app_name }}
+                <span class="version-badge">v{{ version }}</span>
+            </h1>
+            <p class="subtitle">Experimental Games • Philosophy • Physics • Computation</p>
+
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value" id="total-games">{{ games|length }}</div>
+                    <div class="stat-label">Total Games</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="categories-count">8</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">50+</div>
+                    <div class="stat-label">Features</div>
+                </div>
+            </div>
         </header>
 
-        <div class="games-grid">
-            {% for game in games %}
-            <div class="game-card" onclick="location.href='/play/{{ game.file }}'">
-                <div class="icon">
-                    {% if 'echo' in game.id %}🌌
-                    {% elif 'code' in game.id %}💾
-                    {% elif 'library' in game.id %}📚
-                    {% elif 'forking' in game.id %}🌳
-                    {% elif 'recursion' in game.id %}🔄
-                    {% elif 'schrodinger' in game.id %}🐱
-                    {% elif 'emergence' in game.id %}🧬
-                    {% elif 'theseus' in game.id %}🚢
-                    {% elif 'butterfly' in game.id %}🦋
-                    {% elif 'syntax' in game.id %}🌳
-                    {% elif 'entanglement' in game.id %}🔗
-                    {% endif %}
-                </div>
-                <h2>{{ game.name }}</h2>
-                <a href="/play/{{ game.file }}" class="play-button">Play Now →</a>
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search games..." autocomplete="off">
             </div>
-            {% endfor %}
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="main">Main</button>
+            <button class="filter-btn" data-filter="quantum">Quantum</button>
+            <button class="filter-btn" data-filter="philosophy">Philosophy</button>
+            <button class="filter-btn" data-filter="logic">Logic</button>
+        </div>
+
+        <!-- Main Games Category -->
+        <div class="category" data-category="main">
+            <div class="category-header">
+                <span class="category-icon">🏠</span>
+                <h2 class="category-title">Main Games</h2>
+                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Main Games')|list|length }}</span>
+            </div>
+            <div class="games-grid">
+                {% for game in games if game.category == 'Main Games' %}
+                <div class="game-card fade-in {% if 'v9' in game.name or 'Ultimate' in game.name %}featured{% endif %}"
+                     onclick="location.href='/play/{{ game.file }}'"
+                     data-name="{{ game.name|lower }}"
+                     data-category="main">
+                    {% if 'v9' in game.name or 'Ultimate' in game.name %}
+                    <span class="featured-badge">★ Featured</span>
+                    {% endif %}
+                    <div class="game-header">
+                        <span class="game-icon">🏛️</span>
+                        <div class="game-info">
+                            <h3 class="game-title">{{ game.name }}</h3>
+                            <span class="game-version">{{ game.category }}</span>
+                        </div>
+                    </div>
+                    <p class="game-description">{{ game.description }}</p>
+                    <div class="game-tags">
+                        <span class="tag">Simulation</span>
+                        <span class="tag">Strategy</span>
+                        <span class="tag">Survival</span>
+                    </div>
+                    <div class="game-footer">
+                        <a href="/play/{{ game.file }}" class="play-button">
+                            ▶ Play Now
+                        </a>
+                        <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
+                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quantum & Physics -->
+        <div class="category" data-category="quantum">
+            <div class="category-header">
+                <span class="category-icon">⚛️</span>
+                <h2 class="category-title">Quantum & Physics</h2>
+                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Quantum & Physics')|list|length }}</span>
+            </div>
+            <div class="games-grid">
+                {% for game in games if game.category == 'Quantum & Physics' or game.category == 'Physics Simulations' %}
+                <div class="game-card fade-in"
+                     onclick="location.href='/play/{{ game.file }}'"
+                     data-name="{{ game.name|lower }}"
+                     data-category="quantum">
+                    <div class="game-header">
+                        <span class="game-icon">
+                            {% if 'schrodinger' in game.id %}🐱
+                            {% elif 'echo' in game.id %}🌌
+                            {% elif 'quantum' in game.id %}⚛️
+                            {% elif 'entangle' in game.id %}🔗
+                            {% elif 'butterfly' in game.id %}🦋
+                            {% elif 'maxwell' in game.id %}🌡️
+                            {% elif 'twin' in game.id %}👥
+                            {% elif 'emergence' in game.id %}🧬
+                            {% else %}🔬{% endif %}
+                        </span>
+                        <div class="game-info">
+                            <h3 class="game-title">{{ game.name }}</h3>
+                            <span class="game-version">{{ game.category }}</span>
+                        </div>
+                    </div>
+                    <p class="game-description">{{ game.description }}</p>
+                    <div class="game-tags">
+                        <span class="tag">Physics</span>
+                        <span class="tag">Experimental</span>
+                    </div>
+                    <div class="game-footer">
+                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
+                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Philosophy & Decision -->
+        <div class="category" data-category="philosophy">
+            <div class="category-header">
+                <span class="category-icon">🧠</span>
+                <h2 class="category-title">Philosophy & Decision Theory</h2>
+                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Philosophy of Mind')|list|length + games|selectattr('category', 'equalto', 'Decision Theory')|list|length }}</span>
+            </div>
+            <div class="games-grid">
+                {% for game in games if game.category == 'Philosophy of Mind' or game.category == 'Decision Theory' %}
+                <div class="game-card fade-in"
+                     onclick="location.href='/play/{{ game.file }}'"
+                     data-name="{{ game.name|lower }}"
+                     data-category="philosophy">
+                    <div class="game-header">
+                        <span class="game-icon">
+                            {% if 'chinese' in game.id %}🏮
+                            {% elif 'mary' in game.id %}👁️
+                            {% elif 'plato' in game.id %}🔦
+                            {% elif 'theseus' in game.id %}🚢
+                            {% elif 'trolley' in game.id %}🚃
+                            {% elif 'prisoner' in game.id %}🔒
+                            {% elif 'newcomb' in game.id %}📦
+                            {% elif 'pascal' in game.id %}🎰
+                            {% elif 'monty' in game.id %}🚪
+                            {% elif 'sleeping' in game.id %}😴
+                            {% else %}💭{% endif %}
+                        </span>
+                        <div class="game-info">
+                            <h3 class="game-title">{{ game.name }}</h3>
+                            <span class="game-version">{{ game.category }}</span>
+                        </div>
+                    </div>
+                    <p class="game-description">{{ game.description }}</p>
+                    <div class="game-tags">
+                        <span class="tag">Philosophy</span>
+                        <span class="tag">Thought Experiment</span>
+                    </div>
+                    <div class="game-footer">
+                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
+                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Computation & Logic -->
+        <div class="category" data-category="logic">
+            <div class="category-header">
+                <span class="category-icon">💻</span>
+                <h2 class="category-title">Computation & Logic</h2>
+                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Computation & Logic')|list|length + games|selectattr('category', 'equalto', 'Logic & Mathematics')|list|length }}</span>
+            </div>
+            <div class="games-grid">
+                {% for game in games if game.category == 'Computation & Logic' or game.category == 'Logic & Mathematics' %}
+                <div class="game-card fade-in"
+                     onclick="location.href='/play/{{ game.file }}'"
+                     data-name="{{ game.name|lower }}"
+                     data-category="logic">
+                    <div class="game-header">
+                        <span class="game-icon">
+                            {% if 'halting' in game.id %}⏹️
+                            {% elif 'recursion' in game.id %}🔄
+                            {% elif 'syntax' in game.id %}🌳
+                            {% elif 'code' in game.id %}💾
+                            {% elif 'godel' in game.id %}∞
+                            {% elif 'library' in game.id %}📚
+                            {% elif 'zeno' in game.id %}🏃
+                            {% elif 'sorites' in game.id %}🏔️
+                            {% else %}🧮{% endif %}
+                        </span>
+                        <div class="game-info">
+                            <h3 class="game-title">{{ game.name }}</h3>
+                            <span class="game-version">{{ game.category }}</span>
+                        </div>
+                    </div>
+                    <p class="game-description">{{ game.description }}</p>
+                    <div class="game-tags">
+                        <span class="tag">Logic</span>
+                        <span class="tag">Computation</span>
+                    </div>
+                    <div class="game-footer">
+                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
+                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Other Experiments -->
+        <div class="category" data-category="other">
+            <div class="category-header">
+                <span class="category-icon">🎲</span>
+                <h2 class="category-title">Other Experiments</h2>
+                <span class="category-count">{{ games|selectattr('category', 'equalto', 'Other Experiments')|list|length }}</span>
+            </div>
+            <div class="games-grid">
+                {% for game in games if game.category == 'Other Experiments' %}
+                <div class="game-card fade-in"
+                     onclick="location.href='/play/{{ game.file }}'"
+                     data-name="{{ game.name|lower }}"
+                     data-category="other">
+                    <div class="game-header">
+                        <span class="game-icon">
+                            {% if 'forking' in game.id %}🌳
+                            {% elif 'bootstrap' in game.id %}🔁
+                            {% elif 'boltzmann' in game.id %}🧠
+                            {% elif 'simulation' in game.id %}🖥️
+                            {% elif 'doomsday' in game.id %}☄️
+                            {% elif 'munchhausen' in game.id %}🤔
+                            {% elif 'braess' in game.id %}🛣️
+                            {% elif 'categorizer' in game.id %}📁
+                            {% else %}🎲{% endif %}
+                        </span>
+                        <div class="game-info">
+                            <h3 class="game-title">{{ game.name }}</h3>
+                            <span class="game-version">{{ game.category }}</span>
+                        </div>
+                    </div>
+                    <p class="game-description">{{ game.description }}</p>
+                    <div class="game-tags">
+                        <span class="tag">Experimental</span>
+                    </div>
+                    <div class="game-footer">
+                        <a href="/play/{{ game.file }}" class="play-button">▶ Play</a>
+                        <span class="game-status {% if game.available %}available{% else %}unavailable{% endif %}">
+                            {% if game.available %}● Ready{% else %}○ Coming Soon{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
         <footer>
-            <p>Built with curiosity, creativity, and a desire to make something truly unique.</p>
+            <div class="footer-content">
+                <p>Built with curiosity, creativity, and a desire to explore the nature of reality.</p>
+                <div class="footer-links">
+                    <a href="#">Documentation</a>
+                    <a href="#">GitHub</a>
+                    <a href="#">About</a>
+                </div>
+            </div>
         </footer>
     </div>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('search');
+        const gameCards = document.querySelectorAll('.game-card');
+        const categories = document.querySelectorAll('.category');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+
+            gameCards.forEach(card => {
+                const name = card.dataset.name;
+                const matches = name.includes(query);
+                card.style.display = matches ? '' : 'none';
+            });
+
+            // Hide empty categories
+            categories.forEach(cat => {
+                const visibleCards = cat.querySelectorAll('.game-card:not([style*="display: none"])');
+                cat.style.display = visibleCards.length > 0 ? '' : 'none';
+            });
+        });
+
+        // Filter functionality
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
+
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (filter === 'all') {
+                    categories.forEach(cat => cat.style.display = '');
+                    gameCards.forEach(card => card.style.display = '');
+                } else {
+                    categories.forEach(cat => {
+                        cat.style.display = cat.dataset.category === filter ? '' : 'none';
+                    });
+                }
+            });
+        });
+
+        // Count unique categories
+        const uniqueCategories = new Set();
+        document.querySelectorAll('.category').forEach(cat => {
+            uniqueCategories.add(cat.dataset.category);
+        });
+        document.getElementById('categories-count').textContent = uniqueCategories.size;
+    </script>
 </body>
 </html>
