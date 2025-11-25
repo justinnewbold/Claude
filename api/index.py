@@ -1,114 +1,165 @@
 """
 Vercel Serverless Function Entrypoint for VAULT 13 Web Terminal
-================================================================
-This file exposes the Flask application for Vercel deployment.
-
-Note: Vercel serverless functions have limited WebSocket support.
-The terminal gameplay requires WebSocket for real-time I/O.
-This deployment serves the game launcher and info pages.
 """
 
-import os
-import sys
-from pathlib import Path
+from flask import Flask, Response
 
-# Add the web-terminal directory to Python path
-web_terminal_path = Path(__file__).parent.parent / 'deploy' / 'web-terminal'
-sys.path.insert(0, str(web_terminal_path))
+app = Flask(__name__)
 
-# Add root directory for config imports
-root_path = Path(__file__).parent.parent
-sys.path.insert(0, str(root_path))
+HTML_PAGE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>VAULT 13 - Game Collection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ffcc;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text: #e0e0e0;
+            --text-dim: #808080;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100dvh;
+            padding: var(--safe-top) 16px var(--safe-bottom);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+        .game-grid {
+            display: grid;
+            gap: 16px;
+        }
+        .game-card {
+            background: var(--bg-card);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .game-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+        .game-name {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        .game-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .game-category {
+            display: inline-block;
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+        .notice {
+            background: rgba(255, 200, 0, 0.1);
+            border: 1px solid rgba(255, 200, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #ffc800;
+            font-size: 0.9rem;
+        }
+        .notice-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        a { color: var(--secondary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">VAULT 13</div>
+            <div class="subtitle">Terminal Game Collection v9.0</div>
+        </header>
 
-from flask import Flask, render_template, jsonify
+        <div class="notice">
+            <div class="notice-title">Deployment Notice</div>
+            <p>This is a static preview. Terminal games require WebSocket support for real-time gameplay.
+            Run locally with: <code>python deploy/web-terminal/app_crossplatform.py</code></p>
+        </div>
 
-# Create a minimal Flask app for Vercel
-app = Flask(
-    __name__,
-    template_folder=str(web_terminal_path / 'templates'),
-    static_folder=str(web_terminal_path / 'static'),
-    static_url_path='/static'
-)
-
-# Try to import game registry
-try:
-    sys.path.insert(0, str(root_path))
-    from config import GAME_REGISTRY, APP_DISPLAY_NAME, APP_VERSION
-except ImportError:
-    GAME_REGISTRY = {}
-    APP_DISPLAY_NAME = "VAULT 13"
-    APP_VERSION = "9.0"
+        <div class="game-grid">
+            <div class="game-card">
+                <div class="game-name">VAULT 13 v9.0 - Ultimate Evolution</div>
+                <div class="game-desc">Complete vault survival simulation with 15+ game systems</div>
+                <span class="game-category">Main Games</span>
+            </div>
+            <div class="game-card">
+                <div class="game-name">Echo Chambers</div>
+                <div class="game-desc">Navigate through quantum timeline paradoxes</div>
+                <span class="game-category">Quantum & Physics</span>
+            </div>
+            <div class="game-card">
+                <div class="game-name">Boltzmann's Demon</div>
+                <div class="game-desc">Statistical mechanics thought experiment</div>
+                <span class="game-category">Physics Simulations</span>
+            </div>
+            <div class="game-card">
+                <div class="game-name">Newcomb's Paradox</div>
+                <div class="game-desc">Decision theory and free will exploration</div>
+                <span class="game-category">Decision Theory</span>
+            </div>
+            <div class="game-card">
+                <div class="game-name">Chinese Room</div>
+                <div class="game-desc">Searle's philosophy of mind experiment</div>
+                <span class="game-category">Philosophy of Mind</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>"""
 
 
 @app.route('/')
 def index():
-    """Show game selection page."""
-    games = []
-
-    if GAME_REGISTRY:
-        categories = {
-            'main': 'Main Games',
-            'quantum': 'Quantum & Physics',
-            'physics': 'Physics Simulations',
-            'computation': 'Computation & Logic',
-            'logic': 'Logic & Mathematics',
-            'philosophy': 'Philosophy of Mind',
-            'decision': 'Decision Theory',
-            'other': 'Other Experiments'
-        }
-
-        for game_id, game_info in GAME_REGISTRY.items():
-            games.append({
-                'id': game_info.id,
-                'name': game_info.name,
-                'file': game_info.file,
-                'description': game_info.description,
-                'category': categories.get(game_info.category, game_info.category),
-                'available': True  # Assume available for display
-            })
-    else:
-        # Fallback game list
-        games = [
-            {'id': 'vault_shelter_v6', 'name': 'VAULT 13 v9.0 - Ultimate Evolution', 'file': 'vault_shelter_v6.py', 'description': 'Full vault simulation', 'category': 'Main Games', 'available': True},
-            {'id': 'vault_shelter_v5', 'name': 'VAULT 13 v5.0 - Mega', 'file': 'vault_shelter_v5.py', 'description': '9 game systems', 'category': 'Main Games', 'available': True},
-            {'id': 'echo_chambers', 'name': 'Echo Chambers', 'file': 'echo_chambers.py', 'description': 'Timeline navigation', 'category': 'Quantum & Physics', 'available': True},
-        ]
-
-    return render_template('index.html', games=games, app_name=APP_DISPLAY_NAME, version=APP_VERSION)
+    return Response(HTML_PAGE, mimetype='text/html')
 
 
-@app.route('/play/<game_file>')
-def play(game_file: str):
-    """Show terminal page for a specific game."""
-    return render_template('terminal.html', game_file=game_file, app_name=APP_DISPLAY_NAME)
+@app.route('/api/health')
+def health():
+    return {'status': 'ok', 'platform': 'vercel'}
 
 
-@app.route('/api/games')
-def api_games():
-    """API endpoint to get games list."""
-    games = []
-    for game_id, game_info in GAME_REGISTRY.items():
-        games.append({
-            'id': game_info.id,
-            'name': game_info.name,
-            'file': game_info.file,
-            'description': game_info.description,
-            'category': game_info.category,
-            'available': True
-        })
-    return jsonify(games)
-
-
-@app.route('/api/system')
-def api_system():
-    """API endpoint to get system info."""
-    return jsonify({
-        'platform': 'vercel',
-        'version': APP_VERSION,
-        'name': APP_DISPLAY_NAME,
-        'websocket_note': 'WebSocket terminal requires local server or WebSocket-enabled hosting'
-    })
-
-
-# Vercel expects the app variable
+# Vercel handler
 handler = app
