@@ -1,0 +1,27 @@
+# VAULT 13 Game Collection - Requirements
+# =========================================
+# Core dependencies for running games locally
+
+# Cross-platform terminal support
+colorama>=0.4.6          # Windows ANSI color support
+blessed>=1.20.0          # Cross-platform terminal abstraction (optional)
+
+# Web terminal server (optional)
+Flask>=3.0.0
+flask-socketio>=5.3.5
+python-socketio>=5.10.0
+
+# Async support (platform-specific)
+# eventlet is preferred on Unix, threading on Windows
+eventlet>=0.33.3; sys_platform != 'win32'
+
+# AI features (optional)
+anthropic>=0.18.0        # Claude API integration
+
+# Build tools (optional, for creating executables)
+# pyinstaller>=6.0.0     # Uncomment to build standalone executables
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# black>=23.0.0
+# mypy>=1.0.0

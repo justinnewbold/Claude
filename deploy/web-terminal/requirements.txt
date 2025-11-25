@@ -1,4 +1,18 @@
-Flask==3.0.0
-flask-socketio==5.3.5
-python-socketio==5.10.0
-eventlet==0.33.3
+# Web Terminal Server Requirements
+# =================================
+
+# Core web framework
+Flask>=3.0.0
+flask-socketio>=5.3.5
+python-socketio>=5.10.0
+
+# Async support (platform-specific)
+eventlet>=0.33.3; sys_platform != 'win32'
+gevent>=23.0.0; sys_platform != 'win32'
+
+# Cross-platform support
+colorama>=0.4.6
+
+# Production server
+gunicorn>=21.0.0; sys_platform != 'win32'
+waitress>=2.1.0; sys_platform == 'win32'

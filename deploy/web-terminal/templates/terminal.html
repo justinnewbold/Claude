@@ -2,30 +2,318 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>{{ game_file }} - {{ app_name }}</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #00d4ff;
+            --accent: #ff6b35;
+            --bg-dark: #0a0a0f;
+            --bg-panel: #12151c;
+            --border: rgba(0, 255, 136, 0.2);
+            --text: #e0e8f0;
+            --text-dim: #6a7a8a;
+
+            /* Safe area insets */
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+
+            /* Touch targets */
+            --touch-target: 44px;
+            --key-size: 36px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
         }
 
         body {
-            font-family: 'Monaco', 'Courier New', monospace;
-            background: #000;
-            color: #e0e0e0;
-            overflow: hidden;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--bg-dark);
+            color: var(--text);
+            touch-action: none;
         }
 
-        #terminal-container {
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            height: 100dvh;
+            padding-top: var(--safe-top);
+        }
+
+        /* Top Bar - Compact for mobile */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0.75rem;
+            padding-left: calc(0.75rem + var(--safe-left));
+            padding-right: calc(0.75rem + var(--safe-right));
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            min-height: 44px;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .top-bar.hidden {
+            display: none;
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: var(--touch-target);
+            height: var(--touch-target);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:active {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary);
+        }
+
+        .game-title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 480px) {
+            .game-title {
+                max-width: none;
+            }
+        }
+
+        .game-title span {
+            color: var(--primary);
+        }
+
+        .top-center {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.6rem;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 16px;
+            font-size: 0.7rem;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background: var(--accent);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Control Buttons */
+        .control-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: var(--touch-target);
+            height: var(--touch-target);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .control-btn:active {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(0.95);
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border-color: var(--primary);
+        }
+
+        /* Hide some controls on mobile */
+        @media (max-width: 480px) {
+            .hide-mobile {
+                display: none;
+            }
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
             position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            min-width: 180px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            transition: all 0.2s ease;
+            min-height: var(--touch-target);
+        }
+
+        .dropdown-item:active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--text);
+        }
+
+        .dropdown-item.active {
+            color: var(--primary);
+        }
+
+        .dropdown-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            padding: 0.3rem 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Font Size Slider */
+        .font-slider {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.8rem;
+        }
+
+        .font-slider input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+
+        .font-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .font-size-value {
+            font-size: 0.75rem;
+            color: var(--primary);
+            min-width: 35px;
+            text-align: right;
+        }
+
+        /* Terminal Container */
+        #terminal-container {
+            flex: 1;
+            padding: 4px;
+            padding-left: calc(4px + var(--safe-left));
+            padding-right: calc(4px + var(--safe-right));
+            background: #000;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        #terminal-container.fullscreen {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 40px;
-            padding: 10px;
+            bottom: 0;
+            padding: 0;
+            z-index: 9999;
         }
 
         #terminal {
@@ -33,61 +321,465 @@
             height: 100%;
         }
 
-        .controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: #1a1a1a;
+        /* Themes */
+        .theme-dark #terminal-container { background: #000000; }
+        .theme-monokai #terminal-container { background: #272822; }
+        .theme-dracula #terminal-container { background: #282a36; }
+        .theme-nord #terminal-container { background: #2e3440; }
+        .theme-solarized #terminal-container { background: #002b36; }
+        .theme-matrix #terminal-container { background: #0d0d0d; }
+
+        /* Mobile Virtual Keyboard */
+        .virtual-keyboard {
+            display: none;
+            flex-direction: column;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            padding: 0.5rem;
+            padding-bottom: calc(0.5rem + var(--safe-bottom));
+            padding-left: calc(0.5rem + var(--safe-left));
+            padding-right: calc(0.5rem + var(--safe-right));
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .virtual-keyboard.show {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .virtual-keyboard {
+                display: flex;
+            }
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .key {
             display: flex;
             align-items: center;
-            padding: 0 1rem;
-            gap: 1rem;
-            border-top: 1px solid #333;
-        }
-
-        .back-button {
-            padding: 0.5rem 1rem;
-            background: #667eea;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .back-button:hover {
-            background: #764ba2;
-        }
-
-        .status {
-            color: #888;
+            justify-content: center;
+            min-width: var(--key-size);
+            height: var(--key-size);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
             font-size: 0.85rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            padding: 0 0.5rem;
+        }
+
+        .key:active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            transform: scale(0.95);
+        }
+
+        .key.special {
+            background: rgba(0, 255, 136, 0.15);
+            min-width: 50px;
+        }
+
+        .key.wide {
+            min-width: 70px;
+        }
+
+        .key.extra-wide {
+            flex: 1;
+            max-width: 200px;
+        }
+
+        /* Quick Actions Row */
+        .quick-actions {
+            display: flex;
+            gap: 0.3rem;
+            overflow-x: auto;
+            padding-bottom: 0.3rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            padding: 0 0.75rem;
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .quick-btn:active {
+            background: var(--secondary);
+            color: var(--bg-dark);
+        }
+
+        /* Keyboard Toggle Button */
+        .keyboard-toggle {
+            position: fixed;
+            bottom: calc(10px + var(--safe-bottom));
+            right: calc(10px + var(--safe-right));
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border: none;
+            border-radius: 50%;
+            color: var(--bg-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .keyboard-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .keyboard-toggle.hidden {
+                display: none;
+            }
+        }
+
+        .keyboard-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Bottom Bar - Only on desktop */
+        .bottom-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 1rem;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            min-height: 36px;
+        }
+
+        @media (min-width: 769px) {
+            .bottom-bar {
+                display: flex;
+            }
+        }
+
+        .bottom-bar.hidden {
+            display: none;
+        }
+
+        .bottom-left, .bottom-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .shortcut kbd {
+            padding: 0.15rem 0.4rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 0.7rem;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: calc(80px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.7rem 1.2rem;
+            color: var(--text);
+            font-size: 0.8rem;
+            z-index: 10001;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-color: var(--primary); }
+        .toast.error { border-color: var(--accent); }
+
+        /* Landscape mode adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .top-bar {
+                min-height: 36px;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .control-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .virtual-keyboard {
+                padding: 0.25rem;
+            }
+
+            .key {
+                height: 28px;
+                min-width: 28px;
+                font-size: 0.75rem;
+            }
+
+            .quick-actions {
+                padding-bottom: 0.2rem;
+            }
+
+            .quick-btn {
+                height: 26px;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Hidden native keyboard helper */
+        .native-input {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
-<body>
-    <div id="terminal-container">
-        <div id="terminal"></div>
+<body class="theme-dark">
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading game...</div>
     </div>
 
-    <div class="controls">
-        <button class="back-button" onclick="location.href='/'">← Back to Games</button>
-        <span class="status" id="status">Connecting...</span>
+    <!-- Hidden input for native keyboard -->
+    <input type="text" class="native-input" id="nativeInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+    <div class="app-container">
+        <div class="top-bar" id="topBar">
+            <div class="top-left">
+                <a href="/" class="back-button">←</a>
+                <div class="game-title">
+                    <span>▶</span> {{ game_file }}
+                </div>
+            </div>
+
+            <div class="top-center">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">...</span>
+                </div>
+            </div>
+
+            <div class="top-right">
+                <!-- Settings dropdown -->
+                <div class="dropdown hide-mobile">
+                    <button class="control-btn" id="settingsBtn" title="Settings">⚙</button>
+                    <div class="dropdown-menu" id="settingsMenu">
+                        <div class="dropdown-label">Font Size</div>
+                        <div class="font-slider">
+                            <input type="range" id="fontSlider" min="10" max="20" value="12">
+                            <span class="font-size-value" id="fontValue">12px</span>
+                        </div>
+                        <div class="dropdown-label">Theme</div>
+                        <div class="dropdown-item active" data-theme="dark">Dark</div>
+                        <div class="dropdown-item" data-theme="monokai">Monokai</div>
+                        <div class="dropdown-item" data-theme="dracula">Dracula</div>
+                        <div class="dropdown-item" data-theme="nord">Nord</div>
+                        <div class="dropdown-item" data-theme="matrix">Matrix</div>
+                    </div>
+                </div>
+
+                <!-- Fullscreen -->
+                <button class="control-btn hide-mobile" id="fullscreenBtn" title="Fullscreen">⛶</button>
+
+                <!-- Restart -->
+                <button class="control-btn" id="restartBtn" title="Restart">↻</button>
+            </div>
+        </div>
+
+        <div id="terminal-container">
+            <div id="terminal"></div>
+        </div>
+
+        <!-- Virtual Keyboard for Mobile -->
+        <div class="virtual-keyboard" id="virtualKeyboard">
+            <!-- Quick Actions -->
+            <div class="quick-actions" id="quickActions">
+                <button class="quick-btn" data-cmd="1">1. Menu</button>
+                <button class="quick-btn" data-cmd="2">2. Build</button>
+                <button class="quick-btn" data-cmd="3">3. Dwellers</button>
+                <button class="quick-btn" data-cmd="y">Yes</button>
+                <button class="quick-btn" data-cmd="n">No</button>
+                <button class="quick-btn" data-cmd="q">Quit</button>
+                <button class="quick-btn" data-cmd="s">Save</button>
+                <button class="quick-btn" data-cmd="h">Help</button>
+            </div>
+
+            <!-- Number Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="1">1</button>
+                <button class="key" data-key="2">2</button>
+                <button class="key" data-key="3">3</button>
+                <button class="key" data-key="4">4</button>
+                <button class="key" data-key="5">5</button>
+                <button class="key" data-key="6">6</button>
+                <button class="key" data-key="7">7</button>
+                <button class="key" data-key="8">8</button>
+                <button class="key" data-key="9">9</button>
+                <button class="key" data-key="0">0</button>
+            </div>
+
+            <!-- QWERTY Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="q">Q</button>
+                <button class="key" data-key="w">W</button>
+                <button class="key" data-key="e">E</button>
+                <button class="key" data-key="r">R</button>
+                <button class="key" data-key="t">T</button>
+                <button class="key" data-key="y">Y</button>
+                <button class="key" data-key="u">U</button>
+                <button class="key" data-key="i">I</button>
+                <button class="key" data-key="o">O</button>
+                <button class="key" data-key="p">P</button>
+            </div>
+
+            <!-- ASDF Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="a">A</button>
+                <button class="key" data-key="s">S</button>
+                <button class="key" data-key="d">D</button>
+                <button class="key" data-key="f">F</button>
+                <button class="key" data-key="g">G</button>
+                <button class="key" data-key="h">H</button>
+                <button class="key" data-key="j">J</button>
+                <button class="key" data-key="k">K</button>
+                <button class="key" data-key="l">L</button>
+            </div>
+
+            <!-- ZXCV Row -->
+            <div class="keyboard-row">
+                <button class="key" data-key="z">Z</button>
+                <button class="key" data-key="x">X</button>
+                <button class="key" data-key="c">C</button>
+                <button class="key" data-key="v">V</button>
+                <button class="key" data-key="b">B</button>
+                <button class="key" data-key="n">N</button>
+                <button class="key" data-key="m">M</button>
+                <button class="key special" data-key="Backspace">⌫</button>
+            </div>
+
+            <!-- Special Keys Row -->
+            <div class="keyboard-row">
+                <button class="key special" data-key="ArrowUp">↑</button>
+                <button class="key special" data-key="ArrowDown">↓</button>
+                <button class="key special" data-key="ArrowLeft">←</button>
+                <button class="key special" data-key="ArrowRight">→</button>
+                <button class="key extra-wide" data-key=" ">Space</button>
+                <button class="key special wide" data-key="Enter">Enter</button>
+            </div>
+        </div>
+
+        <!-- Bottom Bar (Desktop only) -->
+        <div class="bottom-bar" id="bottomBar">
+            <div class="bottom-left">
+                <span id="dimensions">80×24</span>
+                <span>•</span>
+                <span id="gameTime">0:00</span>
+            </div>
+            <div class="bottom-right">
+                <span class="shortcut"><kbd>F11</kbd> Fullscreen</span>
+                <span class="shortcut"><kbd>Ctrl+R</kbd> Restart</span>
+            </div>
+        </div>
     </div>
+
+    <!-- Keyboard Toggle Button (Mobile) -->
+    <button class="keyboard-toggle" id="keyboardToggle">⌨</button>
+
+    <div class="toast" id="toast"></div>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
 
     <script>
-        // Initialize xterm.js
-        const term = new Terminal({
-            cursorBlink: true,
-            fontSize: 14,
-            fontFamily: 'Monaco, Courier New, monospace',
-            theme: {
+        // Theme definitions
+        const themes = {
+            dark: {
                 background: '#000000',
                 foreground: '#ffffff',
                 cursor: '#ffffff',
@@ -109,52 +801,455 @@
                 brightMagenta: '#c678dd',
                 brightCyan: '#56b6c2',
                 brightWhite: '#ffffff'
+            },
+            monokai: {
+                background: '#272822',
+                foreground: '#f8f8f2',
+                cursor: '#f8f8f2',
+                cursorAccent: '#272822',
+                selection: 'rgba(73, 72, 62, 0.5)',
+                black: '#272822',
+                red: '#f92672',
+                green: '#a6e22e',
+                yellow: '#f4bf75',
+                blue: '#66d9ef',
+                magenta: '#ae81ff',
+                cyan: '#a1efe4',
+                white: '#f8f8f2'
+            },
+            dracula: {
+                background: '#282a36',
+                foreground: '#f8f8f2',
+                cursor: '#f8f8f2',
+                cursorAccent: '#282a36',
+                selection: 'rgba(68, 71, 90, 0.5)',
+                black: '#21222c',
+                red: '#ff5555',
+                green: '#50fa7b',
+                yellow: '#f1fa8c',
+                blue: '#bd93f9',
+                magenta: '#ff79c6',
+                cyan: '#8be9fd',
+                white: '#f8f8f2'
+            },
+            nord: {
+                background: '#2e3440',
+                foreground: '#d8dee9',
+                cursor: '#d8dee9',
+                cursorAccent: '#2e3440',
+                selection: 'rgba(67, 76, 94, 0.5)',
+                black: '#3b4252',
+                red: '#bf616a',
+                green: '#a3be8c',
+                yellow: '#ebcb8b',
+                blue: '#81a1c1',
+                magenta: '#b48ead',
+                cyan: '#88c0d0',
+                white: '#e5e9f0'
+            },
+            matrix: {
+                background: '#0d0d0d',
+                foreground: '#00ff00',
+                cursor: '#00ff00',
+                cursorAccent: '#0d0d0d',
+                selection: 'rgba(0, 255, 0, 0.2)',
+                black: '#0d0d0d',
+                red: '#00ff00',
+                green: '#00ff00',
+                yellow: '#00ff00',
+                blue: '#00ff00',
+                magenta: '#00ff00',
+                cyan: '#00ff00',
+                white: '#00ff00'
             }
+        };
+
+        // Detect mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                        window.innerWidth <= 768;
+
+        let currentTheme = 'dark';
+        let currentFontSize = isMobile ? 11 : 14;
+        let isFullscreen = false;
+        let gameStartTime = Date.now();
+        let keyboardVisible = isMobile;
+
+        // Initialize xterm.js
+        const term = new Terminal({
+            cursorBlink: true,
+            fontSize: currentFontSize,
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            theme: themes[currentTheme],
+            scrollback: 5000,
+            convertEol: true,
+            allowProposedApi: true,
+            // Mobile optimizations
+            screenReaderMode: false,
+            scrollOnUserInput: true
         });
 
         const fitAddon = new FitAddon.FitAddon();
         term.loadAddon(fitAddon);
         term.open(document.getElementById('terminal'));
-        fitAddon.fit();
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
+        // Initial fit
+        setTimeout(() => {
             fitAddon.fit();
-            if (socket.connected) {
-                socket.emit('resize', {
-                    cols: term.cols,
-                    rows: term.rows
-                });
+            updateDimensions();
+        }, 100);
+
+        function updateDimensions() {
+            const dims = document.getElementById('dimensions');
+            if (dims) {
+                dims.textContent = `${term.cols}×${term.rows}`;
             }
+        }
+
+        // Handle resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                fitAddon.fit();
+                updateDimensions();
+                if (socket && socket.connected) {
+                    socket.emit('resize', { cols: term.cols, rows: term.rows });
+                }
+            }, 100);
         });
 
-        // Initialize Socket.IO
+        // Socket.IO connection
         const socket = io();
         const gameFile = '{{ game_file }}';
 
         socket.on('connect', () => {
-            document.getElementById('status').textContent = 'Connected';
-            // Start the game
+            document.getElementById('statusDot').classList.remove('disconnected');
+            document.getElementById('statusText').textContent = 'OK';
+            document.getElementById('loading').classList.add('hidden');
+            showToast('Connected', 'success');
             socket.emit('start', { game_file: gameFile });
         });
 
         socket.on('disconnect', () => {
-            document.getElementById('status').textContent = 'Disconnected';
+            document.getElementById('statusDot').classList.add('disconnected');
+            document.getElementById('statusText').textContent = 'Lost';
+            showToast('Disconnected', 'error');
         });
 
         socket.on('output', (data) => {
             term.write(data.output);
         });
 
-        // Send keyboard input to server
+        // Terminal input (desktop)
         term.onData((data) => {
             socket.emit('input', { input: data });
         });
 
-        // Handle paste
-        term.onPaste((data) => {
-            socket.emit('input', { input: data });
+        // Virtual Keyboard
+        const virtualKeyboard = document.getElementById('virtualKeyboard');
+        const keyboardToggle = document.getElementById('keyboardToggle');
+
+        // Key mapping for special keys
+        const keyMap = {
+            'ArrowUp': '\x1b[A',
+            'ArrowDown': '\x1b[B',
+            'ArrowRight': '\x1b[C',
+            'ArrowLeft': '\x1b[D',
+            'Enter': '\r',
+            'Backspace': '\x7f',
+            ' ': ' '
+        };
+
+        // Virtual keyboard key handler
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                hapticFeedback();
+            }, { passive: false });
+
+            key.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const keyValue = key.dataset.key;
+                const mapped = keyMap[keyValue] || keyValue.toLowerCase();
+                socket.emit('input', { input: mapped });
+            }, { passive: false });
+
+            // Also support click for testing on desktop
+            key.addEventListener('click', (e) => {
+                e.preventDefault();
+                const keyValue = key.dataset.key;
+                const mapped = keyMap[keyValue] || keyValue.toLowerCase();
+                socket.emit('input', { input: mapped });
+            });
         });
+
+        // Quick action buttons
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                hapticFeedback();
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const cmd = btn.dataset.cmd;
+                socket.emit('input', { input: cmd + '\r' });
+            }, { passive: false });
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const cmd = btn.dataset.cmd;
+                socket.emit('input', { input: cmd + '\r' });
+            });
+        });
+
+        // Keyboard toggle
+        keyboardToggle.addEventListener('click', () => {
+            keyboardVisible = !keyboardVisible;
+            virtualKeyboard.classList.toggle('show', keyboardVisible);
+            keyboardToggle.classList.toggle('hidden', keyboardVisible);
+
+            setTimeout(() => {
+                fitAddon.fit();
+                updateDimensions();
+            }, 100);
+        });
+
+        // Initialize keyboard state
+        if (isMobile) {
+            virtualKeyboard.classList.add('show');
+            keyboardToggle.classList.add('hidden');
+        }
+
+        // Native keyboard option (tap terminal to show)
+        const nativeInput = document.getElementById('nativeInput');
+        const terminalContainer = document.getElementById('terminal-container');
+
+        terminalContainer.addEventListener('click', () => {
+            if (isMobile && !keyboardVisible) {
+                nativeInput.focus();
+            } else {
+                term.focus();
+            }
+        });
+
+        nativeInput.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value) {
+                socket.emit('input', { input: value });
+                e.target.value = '';
+            }
+        });
+
+        nativeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                socket.emit('input', { input: '\r' });
+            } else if (e.key === 'Backspace') {
+                socket.emit('input', { input: '\x7f' });
+            }
+        });
+
+        // Settings dropdown
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsMenu = document.getElementById('settingsMenu');
+
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                settingsMenu.classList.toggle('show');
+            });
+        }
+
+        document.addEventListener('click', () => {
+            if (settingsMenu) settingsMenu.classList.remove('show');
+        });
+
+        // Font size
+        const fontSlider = document.getElementById('fontSlider');
+        const fontValue = document.getElementById('fontValue');
+
+        if (fontSlider) {
+            fontSlider.value = currentFontSize;
+            fontValue.textContent = `${currentFontSize}px`;
+
+            fontSlider.addEventListener('input', (e) => {
+                currentFontSize = parseInt(e.target.value);
+                fontValue.textContent = `${currentFontSize}px`;
+                term.options.fontSize = currentFontSize;
+                fitAddon.fit();
+                updateDimensions();
+                localStorage.setItem('terminalFontSize', currentFontSize);
+            });
+        }
+
+        // Load saved font size
+        const savedFontSize = localStorage.getItem('terminalFontSize');
+        if (savedFontSize) {
+            currentFontSize = parseInt(savedFontSize);
+            if (fontSlider) fontSlider.value = currentFontSize;
+            if (fontValue) fontValue.textContent = `${currentFontSize}px`;
+            term.options.fontSize = currentFontSize;
+        }
+
+        // Theme selection
+        document.querySelectorAll('[data-theme]').forEach(item => {
+            item.addEventListener('click', () => {
+                const theme = item.dataset.theme;
+                setTheme(theme);
+                document.querySelectorAll('[data-theme]').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.body.className = `theme-${theme}`;
+            term.options.theme = themes[theme];
+            localStorage.setItem('terminalTheme', theme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('terminalTheme');
+        if (savedTheme && themes[savedTheme]) {
+            setTheme(savedTheme);
+            document.querySelectorAll('[data-theme]').forEach(item => {
+                item.classList.toggle('active', item.dataset.theme === savedTheme);
+            });
+        }
+
+        // Fullscreen
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const topBar = document.getElementById('topBar');
+        const bottomBar = document.getElementById('bottomBar');
+
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+
+            if (isFullscreen) {
+                terminalContainer.classList.add('fullscreen');
+                topBar.classList.add('hidden');
+                bottomBar.classList.add('hidden');
+                virtualKeyboard.classList.remove('show');
+                keyboardToggle.classList.remove('hidden');
+
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            } else {
+                terminalContainer.classList.remove('fullscreen');
+                topBar.classList.remove('hidden');
+                bottomBar.classList.remove('hidden');
+                if (isMobile) {
+                    virtualKeyboard.classList.add('show');
+                    keyboardToggle.classList.add('hidden');
+                }
+
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+
+            setTimeout(() => {
+                fitAddon.fit();
+                updateDimensions();
+            }, 100);
+        }
+
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+            if (e.key === 'Escape' && isFullscreen) {
+                toggleFullscreen();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                restartGame();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && isFullscreen) {
+                isFullscreen = false;
+                terminalContainer.classList.remove('fullscreen');
+                topBar.classList.remove('hidden');
+                bottomBar.classList.remove('hidden');
+                if (isMobile) {
+                    virtualKeyboard.classList.add('show');
+                    keyboardToggle.classList.add('hidden');
+                }
+                setTimeout(() => {
+                    fitAddon.fit();
+                    updateDimensions();
+                }, 100);
+            }
+        });
+
+        // Restart
+        const restartBtn = document.getElementById('restartBtn');
+
+        function restartGame() {
+            term.clear();
+            gameStartTime = Date.now();
+            socket.emit('start', { game_file: gameFile });
+            showToast('Restarted', 'success');
+        }
+
+        restartBtn.addEventListener('click', restartGame);
+
+        // Toast
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Game timer
+        function updateGameTime() {
+            const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            const timeEl = document.getElementById('gameTime');
+            if (timeEl) {
+                timeEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+        setInterval(updateGameTime, 1000);
+
+        // Haptic feedback
+        function hapticFeedback() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(10);
+            }
+        }
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Prevent pinch zoom
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        document.addEventListener('gestureend', (e) => e.preventDefault());
+
+        // Initial focus
+        setTimeout(() => {
+            if (!isMobile) {
+                term.focus();
+            }
+        }, 500);
     </script>
 </body>
 </html>
