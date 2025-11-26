@@ -294,6 +294,9 @@ class handler(BaseHTTPRequestHandler):
 import random
 import json
 
+# Define newline as variable to avoid escape issues
+NL = chr(10)
+
 class GameEngine:
     def __init__(self):
         self.games = {}
@@ -350,7 +353,7 @@ VAULT 13 COMMANDS:
                 new_room = random.choice([r for r in rooms if r not in s['rooms']])
                 s['rooms'].append(new_room)
                 s['caps'] -= 50
-                return f"✅ Built {new_room}! (-50 caps)\\n" + self.vault_status()
+                return f"✅ Built {new_room}! (-50 caps){NL}" + self.vault_status()
             return "❌ Not enough caps! Need 50."
         elif cmd == 'explore':
             if s['dwellers'] >= 3:
@@ -359,18 +362,18 @@ VAULT 13 COMMANDS:
                 injury = random.random() < 0.3
                 s['caps'] += found_caps
                 s['food'] += found_food
-                result = f"🗺️ Exploration complete!\\n+{found_caps} caps, +{found_food} food"
+                result = f"🗺️ Exploration complete!{NL}+{found_caps} caps, +{found_food} food"
                 if injury:
                     s['dwellers'] -= 1
-                    result += "\\n⚠️ One dweller was injured and couldn't return."
-                return result + "\\n" + self.vault_status()
+                    result += f"{NL}⚠️ One dweller was injured and couldn't return."
+                return result + NL + self.vault_status()
             return "❌ Need at least 3 dwellers to explore!"
         elif cmd == 'trade':
             if s['caps'] >= 30:
                 s['caps'] -= 30
                 s['food'] += 20
                 s['water'] += 20
-                return "💰 Traded 30 caps for supplies!\\n+20 food, +20 water\\n" + self.vault_status()
+                return f"💰 Traded 30 caps for supplies!{NL}+20 food, +20 water{NL}" + self.vault_status()
             return "❌ Not enough caps for trading! Need 30."
         elif cmd == 'rest':
             # Consume resources
@@ -386,10 +389,10 @@ VAULT 13 COMMANDS:
             if event_roll < 0.2:
                 new_dwellers = random.randint(1, 3)
                 s['dwellers'] += new_dwellers
-                event = f"\\n🎉 {new_dwellers} new dweller(s) arrived!"
+                event = f"{NL}🎉 {new_dwellers} new dweller(s) arrived!"
             elif event_roll < 0.3:
                 s['happiness'] = min(100, s['happiness'] + 10)
-                event = "\\n🎵 Dwellers threw a party! +10 happiness"
+                event = f"{NL}🎵 Dwellers threw a party! +10 happiness"
 
             # Check resources
             warnings = []
@@ -404,10 +407,10 @@ VAULT 13 COMMANDS:
 
             result = f"💤 Day {s['day']} begins... (-{consumption} food/water){event}"
             if warnings:
-                result += "\\n" + "\\n".join(warnings)
-            return result + "\\n" + self.vault_status()
+                result += NL + NL.join(warnings)
+            return result + NL + self.vault_status()
         else:
-            return f"Unknown command: {cmd}\\nType 'help' for commands."
+            return f"Unknown command: {cmd}{NL}Type 'help' for commands."
 
     def init_echo(self):
         self.state = {
@@ -454,28 +457,28 @@ Commands: look, north, south, east, west, interact"""
             if abs(self.state['y']) > 1:
                 self.state['y'] = 0
                 self.state['paradoxes'] += 1
-                return "⚠️ PARADOX! You walked too far and looped back...\\n" + self.echo_look()
+                return "⚠️ PARADOX! You walked too far and looped back..." + NL + self.echo_look()
             return self.echo_look()
         elif cmd == 'south':
             self.state['y'] -= 1
             if abs(self.state['y']) > 1:
                 self.state['y'] = 0
                 self.state['paradoxes'] += 1
-                return "⚠️ PARADOX! Space folded on itself...\\n" + self.echo_look()
+                return "⚠️ PARADOX! Space folded on itself..." + NL + self.echo_look()
             return self.echo_look()
         elif cmd == 'east':
             self.state['x'] += 1
             if abs(self.state['x']) > 1:
                 self.state['x'] = 0
                 self.state['timeline'] = random.choice(['Alpha', 'Beta', 'Gamma', 'Delta'])
-                return f"🌀 Timeline shift! Now in Timeline {self.state['timeline']}\\n" + self.echo_look()
+                return f"🌀 Timeline shift! Now in Timeline {self.state['timeline']}{NL}" + self.echo_look()
             return self.echo_look()
         elif cmd == 'west':
             self.state['x'] -= 1
             if abs(self.state['x']) > 1:
                 self.state['x'] = 0
                 self.state['timeline'] = random.choice(['Alpha', 'Beta', 'Gamma', 'Delta'])
-                return f"🌀 Timeline shift! Now in Timeline {self.state['timeline']}\\n" + self.echo_look()
+                return f"🌀 Timeline shift! Now in Timeline {self.state['timeline']}{NL}" + self.echo_look()
             return self.echo_look()
         elif cmd == 'interact':
             events = [
@@ -485,7 +488,7 @@ Commands: look, north, south, east, west, interact"""
                 "A quantum flower blooms and wilts in your hand simultaneously."
             ]
             self.state['paradoxes'] += 1
-            return random.choice(events) + f"\\n\\nParadoxes: {self.state['paradoxes']}"
+            return random.choice(events) + f"{NL}{NL}Paradoxes: {self.state['paradoxes']}"
         return f"Unknown command. Try: look, north, south, east, west, interact"
 
     def init_chinese_room(self):
@@ -528,10 +531,10 @@ CHINESE ROOM - Commands:
             symbol = random.choice(s['symbols'])
             meanings = {'龙': 'dragon', '爱': 'love', '和平': 'peace', '真理': 'truth', '智慧': 'wisdom'}
             s['responses'] += 1
-            return f"Symbol: {symbol}\\nRulebook says: respond with '是' (yes)\\n\\nBut do you know what {symbol} means? ({meanings.get(symbol, '???')})"
+            return f"Symbol: {symbol}{NL}Rulebook says: respond with '是' (yes){NL}{NL}But do you know what {symbol} means? ({meanings.get(symbol, '???')})"
         elif cmd == 'respond':
             s['correct'] += 1
-            return f"You pass '是' through the slot.\\nThe person outside thinks you understand Chinese!\\n\\nCorrect responses: {s['correct']}"
+            return f"You pass '是' through the slot.{NL}The person outside thinks you understand Chinese!{NL}{NL}Correct responses: {s['correct']}"
         elif cmd == 'think':
             s['understanding'] += 1
             thoughts = [
@@ -541,7 +544,7 @@ CHINESE ROOM - Commands:
                 "You process symbols. Computers process data. What's the difference?",
                 "Understanding seems to require something more than symbol manipulation..."
             ]
-            return f"🤔 {random.choice(thoughts)}\\n\\nTimes pondered: {s['understanding']}"
+            return f"🤔 {random.choice(thoughts)}{NL}{NL}Times pondered: {s['understanding']}"
         elif cmd == 'examine':
             return """
 The room contains:
@@ -608,21 +611,21 @@ Commands: pull, wait, think, stats"""
             s['scenarios'] += 1
             s['saved'] += c['main']
             s['sacrificed'] += c['side']
-            result = f"🔀 You pulled the lever!\\n\\n"
-            result += f"The trolley diverts. {c['side']} person dies.\\n"
-            result += f"But {c['main']} people are saved.\\n\\n"
+            result = f"🔀 You pulled the lever!{NL}{NL}"
+            result += f"The trolley diverts. {c['side']} person dies.{NL}"
+            result += f"But {c['main']} people are saved.{NL}{NL}"
             result += "You chose to ACT. You took responsibility for a death to save more lives."
             s['current'] = self.new_trolley_scenario()
-            return result + "\\n\\n--- Next scenario loading... ---\\n" + self.show_trolley()
+            return result + f"{NL}{NL}--- Next scenario loading... ---{NL}" + self.show_trolley()
         elif cmd == 'wait':
             s['scenarios'] += 1
             s['sacrificed'] += c['main']
-            result = f"⏳ You did nothing.\\n\\n"
-            result += f"The trolley continues. {c['main']} people die.\\n"
-            result += f"The {c['side']} person on the side track lives.\\n\\n"
+            result = f"⏳ You did nothing.{NL}{NL}"
+            result += f"The trolley continues. {c['main']} people die.{NL}"
+            result += f"The {c['side']} person on the side track lives.{NL}{NL}"
             result += "You chose INACTION. Some argue you're not responsible for deaths you didn't cause."
             s['current'] = self.new_trolley_scenario()
-            return result + "\\n\\n--- Next scenario loading... ---\\n" + self.show_trolley()
+            return result + f"{NL}{NL}--- Next scenario loading... ---{NL}" + self.show_trolley()
         elif cmd == 'think':
             thoughts = [
                 "Utilitarians say: maximize lives saved. Pull the lever.",
@@ -699,7 +702,7 @@ Commands: cooperate, defect, stats, opponent"""
                 result = "You cooperated, they defected! You: +0, Them: +5"
             s['history'].append(('C', opp))
             s['round'] += 1
-            return result + "\\n" + self.show_prisoners()
+            return result + NL + self.show_prisoners()
         elif cmd in ['defect', 'd']:
             opp = get_opponent_move()
             if opp == 'C':
@@ -711,11 +714,11 @@ Commands: cooperate, defect, stats, opponent"""
                 result = "Both defected! +1 each"
             s['history'].append(('D', opp))
             s['round'] += 1
-            return result + "\\n" + self.show_prisoners()
+            return result + NL + self.show_prisoners()
         elif cmd == 'stats':
-            return f"Round {s['round']} | You: {s['your_score']} | Opponent: {s['opp_score']}\\nHistory: {s['history'][-5:]}"
+            return f"Round {s['round']} | You: {s['your_score']} | Opponent: {s['opp_score']}{NL}History: {s['history'][-5:]}"
         elif cmd == 'opponent':
-            return f"You're playing against: {s['opponent']}\\n(Strategy revealed for educational purposes)"
+            return f"You're playing against: {s['opponent']}{NL}(Strategy revealed for educational purposes)"
         return "Commands: cooperate (c), defect (d), stats, opponent"
 
     def init_monty(self):
@@ -800,30 +803,30 @@ Commands: switch, stay, stats"""
             s['games'] += 1
             if won:
                 s['wins_switch'] += 1
-            result = f"You switched to door {final}...\\n\\n"
-            result += f"The car was behind door {s['prize_door']}!\\n"
+            result = f"You switched to door {final}...{NL}{NL}"
+            result += f"The car was behind door {s['prize_door']}!{NL}"
             result += "🎉 YOU WON!" if won else "😔 You got a goat."
             # Reset for next game
             s['prize_door'] = random.randint(1, 3)
             s['chosen'] = None
             s['revealed'] = None
             s['phase'] = 'choose'
-            return result + f"\\n\\nSwitch win rate: {s['wins_switch']}/{s['games']} ({100*s['wins_switch']//max(1,s['games'])}%)\\n\\n" + self.show_monty()
+            return result + f"{NL}{NL}Switch win rate: {s['wins_switch']}/{s['games']} ({100*s['wins_switch']//max(1,s['games'])}%){NL}{NL}" + self.show_monty()
 
         elif cmd == 'stay' and s['phase'] == 'switch':
             won = s['chosen'] == s['prize_door']
             s['games'] += 1
             if won:
                 s['wins_stay'] += 1
-            result = f"You stayed with door {s['chosen']}...\\n\\n"
-            result += f"The car was behind door {s['prize_door']}!\\n"
+            result = f"You stayed with door {s['chosen']}...{NL}{NL}"
+            result += f"The car was behind door {s['prize_door']}!{NL}"
             result += "🎉 YOU WON!" if won else "😔 You got a goat."
             # Reset
             s['prize_door'] = random.randint(1, 3)
             s['chosen'] = None
             s['revealed'] = None
             s['phase'] = 'choose'
-            return result + f"\\n\\nStay win rate: {s['wins_stay']}/{s['games']} ({100*s['wins_stay']//max(1,s['games'])}%)\\n\\n" + self.show_monty()
+            return result + f"{NL}{NL}Stay win rate: {s['wins_stay']}/{s['games']} ({100*s['wins_stay']//max(1,s['games'])}%){NL}{NL}" + self.show_monty()
 
         elif cmd == 'stats':
             total = s['games']
