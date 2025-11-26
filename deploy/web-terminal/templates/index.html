@@ -889,6 +889,526 @@
                 display: none;
             }
         }
+
+        /* ===== NEW FEATURES ===== */
+
+        /* Favorite Star Button */
+        .favorite-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.2s ease;
+            z-index: 10;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        .favorite-btn:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .favorite-btn.active {
+            opacity: 1;
+        }
+
+        .favorite-btn.active::after {
+            content: '⭐';
+        }
+
+        .favorite-btn:not(.active)::after {
+            content: '☆';
+        }
+
+        .game-card.featured .favorite-btn {
+            right: 5.5rem;
+        }
+
+        /* Recently Played Section */
+        .recent-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .recent-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .recent-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .clear-recent {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-recent:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .recent-games {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .recent-games::-webkit-scrollbar {
+            display: none;
+        }
+
+        .recent-game {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+
+        .recent-game:hover {
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+        }
+
+        .recent-game:active {
+            transform: scale(0.95);
+        }
+
+        .recent-game-icon {
+            font-size: 1.2rem;
+        }
+
+        .recent-game-name {
+            font-size: 0.75rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        /* Favorites Section */
+        .favorites-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, transparent 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 204, 0, 0.2);
+            display: none;
+        }
+
+        .favorites-section.has-favorites {
+            display: block;
+        }
+
+        .favorites-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .favorites-grid {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .favorites-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Settings Modal */
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .settings-overlay.show {
+            display: flex;
+        }
+
+        .settings-modal {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .settings-close {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .settings-close:hover {
+            color: var(--danger);
+        }
+
+        .settings-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-group-title {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .settings-option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .settings-option-icon {
+            font-size: 1.2rem;
+        }
+
+        .settings-option-text {
+            font-size: 0.9rem;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: var(--text);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle.active::after {
+            left: 25px;
+            background: var(--bg-dark);
+        }
+
+        /* Theme Selector */
+        .theme-options {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .theme-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-option.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .theme-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1rem;
+            text-shadow: 0 0 5px black;
+        }
+
+        .theme-option.green { background: linear-gradient(135deg, #00ff88, #00cc6a); }
+        .theme-option.blue { background: linear-gradient(135deg, #00d4ff, #0088cc); }
+        .theme-option.purple { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .theme-option.red { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .theme-option.orange { background: linear-gradient(135deg, #ff9f43, #ee8c2c); }
+
+        /* Settings Button in Header */
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: var(--touch-target);
+        }
+
+        .header-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Achievement Toast */
+        .achievement-toast {
+            position: fixed;
+            top: calc(20px + var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, var(--warning), var(--accent));
+            color: var(--bg-dark);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 3000;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .achievement-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+        }
+
+        .achievement-text h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .achievement-text p {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* Quick Play Floating Button */
+        .quick-play-fab {
+            display: none;
+            position: fixed;
+            bottom: calc(90px + var(--safe-bottom));
+            right: 1rem;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50%;
+            color: var(--bg-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .quick-play-fab:hover {
+            transform: scale(1.1);
+        }
+
+        .quick-play-fab.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .quick-play-fab {
+                bottom: 2rem;
+                right: 2rem;
+            }
+        }
+
+        /* Stats Dashboard */
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .user-stat {
+            text-align: center;
+        }
+
+        .user-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-stat-label {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) {
+            .user-stat-value {
+                font-size: 1.5rem;
+            }
+            .user-stat-label {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Theme variations */
+        body.theme-blue {
+            --primary: #00d4ff;
+            --primary-dim: #00a8cc;
+            --secondary: #00ff88;
+        }
+
+        body.theme-purple {
+            --primary: #a855f7;
+            --primary-dim: #9333ea;
+            --secondary: #ec4899;
+        }
+
+        body.theme-red {
+            --primary: #ff6b6b;
+            --primary-dim: #ee5a5a;
+            --secondary: #ffa502;
+        }
+
+        body.theme-orange {
+            --primary: #ff9f43;
+            --primary-dim: #ee8c2c;
+            --secondary: #ff6b6b;
+        }
     </style>
 </head>
 <body>
@@ -906,6 +1426,15 @@
                 <span class="version-badge">v{{ version }}</span>
             </h1>
             <p class="subtitle">Experimental Games • Philosophy • Physics • Computation</p>
+
+            <div class="header-actions">
+                <button class="header-btn" id="settingsBtn">
+                    <span>⚙️</span> Settings
+                </button>
+                <button class="header-btn" id="statsBtn">
+                    <span>📊</span> Stats
+                </button>
+            </div>
 
             <div class="stats-bar">
                 <div class="stat">
@@ -937,6 +1466,49 @@
             </div>
         </div>
 
+        <!-- User Stats Dashboard -->
+        <div class="user-stats" id="userStats">
+            <div class="user-stat">
+                <div class="user-stat-value" id="gamesPlayed">0</div>
+                <div class="user-stat-label">Played</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="totalTime">0m</div>
+                <div class="user-stat-label">Time</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="favoritesCount">0</div>
+                <div class="user-stat-label">Favorites</div>
+            </div>
+            <div class="user-stat">
+                <div class="user-stat-value" id="achievementsCount">0</div>
+                <div class="user-stat-label">Badges</div>
+            </div>
+        </div>
+
+        <!-- Favorites Section -->
+        <div class="favorites-section" id="favoritesSection">
+            <div class="favorites-header">
+                <span>⭐</span> Your Favorites
+            </div>
+            <div class="favorites-grid" id="favoritesGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Recently Played Section -->
+        <div class="recent-section" id="recentSection" style="display: none;">
+            <div class="recent-header">
+                <div class="recent-title">
+                    <span>🕐</span> Recently Played
+                </div>
+                <button class="clear-recent" id="clearRecent">Clear</button>
+            </div>
+            <div class="recent-games" id="recentGames">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
         <!-- Main Games Category -->
         <div class="category" data-category="main">
             <div class="category-header">
@@ -947,9 +1519,11 @@
             <div class="games-grid">
                 {% for game in games if game.category == 'Main Games' %}
                 <div class="game-card fade-in {% if 'v9' in game.name or 'Ultimate' in game.name %}featured{% endif %}"
-                     onclick="location.href='/play/{{ game.file }}'"
+                     onclick="playGame('{{ game.file }}', '{{ game.name }}', '🏛️')"
                      data-name="{{ game.name|lower }}"
+                     data-file="{{ game.file }}"
                      data-category="main">
+                    <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('{{ game.file }}', '{{ game.name }}', '🏛️')" data-game="{{ game.file }}"></button>
                     {% if 'v9' in game.name or 'Ultimate' in game.name %}
                     <span class="featured-badge">★ Featured</span>
                     {% endif %}
@@ -987,9 +1561,11 @@
             <div class="games-grid">
                 {% for game in games if game.category == 'Quantum & Physics' or game.category == 'Physics Simulations' %}
                 <div class="game-card fade-in"
-                     onclick="location.href='/play/{{ game.file }}'"
+                     onclick="playGame('{{ game.file }}', '{{ game.name }}', '⚛️')"
                      data-name="{{ game.name|lower }}"
+                     data-file="{{ game.file }}"
                      data-category="quantum">
+                    <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('{{ game.file }}', '{{ game.name }}', '⚛️')" data-game="{{ game.file }}"></button>
                     <div class="game-header">
                         <span class="game-icon">
                             {% if 'schrodinger' in game.id %}🐱
@@ -1031,9 +1607,11 @@
             <div class="games-grid">
                 {% for game in games if game.category == 'Philosophy of Mind' or game.category == 'Decision Theory' %}
                 <div class="game-card fade-in"
-                     onclick="location.href='/play/{{ game.file }}'"
+                     onclick="playGame('{{ game.file }}', '{{ game.name }}', '🧠')"
                      data-name="{{ game.name|lower }}"
+                     data-file="{{ game.file }}"
                      data-category="philosophy">
+                    <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('{{ game.file }}', '{{ game.name }}', '🧠')" data-game="{{ game.file }}"></button>
                     <div class="game-header">
                         <span class="game-icon">
                             {% if 'chinese' in game.id %}🏮
@@ -1077,9 +1655,11 @@
             <div class="games-grid">
                 {% for game in games if game.category == 'Computation & Logic' or game.category == 'Logic & Mathematics' %}
                 <div class="game-card fade-in"
-                     onclick="location.href='/play/{{ game.file }}'"
+                     onclick="playGame('{{ game.file }}', '{{ game.name }}', '💻')"
                      data-name="{{ game.name|lower }}"
+                     data-file="{{ game.file }}"
                      data-category="logic">
+                    <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('{{ game.file }}', '{{ game.name }}', '💻')" data-game="{{ game.file }}"></button>
                     <div class="game-header">
                         <span class="game-icon">
                             {% if 'halting' in game.id %}⏹️
@@ -1121,9 +1701,11 @@
             <div class="games-grid">
                 {% for game in games if game.category == 'Other Experiments' %}
                 <div class="game-card fade-in"
-                     onclick="location.href='/play/{{ game.file }}'"
+                     onclick="playGame('{{ game.file }}', '{{ game.name }}', '🎲')"
                      data-name="{{ game.name|lower }}"
+                     data-file="{{ game.file }}"
                      data-category="other">
+                    <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite('{{ game.file }}', '{{ game.name }}', '🎲')" data-game="{{ game.file }}"></button>
                     <div class="game-header">
                         <span class="game-icon">
                             {% if 'forking' in game.id %}🌳
@@ -1204,11 +1786,418 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-modal">
+            <div class="settings-header">
+                <h3 class="settings-title">⚙️ Settings</h3>
+                <button class="settings-close" id="settingsClose">×</button>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-group-title">Theme</div>
+                <div class="theme-options">
+                    <div class="theme-option green active" data-theme="green" title="Matrix Green"></div>
+                    <div class="theme-option blue" data-theme="blue" title="Cyber Blue"></div>
+                    <div class="theme-option purple" data-theme="purple" title="Neon Purple"></div>
+                    <div class="theme-option red" data-theme="red" title="Alert Red"></div>
+                    <div class="theme-option orange" data-theme="orange" title="Warning Orange"></div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-group-title">Audio & Effects</div>
+                <div class="settings-option">
+                    <div class="settings-option-label">
+                        <span class="settings-option-icon">🔊</span>
+                        <span class="settings-option-text">Sound Effects</span>
+                    </div>
+                    <div class="toggle" id="soundToggle" data-setting="sound"></div>
+                </div>
+                <div class="settings-option">
+                    <div class="settings-option-label">
+                        <span class="settings-option-icon">📳</span>
+                        <span class="settings-option-text">Haptic Feedback</span>
+                    </div>
+                    <div class="toggle active" id="hapticToggle" data-setting="haptic"></div>
+                </div>
+                <div class="settings-option">
+                    <div class="settings-option-label">
+                        <span class="settings-option-icon">✨</span>
+                        <span class="settings-option-text">Animations</span>
+                    </div>
+                    <div class="toggle active" id="animationToggle" data-setting="animations"></div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-group-title">Data</div>
+                <div class="settings-option">
+                    <div class="settings-option-label">
+                        <span class="settings-option-icon">🗑️</span>
+                        <span class="settings-option-text">Clear All Data</span>
+                    </div>
+                    <button class="clear-recent" id="clearAllData">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Toast -->
+    <div class="achievement-toast" id="achievementToast">
+        <span class="achievement-icon">🏆</span>
+        <div class="achievement-text">
+            <h4 id="achievementTitle">Achievement Unlocked!</h4>
+            <p id="achievementDesc">You did something awesome</p>
+        </div>
+    </div>
+
+    <!-- Quick Play FAB -->
+    <button class="quick-play-fab" id="quickPlayFab" title="Quick Play Last Game">▶</button>
+
     <script>
-        // Search functionality
+        // ===== STORAGE & STATE =====
+        const STORAGE_KEYS = {
+            favorites: 'vault13_favorites',
+            recent: 'vault13_recent',
+            stats: 'vault13_stats',
+            settings: 'vault13_settings',
+            achievements: 'vault13_achievements'
+        };
+
+        // Load data from localStorage
+        function loadData(key, defaultValue = []) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : defaultValue;
+            } catch (e) {
+                return defaultValue;
+            }
+        }
+
+        function saveData(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.warn('Storage error:', e);
+            }
+        }
+
+        // Initialize state
+        let favorites = loadData(STORAGE_KEYS.favorites, []);
+        let recentGames = loadData(STORAGE_KEYS.recent, []);
+        let userStats = loadData(STORAGE_KEYS.stats, { gamesPlayed: 0, totalTime: 0, sessions: 0 });
+        let settings = loadData(STORAGE_KEYS.settings, { theme: 'green', sound: false, haptic: true, animations: true });
+        let achievements = loadData(STORAGE_KEYS.achievements, []);
+
+        // ===== ACHIEVEMENTS SYSTEM =====
+        const ACHIEVEMENTS = {
+            first_game: { id: 'first_game', title: 'First Steps', desc: 'Play your first game', icon: '🎮' },
+            five_games: { id: 'five_games', title: 'Getting Started', desc: 'Play 5 different games', icon: '🌟' },
+            ten_games: { id: 'ten_games', title: 'Explorer', desc: 'Play 10 different games', icon: '🗺️' },
+            first_favorite: { id: 'first_favorite', title: 'Collector', desc: 'Add your first favorite', icon: '⭐' },
+            five_favorites: { id: 'five_favorites', title: 'Curator', desc: 'Have 5 favorites', icon: '💎' },
+            night_owl: { id: 'night_owl', title: 'Night Owl', desc: 'Play after midnight', icon: '🦉' },
+            early_bird: { id: 'early_bird', title: 'Early Bird', desc: 'Play before 6 AM', icon: '🐦' },
+            theme_changer: { id: 'theme_changer', title: 'Stylist', desc: 'Change the theme', icon: '🎨' },
+            marathon: { id: 'marathon', title: 'Marathon', desc: 'Play for 30+ minutes', icon: '🏃' }
+        };
+
+        function checkAchievement(id) {
+            if (!achievements.includes(id) && ACHIEVEMENTS[id]) {
+                achievements.push(id);
+                saveData(STORAGE_KEYS.achievements, achievements);
+                showAchievement(ACHIEVEMENTS[id]);
+                updateStatsDisplay();
+            }
+        }
+
+        function showAchievement(achievement) {
+            const toast = document.getElementById('achievementToast');
+            document.getElementById('achievementTitle').textContent = achievement.title;
+            document.getElementById('achievementDesc').textContent = achievement.desc;
+            toast.querySelector('.achievement-icon').textContent = achievement.icon;
+
+            toast.classList.add('show');
+            playSound('achievement');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // ===== SOUND EFFECTS =====
+        const sounds = {
+            click: null,
+            favorite: null,
+            achievement: null
+        };
+
+        // Create audio context on first interaction
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!settings.sound) return;
+            initAudio();
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            switch(type) {
+                case 'click':
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.value = 0.1;
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.05);
+                    break;
+                case 'favorite':
+                    oscillator.frequency.value = 523.25; // C5
+                    gainNode.gain.value = 0.1;
+                    oscillator.start();
+                    setTimeout(() => oscillator.frequency.value = 659.25, 100); // E5
+                    setTimeout(() => oscillator.frequency.value = 783.99, 200); // G5
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+                case 'achievement':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 523.25;
+                    gainNode.gain.value = 0.15;
+                    oscillator.start();
+                    setTimeout(() => oscillator.frequency.value = 659.25, 150);
+                    setTimeout(() => oscillator.frequency.value = 783.99, 300);
+                    setTimeout(() => oscillator.frequency.value = 1046.50, 450);
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                    break;
+            }
+        }
+
+        // ===== FAVORITES SYSTEM =====
+        function toggleFavorite(gameFile, gameName, icon) {
+            const index = favorites.findIndex(f => f.file === gameFile);
+
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push({ file: gameFile, name: gameName, icon: icon });
+                if (favorites.length === 1) checkAchievement('first_favorite');
+                if (favorites.length === 5) checkAchievement('five_favorites');
+            }
+
+            saveData(STORAGE_KEYS.favorites, favorites);
+            updateFavoritesDisplay();
+            updateFavoriteButtons();
+            playSound('favorite');
+            hapticFeedback();
+        }
+
+        function updateFavoriteButtons() {
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const gameFile = btn.dataset.game;
+                const isFavorite = favorites.some(f => f.file === gameFile);
+                btn.classList.toggle('active', isFavorite);
+            });
+        }
+
+        function updateFavoritesDisplay() {
+            const section = document.getElementById('favoritesSection');
+            const grid = document.getElementById('favoritesGrid');
+
+            if (favorites.length === 0) {
+                section.classList.remove('has-favorites');
+                return;
+            }
+
+            section.classList.add('has-favorites');
+            grid.innerHTML = favorites.map(fav => `
+                <div class="recent-game" onclick="playGame('${fav.file}', '${fav.name}', '${fav.icon}')">
+                    <span class="recent-game-icon">${fav.icon}</span>
+                    <span class="recent-game-name">${fav.name.split(' - ')[0]}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('favoritesCount').textContent = favorites.length;
+        }
+
+        // ===== RECENTLY PLAYED =====
+        function addToRecent(gameFile, gameName, icon) {
+            // Remove if already exists
+            recentGames = recentGames.filter(g => g.file !== gameFile);
+
+            // Add to front
+            recentGames.unshift({ file: gameFile, name: gameName, icon: icon, time: Date.now() });
+
+            // Keep only last 10
+            recentGames = recentGames.slice(0, 10);
+
+            saveData(STORAGE_KEYS.recent, recentGames);
+            updateRecentDisplay();
+        }
+
+        function updateRecentDisplay() {
+            const section = document.getElementById('recentSection');
+            const container = document.getElementById('recentGames');
+
+            if (recentGames.length === 0) {
+                section.style.display = 'none';
+                document.getElementById('quickPlayFab').classList.remove('show');
+                return;
+            }
+
+            section.style.display = 'block';
+            document.getElementById('quickPlayFab').classList.add('show');
+
+            container.innerHTML = recentGames.slice(0, 5).map(game => `
+                <div class="recent-game" onclick="playGame('${game.file}', '${game.name}', '${game.icon}')">
+                    <span class="recent-game-icon">${game.icon}</span>
+                    <span class="recent-game-name">${game.name.split(' - ')[0]}</span>
+                </div>
+            `).join('');
+        }
+
+        // ===== PLAY GAME =====
+        function playGame(gameFile, gameName, icon) {
+            // Update stats
+            userStats.gamesPlayed++;
+            userStats.sessions++;
+            saveData(STORAGE_KEYS.stats, userStats);
+
+            // Add to recent
+            addToRecent(gameFile, gameName, icon);
+
+            // Check achievements
+            if (userStats.gamesPlayed === 1) checkAchievement('first_game');
+
+            const uniqueGames = new Set(recentGames.map(g => g.file));
+            if (uniqueGames.size >= 5) checkAchievement('five_games');
+            if (uniqueGames.size >= 10) checkAchievement('ten_games');
+
+            const hour = new Date().getHours();
+            if (hour >= 0 && hour < 6) checkAchievement('night_owl');
+            if (hour >= 5 && hour < 7) checkAchievement('early_bird');
+
+            // Navigate to game
+            playSound('click');
+            hapticFeedback();
+            location.href = '/play/' + gameFile;
+        }
+
+        // ===== STATS DISPLAY =====
+        function updateStatsDisplay() {
+            document.getElementById('gamesPlayed').textContent = userStats.gamesPlayed;
+
+            const mins = Math.floor(userStats.totalTime / 60);
+            document.getElementById('totalTime').textContent = mins > 60 ? Math.floor(mins/60) + 'h' : mins + 'm';
+
+            document.getElementById('favoritesCount').textContent = favorites.length;
+            document.getElementById('achievementsCount').textContent = achievements.length;
+        }
+
+        // ===== SETTINGS =====
+        function applySettings() {
+            // Theme
+            document.body.className = settings.theme !== 'green' ? `theme-${settings.theme}` : '';
+
+            // Update theme buttons
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.theme === settings.theme);
+            });
+
+            // Update toggles
+            document.getElementById('soundToggle').classList.toggle('active', settings.sound);
+            document.getElementById('hapticToggle').classList.toggle('active', settings.haptic);
+            document.getElementById('animationToggle').classList.toggle('active', settings.animations);
+
+            // Disable animations if setting is off
+            if (!settings.animations) {
+                document.body.style.setProperty('--animation-duration', '0s');
+            } else {
+                document.body.style.removeProperty('--animation-duration');
+            }
+        }
+
+        // Settings modal
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            document.getElementById('settingsOverlay').classList.add('show');
+            playSound('click');
+        });
+
+        document.getElementById('settingsClose').addEventListener('click', () => {
+            document.getElementById('settingsOverlay').classList.remove('show');
+        });
+
+        document.getElementById('settingsOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.classList.remove('show');
+            }
+        });
+
+        // Theme selection
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                settings.theme = opt.dataset.theme;
+                saveData(STORAGE_KEYS.settings, settings);
+                applySettings();
+                checkAchievement('theme_changer');
+                playSound('click');
+                hapticFeedback();
+            });
+        });
+
+        // Toggle switches
+        document.querySelectorAll('.toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const setting = toggle.dataset.setting;
+                settings[setting] = !settings[setting];
+                saveData(STORAGE_KEYS.settings, settings);
+                toggle.classList.toggle('active', settings[setting]);
+
+                // Initialize audio on first enable
+                if (setting === 'sound' && settings.sound) {
+                    initAudio();
+                    playSound('click');
+                }
+
+                hapticFeedback();
+            });
+        });
+
+        // Clear all data
+        document.getElementById('clearAllData').addEventListener('click', () => {
+            if (confirm('Clear all saved data? This cannot be undone.')) {
+                Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+                location.reload();
+            }
+        });
+
+        // Clear recent
+        document.getElementById('clearRecent').addEventListener('click', () => {
+            recentGames = [];
+            saveData(STORAGE_KEYS.recent, recentGames);
+            updateRecentDisplay();
+            hapticFeedback();
+        });
+
+        // Quick play FAB
+        document.getElementById('quickPlayFab').addEventListener('click', () => {
+            if (recentGames.length > 0) {
+                const last = recentGames[0];
+                playGame(last.file, last.name, last.icon);
+            }
+        });
+
+        // ===== SEARCH & FILTER =====
         const searchInput = document.getElementById('search');
         const gameCards = document.querySelectorAll('.game-card');
-        const categories = document.querySelectorAll('.category');
+        const categoriesEl = document.querySelectorAll('.category');
         const filterBtns = document.querySelectorAll('.filter-btn');
         const navItems = document.querySelectorAll('.nav-item');
 
@@ -1221,29 +2210,27 @@
                 card.style.display = matches ? '' : 'none';
             });
 
-            categories.forEach(cat => {
+            categoriesEl.forEach(cat => {
                 const visibleCards = cat.querySelectorAll('.game-card:not([style*="display: none"])');
                 cat.style.display = visibleCards.length > 0 ? '' : 'none';
             });
         });
 
-        // Filter functionality
         function setFilter(filter) {
-            // Update filter buttons
             filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
             navItems.forEach(n => n.classList.toggle('active', n.dataset.filter === filter));
 
             if (filter === 'all') {
-                categories.forEach(cat => cat.style.display = '');
+                categoriesEl.forEach(cat => cat.style.display = '');
                 gameCards.forEach(card => card.style.display = '');
             } else {
-                categories.forEach(cat => {
+                categoriesEl.forEach(cat => {
                     cat.style.display = cat.dataset.category === filter ? '' : 'none';
                 });
             }
 
-            // Scroll to top smoothly
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            playSound('click');
         }
 
         filterBtns.forEach(btn => {
@@ -1264,17 +2251,14 @@
         });
         document.getElementById('categories-count').textContent = uniqueCategories.size;
 
-        // PWA Install prompt
+        // ===== PWA INSTALL =====
         let deferredPrompt;
         const installPrompt = document.getElementById('installPrompt');
-        const installNow = document.getElementById('installNow');
-        const installLater = document.getElementById('installLater');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
 
-            // Show prompt after a delay
             setTimeout(() => {
                 if (!localStorage.getItem('installPromptDismissed')) {
                     installPrompt.classList.add('show');
@@ -1282,21 +2266,32 @@
             }, 3000);
         });
 
-        installNow.addEventListener('click', async () => {
+        document.getElementById('installNow').addEventListener('click', async () => {
             installPrompt.classList.remove('show');
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
+                await deferredPrompt.userChoice;
                 deferredPrompt = null;
             }
         });
 
-        installLater.addEventListener('click', () => {
+        document.getElementById('installLater').addEventListener('click', () => {
             installPrompt.classList.remove('show');
             localStorage.setItem('installPromptDismissed', 'true');
         });
 
-        // Pull to refresh (visual only - actual refresh handled by browser)
+        // ===== HAPTIC FEEDBACK =====
+        function hapticFeedback() {
+            if (settings.haptic && 'vibrate' in navigator) {
+                navigator.vibrate(10);
+            }
+        }
+
+        document.querySelectorAll('.game-card, .filter-btn, .nav-item, .header-btn').forEach(el => {
+            el.addEventListener('touchstart', hapticFeedback, { passive: true });
+        });
+
+        // ===== PULL TO REFRESH =====
         let touchStartY = 0;
         const pullIndicator = document.getElementById('pullIndicator');
 
@@ -1306,9 +2301,7 @@
 
         document.addEventListener('touchmove', (e) => {
             const touchY = e.touches[0].clientY;
-            const scrollTop = window.scrollY;
-
-            if (scrollTop === 0 && touchY > touchStartY + 50) {
+            if (window.scrollY === 0 && touchY > touchStartY + 50) {
                 pullIndicator.classList.add('visible');
             } else {
                 pullIndicator.classList.remove('visible');
@@ -1319,23 +2312,22 @@
             pullIndicator.classList.remove('visible');
         });
 
-        // Prevent double-tap zoom on buttons
-        document.querySelectorAll('button, .play-button, .game-card').forEach(el => {
-            el.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                el.click();
-            });
-        });
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', () => {
+            applySettings();
+            updateFavoriteButtons();
+            updateFavoritesDisplay();
+            updateRecentDisplay();
+            updateStatsDisplay();
 
-        // Haptic feedback (if supported)
-        function hapticFeedback() {
-            if ('vibrate' in navigator) {
-                navigator.vibrate(10);
-            }
-        }
+            // Track time spent (every minute)
+            setInterval(() => {
+                userStats.totalTime++;
+                saveData(STORAGE_KEYS.stats, userStats);
+                updateStatsDisplay();
 
-        document.querySelectorAll('.game-card, .filter-btn, .nav-item').forEach(el => {
-            el.addEventListener('touchstart', hapticFeedback, { passive: true });
+                if (userStats.totalTime >= 30) checkAchievement('marathon');
+            }, 60000);
         });
     </script>
 </body>

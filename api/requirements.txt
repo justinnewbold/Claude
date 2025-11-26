@@ -1,0 +1,2 @@
+# Minimal requirements for Vercel serverless
+Flask>=2.0.0
