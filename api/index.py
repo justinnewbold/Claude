@@ -194,10 +194,196 @@ class handler(BaseHTTPRequestHandler):
             color: var(--bg);
         }
 
+        /* AI Assistant */
+        .ai-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ai-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(99, 102, 241, 0.6);
+        }
+        .ai-fab.active {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        }
+        .ai-panel {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            max-height: 500px;
+            background: var(--card);
+            border: 1px solid #6366f1;
+            border-radius: 16px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .ai-panel.open { display: flex; }
+        .ai-header {
+            padding: 15px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .ai-name { font-weight: bold; font-size: 1rem; }
+        .ai-status { font-size: 0.75rem; opacity: 0.8; }
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 350px;
+        }
+        .ai-message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 85%;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .ai-message.ai {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            align-self: flex-start;
+        }
+        .ai-message.user {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            align-self: flex-end;
+        }
+        .ai-input-container {
+            display: flex;
+            padding: 10px;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            gap: 8px;
+        }
+        .ai-input {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .ai-input:focus { border-color: #6366f1; }
+        .ai-send {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6366f1;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ai-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 0 15px 10px;
+        }
+        .ai-suggestion {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #a5b4fc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ai-suggestion:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        /* AI Mode Toggle */
+        .ai-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+        }
+        .ai-mode-label { font-size: 0.8rem; color: var(--dim); }
+        .ai-toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .ai-toggle.active { background: #6366f1; }
+        .ai-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .ai-toggle.active::after { left: 22px; }
+
+        /* AI Narrator overlay */
+        .narrator-text {
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-left: 3px solid #6366f1;
+            font-style: italic;
+            color: #a5b4fc;
+        }
+
         /* Mobile */
         @media (max-width: 600px) {
             #terminal { height: 300px; font-size: 13px; }
             .game-grid { grid-template-columns: 1fr; }
+            .ai-panel { width: calc(100vw - 40px); bottom: 80px; }
+            .ai-fab { width: 50px; height: 50px; font-size: 20px; }
         }
     </style>
 </head>
@@ -216,9 +402,14 @@ class handler(BaseHTTPRequestHandler):
             </div>
             <div id="terminal"></div>
             <div class="quick-actions" id="quick-actions"></div>
+            <div class="ai-mode-toggle">
+                <span class="ai-mode-label">🤖 AI Enhanced Mode</span>
+                <div class="ai-toggle" id="ai-mode-toggle" onclick="toggleAIMode()"></div>
+                <span class="ai-mode-label" id="ai-mode-status">OFF</span>
+            </div>
             <div class="input-container">
                 <span class="prompt">&gt;</span>
-                <input type="text" id="user-input" placeholder="Type command..." autocomplete="off" autofocus>
+                <input type="text" id="user-input" placeholder="Type command or natural language..." autocomplete="off" autofocus>
             </div>
         </div>
 
@@ -228,10 +419,315 @@ class handler(BaseHTTPRequestHandler):
         </div>
     </div>
 
+    <!-- AI Assistant Panel -->
+    <button class="ai-fab" id="ai-fab" onclick="toggleAIPanel()">🤖</button>
+    <div class="ai-panel" id="ai-panel">
+        <div class="ai-header">
+            <div class="ai-avatar">🧠</div>
+            <div>
+                <div class="ai-name">ARIA - AI Assistant</div>
+                <div class="ai-status">Adaptive Response Intelligence Agent</div>
+            </div>
+        </div>
+        <div class="ai-messages" id="ai-messages">
+            <div class="ai-message ai">Hello! I'm ARIA, your AI game assistant. I can help with hints, explain game mechanics, or just chat about strategy. What would you like to know?</div>
+        </div>
+        <div class="ai-suggestions" id="ai-suggestions">
+            <span class="ai-suggestion" onclick="askAI('Give me a hint')">💡 Hint</span>
+            <span class="ai-suggestion" onclick="askAI('Explain this game')">📖 Explain</span>
+            <span class="ai-suggestion" onclick="askAI('What should I do?')">🎯 Strategy</span>
+        </div>
+        <div class="ai-input-container">
+            <input type="text" class="ai-input" id="ai-input" placeholder="Ask ARIA anything..." onkeypress="if(event.key==='Enter')sendAIMessage()">
+            <button class="ai-send" onclick="sendAIMessage()">➤</button>
+        </div>
+    </div>
+
     <script>
         let pyodide = null;
         let currentGame = null;
         let gameState = {};
+        let aiModeEnabled = false;
+        let conversationHistory = [];
+
+        // ===== AI ASSISTANT (ARIA) =====
+        const AI_KNOWLEDGE = {
+            vault: {
+                hints: [
+                    "Keep a balance between exploring and resting. Exploration is risky but rewarding!",
+                    "Trading is safe but costs caps. Build up reserves before spending on rooms.",
+                    "Watch your food and water closely - starvation can spiral quickly.",
+                    "New dwellers arrive randomly when you rest. More dwellers = more consumption.",
+                    "The Med Bay and Power Generator are crucial rooms for long-term survival."
+                ],
+                explain: "VAULT 13 is a survival management game inspired by Fallout Shelter. You manage resources (food, water, power, caps) and dwellers in an underground vault. The goal is to survive as long as possible while growing your vault.",
+                lore: "After the Great War, Vault-Tec built underground shelters. Vault 13 was designed for extended isolation. As Overseer, you must ensure your dwellers survive the wasteland's dangers.",
+                strategy: "Focus on building essential rooms first. Keep 50+ caps as emergency reserve. Explore when you have 4+ dwellers. Trade when low on food/water."
+            },
+            echo: {
+                hints: [
+                    "Visit all 5 locations to fully explore the Temporal Nexus.",
+                    "Paradoxes aren't failures - they're part of the experience!",
+                    "Walking too far in any direction causes interesting reality shifts.",
+                    "The timeline can shift when you move east or west beyond boundaries."
+                ],
+                explain: "Echo Chambers is a quantum exploration puzzle. You navigate through a space where time and causality work differently. Locations exist in superposition, and paradoxes reveal deeper truths about reality.",
+                lore: "The Temporal Nexus exists outside normal spacetime. Here, all possible futures and pasts converge. Travelers report experiencing memories of events that never happened.",
+                strategy: "Explore systematically. Each location reveals unique quantum phenomena. Embrace the paradoxes - they're the game's core experience."
+            },
+            chinese_room: {
+                hints: [
+                    "This is more philosophy than game - ponder each response carefully.",
+                    "The 'think' command reveals insights about consciousness and AI.",
+                    "You can perfectly respond without understanding - what does that mean?",
+                    "Consider: if you pass the test, are you conscious?"
+                ],
+                explain: "Based on John Searle's famous thought experiment. You're in a room with a rulebook for Chinese. You can produce perfect Chinese responses without understanding the language. It questions whether AI can truly 'understand'.",
+                lore: "Philosopher John Searle proposed this in 1980 to argue against Strong AI - the idea that a properly programmed computer literally has a mind.",
+                strategy: "There's no 'winning' here. Engage with the philosophy. Consider what understanding really means."
+            },
+            trolley: {
+                hints: [
+                    "There's no 'right' answer - that's the point of moral dilemmas.",
+                    "Utilitarian logic says maximize lives saved. But is it that simple?",
+                    "Consider: is there a difference between killing and letting die?",
+                    "Your stats reveal your ethical tendencies over time."
+                ],
+                explain: "The Trolley Problem is a famous ethical thought experiment. A trolley is heading toward people. You can divert it, saving them but killing someone else. It tests utilitarian vs deontological ethics.",
+                lore: "Proposed by philosopher Philippa Foot in 1967, this dilemma has been debated for decades. Self-driving car developers use it to program ethical decision-making.",
+                strategy: "Play multiple scenarios. Track your choices with 'stats'. Reflect on your ethical framework."
+            },
+            prisoners: {
+                hints: [
+                    "Tit-for-Tat is a strong strategy: cooperate first, then mirror opponent.",
+                    "Always Defect wins short-term but loses in repeated games.",
+                    "Watch the opponent's pattern - some strategies are predictable.",
+                    "Mutual cooperation (3,3) beats mutual defection (1,1) over time."
+                ],
+                explain: "A classic game theory scenario. Two prisoners can cooperate (stay silent) or defect (betray). The best collective outcome requires trust, but individuals are tempted to defect.",
+                lore: "Developed by RAND Corporation in 1950. It models how rational individuals might not cooperate even when it benefits everyone. Used in economics, politics, and evolutionary biology.",
+                strategy: "Against Tit-for-Tat, cooperate. Against Always Defect, defect. Against Grudger, never defect first!"
+            },
+            monty: {
+                hints: [
+                    "Mathematically, switching wins 2/3 of the time!",
+                    "Your initial pick has 1/3 chance. The other door has 2/3.",
+                    "Monty's reveal gives you information - use it!",
+                    "Play many games to see the statistics converge."
+                ],
+                explain: "Based on the game show Let's Make a Deal. Pick a door, Monty reveals a goat behind another, then you choose to switch or stay. Counter-intuitively, switching doubles your win rate!",
+                lore: "This problem went viral in 1990 when Marilyn vos Savant published it. Even mathematicians argued against her correct answer. It's now a famous example of probability intuition failure.",
+                strategy: "Always switch! Your initial 1/3 guess doesn't change, but the remaining door absorbs the 2/3 probability."
+            }
+        };
+
+        // NLP Command Mapping
+        const NLP_PATTERNS = {
+            vault: {
+                'check|show|view|see|what.*status|how.*doing': 'status',
+                'make|create|construct|build|new room': 'build',
+                'go out|venture|search|scavenge|explore|expedition': 'explore',
+                'buy|sell|trade|merchant|shop': 'trade',
+                'sleep|rest|next day|end|pass time|wait': 'rest',
+                'help|commands|what can': 'help'
+            },
+            echo: {
+                'look|see|observe|examine|where': 'look',
+                'up|north|forward': 'north',
+                'down|south|back': 'south',
+                'right|east': 'east',
+                'left|west': 'west',
+                'touch|use|interact|activate': 'interact'
+            },
+            chinese_room: {
+                'translate|read|interpret|lookup': 'translate',
+                'respond|reply|answer|send': 'respond',
+                'think|ponder|consider|reflect|contemplate': 'think',
+                'examine|look|inspect|see': 'examine',
+                'help|commands': 'help'
+            },
+            trolley: {
+                'pull|switch|divert|save|lever': 'pull',
+                'wait|nothing|don\\'t|stay|ignore': 'wait',
+                'think|consider|ponder': 'think',
+                'stats|score|history|record': 'stats'
+            },
+            prisoners: {
+                'cooperate|trust|work together|coop|c$': 'cooperate',
+                'defect|betray|cheat|d$': 'defect',
+                'stats|score|points': 'stats',
+                'opponent|who|enemy|other': 'opponent'
+            },
+            monty: {
+                'pick 1|choose 1|door 1|first': 'pick 1',
+                'pick 2|choose 2|door 2|second|middle': 'pick 2',
+                'pick 3|choose 3|door 3|third|last': 'pick 3',
+                'switch|change|other': 'switch',
+                'stay|keep|same': 'stay',
+                'stats|record|history': 'stats'
+            }
+        };
+
+        // AI Narrator responses
+        const NARRATOR_TEMPLATES = {
+            vault: {
+                build: ["The construction crew works through the night...", "Hammers echo through the vault corridors...", "A new chapter begins for Vault 13..."],
+                explore: ["Your scouts disappear into the wasteland's haze...", "The vault door creaks open, revealing the blasted landscape...", "Geiger counters click as your team ventures forth..."],
+                rest: ["The vault settles into quiet slumber...", "Another day in the underground haven passes...", "Dreams of the world above fill sleeping minds..."]
+            },
+            echo: {
+                move: ["Reality shimmers as you step forward...", "The fabric of spacetime ripples around you...", "Quantum possibilities collapse into your new position..."],
+                paradox: ["Time folds back on itself...", "You glimpse yourself from another timeline...", "Causality protests your presence here..."]
+            },
+            trolley: {
+                pull: ["Your hand trembles on the lever...", "The weight of choice presses down...", "Steel screeches against steel as the track switches..."],
+                wait: ["Your muscles freeze despite your racing thoughts...", "Time seems to slow as the trolley approaches...", "Inaction becomes its own form of choice..."]
+            }
+        };
+
+        function toggleAIPanel() {
+            const panel = document.getElementById('ai-panel');
+            const fab = document.getElementById('ai-fab');
+            panel.classList.toggle('open');
+            fab.classList.toggle('active');
+        }
+
+        function toggleAIMode() {
+            aiModeEnabled = !aiModeEnabled;
+            const toggle = document.getElementById('ai-mode-toggle');
+            const status = document.getElementById('ai-mode-status');
+            toggle.classList.toggle('active', aiModeEnabled);
+            status.textContent = aiModeEnabled ? 'ON' : 'OFF';
+
+            if (aiModeEnabled) {
+                addAIMessage("AI Enhanced Mode activated! I'll now provide dynamic narration and help interpret your natural language commands.", 'ai');
+            }
+        }
+
+        function addAIMessage(text, type) {
+            const messages = document.getElementById('ai-messages');
+            const div = document.createElement('div');
+            div.className = 'ai-message ' + type;
+            div.textContent = text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            conversationHistory.push({role: type, content: text});
+        }
+
+        function askAI(query) {
+            document.getElementById('ai-input').value = query;
+            sendAIMessage();
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addAIMessage(message, 'user');
+            input.value = '';
+
+            // Generate AI response
+            setTimeout(() => {
+                const response = generateAIResponse(message);
+                addAIMessage(response, 'ai');
+                updateSuggestions();
+            }, 500 + Math.random() * 500);
+        }
+
+        function generateAIResponse(query) {
+            const q = query.toLowerCase();
+            const game = currentGame?.id || 'vault';
+            const knowledge = AI_KNOWLEDGE[game];
+
+            // Check for specific intents
+            if (q.includes('hint') || q.includes('help me') || q.includes('stuck')) {
+                return knowledge.hints[Math.floor(Math.random() * knowledge.hints.length)];
+            }
+            if (q.includes('explain') || q.includes('how') || q.includes('what is')) {
+                return knowledge.explain;
+            }
+            if (q.includes('lore') || q.includes('story') || q.includes('background')) {
+                return knowledge.lore;
+            }
+            if (q.includes('strategy') || q.includes('should i') || q.includes('best') || q.includes('what should')) {
+                return knowledge.strategy;
+            }
+            if (q.includes('hello') || q.includes('hi ') || q.includes('hey')) {
+                return "Hello, wanderer! I'm here to help you navigate " + (currentGame?.name || "these games") + ". Ask me for hints, strategy, or lore!";
+            }
+
+            // Dynamic game state analysis
+            if (currentGame) {
+                return analyzeGameState(game, q);
+            }
+
+            return "I'm your AI guide for VAULT 13's game collection. Select a game, and I can provide hints, explain mechanics, share lore, or suggest strategies. What interests you?";
+        }
+
+        function analyzeGameState(gameId, query) {
+            const knowledge = AI_KNOWLEDGE[gameId];
+
+            // Return a contextual hint based on game
+            const hints = knowledge.hints;
+            return hints[Math.floor(Math.random() * hints.length)] + " Would you like more specific guidance?";
+        }
+
+        function updateSuggestions() {
+            const suggestions = document.getElementById('ai-suggestions');
+            const game = currentGame?.id;
+
+            if (game) {
+                const gameSuggestions = {
+                    vault: ['Resource tips', 'Building strategy', 'Exploration risks'],
+                    echo: ['Paradox meaning', 'Timeline tips', 'Location guide'],
+                    chinese_room: ['Philosophy insight', 'Searle\\'s argument', 'AI consciousness'],
+                    trolley: ['Ethical theory', 'Utilitarian view', 'Why it matters'],
+                    prisoners: ['Best strategy', 'Game theory', 'Opponent types'],
+                    monty: ['Why switch?', 'Probability math', 'Common mistakes']
+                };
+
+                const items = gameSuggestions[game] || ['Hint', 'Explain', 'Strategy'];
+                suggestions.innerHTML = items.map(s =>
+                    `<span class="ai-suggestion" onclick="askAI('${s}')">${s}</span>`
+                ).join('');
+            }
+        }
+
+        // Natural Language Processing
+        function parseNaturalLanguage(input, gameId) {
+            const patterns = NLP_PATTERNS[gameId];
+            if (!patterns) return input;
+
+            const normalized = input.toLowerCase().trim();
+
+            for (const [pattern, command] of Object.entries(patterns)) {
+                const regex = new RegExp(pattern, 'i');
+                if (regex.test(normalized)) {
+                    return command;
+                }
+            }
+
+            return input; // Return original if no match
+        }
+
+        // AI Narrator
+        function getNarration(gameId, action) {
+            const templates = NARRATOR_TEMPLATES[gameId];
+            if (!templates || !templates[action]) return null;
+
+            const options = templates[action];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
+        function appendNarration(text) {
+            const terminal = document.getElementById('terminal');
+            const div = document.createElement('div');
+            div.className = 'narrator-text';
+            div.textContent = '✨ ' + text;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
 
         const GAMES = [
             {
@@ -647,12 +1143,27 @@ Net lives: {s['saved'] - s['sacrificed']:+d}
         return "Commands: pull, wait, think, stats"
 
     def init_prisoners(self):
+        # Enhanced AI opponents with personalities
+        opponents = [
+            {'name': 'Tit-for-Tat', 'personality': 'The Mirror', 'desc': 'Starts kind, then copies your moves'},
+            {'name': 'Always Defect', 'personality': 'The Betrayer', 'desc': 'Never trusts, always betrays'},
+            {'name': 'Random', 'personality': 'The Chaos Agent', 'desc': 'Unpredictable and erratic'},
+            {'name': 'Grudger', 'personality': 'The Elephant', 'desc': 'Cooperates until betrayed, then never forgives'},
+            {'name': 'Pavlov', 'personality': 'The Learner', 'desc': 'Repeats successful moves'},
+            {'name': 'Generous TFT', 'personality': 'The Forgiver', 'desc': 'Like Tit-for-Tat but occasionally forgives'},
+            {'name': 'Suspicious TFT', 'personality': 'The Skeptic', 'desc': 'Defects first, then mirrors'},
+            {'name': 'Adaptive', 'personality': 'The Analyst', 'desc': 'Learns your patterns and exploits them'}
+        ]
+        opp = random.choice(opponents)
         self.state = {
             'round': 1,
             'your_score': 0,
             'opp_score': 0,
             'history': [],
-            'opponent': random.choice(['Tit-for-Tat', 'Always Defect', 'Random', 'Grudger'])
+            'opponent': opp['name'],
+            'opp_personality': opp['personality'],
+            'opp_desc': opp['desc'],
+            'last_outcome': None
         }
         return self.show_prisoners()
 
@@ -682,13 +1193,58 @@ Commands: cooperate, defect, stats, opponent"""
         s = self.state
 
         def get_opponent_move():
-            if s['opponent'] == 'Tit-for-Tat':
+            opp = s['opponent']
+
+            if opp == 'Tit-for-Tat':
+                # Cooperate first, then mirror opponent's last move
                 return s['history'][-1][0] if s['history'] else 'C'
-            elif s['opponent'] == 'Always Defect':
+
+            elif opp == 'Always Defect':
                 return 'D'
-            elif s['opponent'] == 'Grudger':
+
+            elif opp == 'Grudger':
+                # Cooperate until betrayed, then always defect
                 return 'D' if any(h[0] == 'D' for h in s['history']) else 'C'
-            else:
+
+            elif opp == 'Pavlov':
+                # Win-stay, lose-shift: repeat last move if it was successful
+                if not s['history']:
+                    return 'C'
+                last_you, last_opp = s['history'][-1]
+                # If last round was mutual cooperation or I defected and they cooperated
+                if s['last_outcome'] in ['good', 'great']:
+                    return s['history'][-1][1] if len(s['history']) > 0 else 'C'
+                return 'D' if s['history'][-1][1] == 'C' else 'C'
+
+            elif opp == 'Generous TFT':
+                # Like TFT but forgives defection 10% of the time
+                if not s['history']:
+                    return 'C'
+                if s['history'][-1][0] == 'D':
+                    return 'C' if random.random() < 0.1 else 'D'
+                return 'C'
+
+            elif opp == 'Suspicious TFT':
+                # Defects first, then mirrors
+                if not s['history']:
+                    return 'D'
+                return s['history'][-1][0]
+
+            elif opp == 'Adaptive':
+                # Analyzes player's cooperation rate and exploits
+                if len(s['history']) < 3:
+                    return 'C'
+                coop_rate = sum(1 for h in s['history'] if h[0] == 'C') / len(s['history'])
+                # If player cooperates often, exploit them
+                if coop_rate > 0.7:
+                    return 'D'
+                # If player defects often, defect back
+                elif coop_rate < 0.3:
+                    return 'D'
+                # Otherwise mirror
+                return s['history'][-1][0]
+
+            else:  # Random
                 return random.choice(['C', 'D'])
 
         if cmd in ['cooperate', 'c']:
@@ -696,10 +1252,12 @@ Commands: cooperate, defect, stats, opponent"""
             if opp == 'C':
                 s['your_score'] += 3
                 s['opp_score'] += 3
-                result = "Both cooperated! +3 each"
+                s['last_outcome'] = 'good'
+                result = "🤝 Both cooperated! +3 each"
             else:
                 s['opp_score'] += 5
-                result = "You cooperated, they defected! You: +0, Them: +5"
+                s['last_outcome'] = 'bad'
+                result = "😔 You cooperated, they defected! You: +0, Them: +5"
             s['history'].append(('C', opp))
             s['round'] += 1
             return result + NL + self.show_prisoners()
@@ -707,18 +1265,37 @@ Commands: cooperate, defect, stats, opponent"""
             opp = get_opponent_move()
             if opp == 'C':
                 s['your_score'] += 5
-                result = "You defected, they cooperated! You: +5, Them: +0"
+                s['last_outcome'] = 'great'
+                result = "😈 You defected, they cooperated! You: +5, Them: +0"
             else:
                 s['your_score'] += 1
                 s['opp_score'] += 1
-                result = "Both defected! +1 each"
+                s['last_outcome'] = 'poor'
+                result = "💔 Both defected! +1 each"
             s['history'].append(('D', opp))
             s['round'] += 1
             return result + NL + self.show_prisoners()
         elif cmd == 'stats':
-            return f"Round {s['round']} | You: {s['your_score']} | Opponent: {s['opp_score']}{NL}History: {s['history'][-5:]}"
+            coop_rate = sum(1 for h in s['history'] if h[0] == 'C') / max(1, len(s['history'])) * 100
+            return f"""
+📊 GAME STATISTICS
+═══════════════════════
+Round: {s['round']}
+Your Score: {s['your_score']} pts
+Opponent Score: {s['opp_score']} pts
+Your Cooperation Rate: {coop_rate:.0f}%
+Recent History: {s['history'][-5:]}
+"""
         elif cmd == 'opponent':
-            return f"You're playing against: {s['opponent']}{NL}(Strategy revealed for educational purposes)"
+            return f"""
+🎭 OPPONENT PROFILE
+═══════════════════════
+Strategy: {s['opponent']}
+Codename: {s['opp_personality']}
+Behavior: {s['opp_desc']}
+
+(Understanding your opponent is key to game theory!)
+"""
         return "Commands: cooperate (c), defect (d), stats, opponent"
 
     def init_monty(self):
@@ -922,7 +1499,28 @@ game_engine = GameEngine()
         async function sendCommand(cmd) {
             if (!currentGame || !pyodide) return;
 
-            appendOutput('> ' + cmd, 'input-line');
+            let processedCmd = cmd;
+
+            // AI Mode: Parse natural language
+            if (aiModeEnabled) {
+                processedCmd = parseNaturalLanguage(cmd, currentGame.id);
+                if (processedCmd !== cmd) {
+                    appendOutput('> ' + cmd + ' → [' + processedCmd + ']', 'input-line');
+                } else {
+                    appendOutput('> ' + cmd, 'input-line');
+                }
+
+                // Add narrator text before action
+                const narrationAction = getNarrationAction(processedCmd, currentGame.id);
+                if (narrationAction) {
+                    const narration = getNarration(currentGame.id, narrationAction);
+                    if (narration) {
+                        appendNarration(narration);
+                    }
+                }
+            } else {
+                appendOutput('> ' + cmd, 'input-line');
+            }
 
             const cmdFuncs = {
                 'vault': 'vault_command',
@@ -935,7 +1533,7 @@ game_engine = GameEngine()
 
             try {
                 const result = await pyodide.runPythonAsync(
-                    `game_engine.${cmdFuncs[currentGame.id]}("${cmd.replace(/"/g, '\\"')}")`
+                    `game_engine.${cmdFuncs[currentGame.id]}("${processedCmd.replace(/"/g, '\\"')}")`
                 );
                 appendOutput(result);
             } catch (err) {
@@ -944,6 +1542,16 @@ game_engine = GameEngine()
 
             document.getElementById('user-input').value = '';
             document.getElementById('user-input').focus();
+        }
+
+        // Map commands to narrator actions
+        function getNarrationAction(cmd, gameId) {
+            const actionMaps = {
+                vault: { build: 'build', explore: 'explore', rest: 'rest' },
+                echo: { north: 'move', south: 'move', east: 'move', west: 'move' },
+                trolley: { pull: 'pull', wait: 'wait' }
+            };
+            return actionMaps[gameId]?.[cmd];
         }
 
         // Handle input
