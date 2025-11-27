@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAULT 13 - Enhanced Edition</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ccff;
+            --warning: #ffaa00;
+            --danger: #ff3344;
+            --bg: #0a0a0f;
+            --card: #12121a;
+            --border: #333;
+            --text: #e0e0e0;
+            --dim: #808080;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,255,136,0.6); }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0,255,136,0.6);
+            animation: glow 2s infinite;
+        }
+
+        .terminal {
+            background: #000;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 20px 0;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .quick-btn {
+            background: rgba(0,255,136,0.1);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .command-bar {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: var(--card);
+            border-radius: 12px;
+        }
+
+        #command-input {
+            flex: 1;
+            background: #000;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            padding: 12px 16px;
+        }
+
+        #command-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: var(--bg);
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ VAULT 13 - Enhanced Edition</h1>
+            <p style="color: var(--dim);">Complete with Tutorial, Quests, Achievements & More!</p>
+        </header>
+
+        <div class="loading" id="loading">Loading Enhanced Edition...</div>
+
+        <div id="game-container" style="display: none;">
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="cmd('status')">📊 Status</button>
+                <button class="quick-btn" onclick="cmd('dwellers')">👥 Dwellers</button>
+                <button class="quick-btn" onclick="cmd('build')">🏗️ Build</button>
+                <button class="quick-btn" onclick="cmd('explore')">🗺️ Explore</button>
+                <button class="quick-btn" onclick="cmd('quests')">🎭 Quests</button>
+                <button class="quick-btn" onclick="cmd('achievements')">🏆 Achievements</button>
+                <button class="quick-btn" onclick="cmd('rest')">💤 Rest</button>
+                <button class="quick-btn" onclick="cmd('help')">❓ Help</button>
+            </div>
+
+            <div class="terminal" id="terminal"></div>
+
+            <div class="command-bar">
+                <span style="color: var(--primary); padding: 12px;">&gt;</span>
+                <input type="text" id="command-input" placeholder="Type command..." autocomplete="off">
+                <button class="send-btn" onclick="execute()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pyodide = null;
+        let terminal = null;
+
+        function write(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function cmd(command) {
+            write('> ' + command);
+            try {
+                const result = await pyodide.runPythonAsync(`game.handle_command("${command}")`);
+                write(result);
+            } catch (error) {
+                write('ERROR: ' + error.message);
+            }
+        }
+
+        async function execute() {
+            const input = document.getElementById('command-input');
+            const command = input.value.trim();
+            if (!command) return;
+            input.value = '';
+            await cmd(command);
+        }
+
+        async function init() {
+            terminal = document.getElementById('terminal');
+
+            try {
+                pyodide = await loadPyodide();
+
+                // Enhanced game engine embedded
+                await pyodide.runPythonAsync(`
+import random
+import json
+
+class EnhancedVault:
+    def __init__(self):
+        self.day = 1
+        self.food = 50
+        self.water = 50
+        self.power = 30
+        self.caps = 100
+        self.dwellers = []
+        self.rooms = ['Living Quarters', 'Diner', 'Water Treatment']
+        self.tutorial_stage = 0
+        self.tutorial_active = True
+        self.achievements = []
+        self.quests = []
+        self.vault_tier = "🔰 Struggling Shelter"
+
+        # Initialize dwellers
+        names = ["Marcus Chen", "Sarah Rodriguez", "David Kim", "Elena Patel",
+                 "James Smith", "Maya Garcia", "Robert Davis", "Lisa Wilson",
+                 "John Brown", "Emma Johnson"]
+
+        for name in names:
+            self.dwellers.append({
+                'name': name,
+                'str': random.randint(3, 8),
+                'per': random.randint(3, 8),
+                'end': random.randint(3, 8),
+                'cha': random.randint(3, 8),
+                'int': random.randint(3, 8),
+                'agi': random.randint(3, 8),
+                'luk': random.randint(3, 8),
+                'health': 100,
+                'happiness': 70,
+                'job': None,
+                'personality': {
+                    'outlook': random.choice(['optimistic', 'pessimistic', 'pragmatic']),
+                    'social': random.choice(['friendly', 'reserved', 'charismatic'])
+                }
+            })
+
+        # Initialize achievements
+        self.achievements = [
+            {'id': 'pop_boom', 'name': 'Population Boom', 'desc': 'Reach 25 dwellers', 'unlocked': False, 'icon': '👥'},
+            {'id': 'survivor', 'name': 'Survivor', 'desc': 'Survive 50 days', 'unlocked': False, 'icon': '❤️'},
+            {'id': 'rich', 'name': 'Capitalist', 'desc': 'Accumulate 1000 caps', 'unlocked': False, 'icon': '💰'},
+            {'id': 'builder', 'name': 'Master Builder', 'desc': 'Build 15 rooms', 'unlocked': False, 'icon': '🏗️'}
+        ]
+
+        # Initialize quests
+        self.quests = [
+            {'id': 'first_steps', 'name': 'First Steps', 'desc': 'Complete the tutorial', 'day': 1, 'completed': False},
+            {'id': 'radio', 'name': 'Radio Contact', 'desc': 'Survive to day 10', 'day': 10, 'completed': False},
+            {'id': 'expedition', 'name': 'First Expedition', 'desc': 'Send team to wasteland', 'day': 20, 'completed': False},
+            {'id': 'century', 'name': 'Century Vault', 'desc': 'Survive 100 days', 'day': 100, 'completed': False}
+        ]
+
+    def get_stat_color(self, stat):
+        if stat >= 8:
+            return "🟢"
+        elif stat >= 5:
+            return "🟡"
+        else:
+            return "🔴"
+
+    def handle_command(self, cmd):
+        cmd = cmd.lower().strip()
+
+        if cmd in ['status', '1']:
+            return self.get_status()
+        elif cmd in ['dwellers', '2']:
+            return self.view_dwellers()
+        elif cmd in ['build', '3']:
+            return self.build_room()
+        elif cmd in ['explore', '4']:
+            return self.explore()
+        elif cmd in ['quests', '5']:
+            return self.view_quests()
+        elif cmd in ['achievements', '6']:
+            return self.view_achievements()
+        elif cmd in ['rest', '7']:
+            return self.rest()
+        elif cmd in ['help', '?']:
+            return self.get_help()
+        elif cmd.startswith('talk '):
+            return self.talk_to_dweller(cmd[5:])
+        else:
+            return f"Unknown command: {cmd}\\nType 'help' for available commands."
+
+    def get_status(self):
+        avg_happiness = sum(d['happiness'] for d in self.dwellers) // max(1, len(self.dwellers))
+
+        tutorial = ""
+        if self.tutorial_active:
+            hints = [
+                "\\n💡 TIP: Check your dwellers with 'dwellers' to see their stats!",
+                "\\n💡 TIP: Build rooms to produce resources. Type 'build'!",
+                "\\n💡 TIP: Send expeditions with 'explore' for loot!",
+                "\\n💡 TIP: Rest to advance time and trigger events!",
+                "\\n✅ Tutorial complete! You're ready to lead Vault 13!"
+            ]
+            if self.tutorial_stage < len(hints):
+                tutorial = hints[self.tutorial_stage]
+
+        status = f"""
+╔══════════════════════════════════════════════════╗
+║     VAULT 13 - Day {self.day:3d}  [{self.vault_tier}]
+╠══════════════════════════════════════════════════╣
+║ 👥 Dwellers: {len(self.dwellers):3d}      😊 Happiness: {avg_happiness:3d}%
+║ 🍖 Food: {self.food:4d}         💧 Water: {self.water:4d}
+║ ⚡ Power: {self.power:4d}        💰 Caps: {self.caps:4d}
+╠══════════════════════════════════════════════════╣
+║ Rooms: {len(self.rooms)} | Achievements: {sum(1 for a in self.achievements if a['unlocked'])}/{len(self.achievements)} | Quests: {sum(1 for q in self.quests if q['completed'])}/{len(self.quests)}
+╚══════════════════════════════════════════════════╝
+{tutorial}
+
+Commands: status, dwellers, build, explore, quests, achievements, rest, help
+"""
+        return status
+
+    def view_dwellers(self):
+        output = "\\n╔═══ VAULT DWELLERS ═══╗\\n"
+
+        for i, d in enumerate(self.dwellers, 1):
+            health_bar = "█" * (d['health'] // 10) + "░" * (10 - d['health'] // 10)
+            happy_bar = "█" * (d['happiness'] // 10) + "░" * (10 - d['happiness'] // 10)
+
+            output += f"\\n{i}. {d['name']}\\n"
+            output += f"   HP: [{health_bar}] {d['health']}/100\\n"
+            output += f"   😊: [{happy_bar}] {d['happiness']}/100\\n"
+            output += f"   Job: {d['job'] or 'Idle'}\\n"
+            output += f"   SPECIAL: S{d['str']}{self.get_stat_color(d['str'])} "
+            output += f"P{d['per']}{self.get_stat_color(d['per'])} "
+            output += f"E{d['end']}{self.get_stat_color(d['end'])} "
+            output += f"C{d['cha']}{self.get_stat_color(d['cha'])} "
+            output += f"I{d['int']}{self.get_stat_color(d['int'])} "
+            output += f"A{d['agi']}{self.get_stat_color(d['agi'])} "
+            output += f"L{d['luk']}{self.get_stat_color(d['luk'])}\\n"
+            output += f"   {d['personality']['outlook'].title()}, {d['personality']['social']}\\n"
+
+        output += "\\n╚══════════════════════╝\\n"
+        output += "Tip: Type 'talk [name]' to chat with a dweller!\\n"
+        return output
+
+    def build_room(self):
+        rooms = [
+            ('Power Generator', 150),
+            ('Water Treatment', 120),
+            ('Diner', 100),
+            ('Med Bay', 150),
+            ('Science Lab', 200),
+            ('Training Room', 180),
+            ('Living Quarters', 100)
+        ]
+
+        menu = "\\n╔═══ BUILD ROOM ═══╗\\n"
+        for i, (name, cost) in enumerate(rooms, 1):
+            can_afford = "✓" if self.caps >= cost else "✗"
+            menu += f"{i}. {name} - {cost} caps {can_afford}\\n"
+        menu += "\\nType number to build, or 'back' to cancel\\n"
+        return menu
+
+    def explore(self):
+        if len(self.dwellers) < 3:
+            return "❌ Need at least 3 dwellers to explore!"
+
+        caps_found = random.randint(30, 100)
+        food_found = random.randint(10, 30)
+        self.caps += caps_found
+        self.food += food_found
+
+        result = f"🗺️  EXPEDITION COMPLETE\\n"
+        result += f"═══════════════════════\\n"
+        result += f"Found {caps_found} caps and {food_found} food!\\n"
+
+        if random.random() < 0.2:
+            injured = random.choice(self.dwellers)
+            injured['health'] -= 20
+            result += f"\\n⚠️  {injured['name']} was injured! (-20 HP)\\n"
+
+        return result + "\\n" + self.get_status()
+
+    def view_quests(self):
+        output = "\\n╔═══ QUESTS ═══╗\\n"
+        for q in self.quests:
+            status = "✅" if q['completed'] else ("🔓" if q['day'] <= self.day else "🔒")
+            output += f"{status} {q['name']} (Day {q['day']})\\n"
+            if q['day'] <= self.day:
+                output += f"   {q['desc']}\\n"
+        output += "╚═══════════════╝\\n"
+        return output
+
+    def view_achievements(self):
+        output = "\\n╔═══ ACHIEVEMENTS ═══╗\\n"
+        for a in self.achievements:
+            status = "✅" if a['unlocked'] else "⬜"
+            output += f"{status} {a['icon']} {a['name']}\\n"
+            output += f"   {a['desc']}\\n"
+        output += f"\\nUnlocked: {sum(1 for a in self.achievements if a['unlocked'])}/{len(self.achievements)}\\n"
+        output += "╚════════════════════╝\\n"
+        return output
+
+    def rest(self):
+        consumption = len(self.dwellers) // 2
+        self.food -= consumption
+        self.water -= consumption
+        self.power -= consumption // 2
+        self.day += 1
+
+        if self.tutorial_active:
+            self.tutorial_stage += 1
+            if self.tutorial_stage >= 5:
+                self.tutorial_active = False
+
+        # Update tier
+        if self.day >= 81:
+            self.vault_tier = "🌟 Wasteland Legend"
+        elif self.day >= 51:
+            self.vault_tier = "✨ Thriving Community"
+        elif self.day >= 21:
+            self.vault_tier = "⚡ Established Vault"
+
+        # Check achievements
+        new_achievements = []
+        for a in self.achievements:
+            if not a['unlocked']:
+                if a['id'] == 'pop_boom' and len(self.dwellers) >= 25:
+                    a['unlocked'] = True
+                    new_achievements.append(a)
+                elif a['id'] == 'survivor' and self.day >= 50:
+                    a['unlocked'] = True
+                    new_achievements.append(a)
+                elif a['id'] == 'rich' and self.caps >= 1000:
+                    a['unlocked'] = True
+                    new_achievements.append(a)
+                elif a['id'] == 'builder' and len(self.rooms) >= 15:
+                    a['unlocked'] = True
+                    new_achievements.append(a)
+
+        result = f"💤 Day {self.day} begins... (-{consumption} food/water)\\n"
+
+        # Events
+        if random.random() < 0.3:
+            events = [
+                ("🎉", "Dwellers threw a party! +10 happiness"),
+                ("👶", "A child was born!"),
+                ("📻", "Intercepted a radio broadcast"),
+                ("🔧", "Systems maintenance complete")
+            ]
+            icon, msg = random.choice(events)
+            result += f"\\n{icon} {msg}\\n"
+
+        if new_achievements:
+            result += "\\n🎉 ACHIEVEMENTS UNLOCKED:\\n"
+            for a in new_achievements:
+                result += f"   {a['icon']} {a['name']}\\n"
+
+        # Check quests
+        for q in self.quests:
+            if not q['completed'] and q['day'] <= self.day:
+                if random.random() < 0.3:
+                    q['completed'] = True
+                    result += f"\\n🎭 QUEST COMPLETE: {q['name']}!\\n"
+
+        # Warnings
+        if self.food <= 0:
+            result += "\\n⚠️  STARVATION! Dwellers suffering!\\n"
+            self.food = 0
+        if self.water <= 0:
+            result += "\\n⚠️  DEHYDRATION! Critical situation!\\n"
+            self.water = 0
+
+        return result + "\\n" + self.get_status()
+
+    def talk_to_dweller(self, name):
+        for d in self.dwellers:
+            if name.lower() in d['name'].lower():
+                responses = {
+                    'optimistic': [
+                        "Things are looking up! We'll make it through this.",
+                        "I'm happy to be here with everyone!",
+                        "Every day is a new opportunity!"
+                    ],
+                    'pessimistic': [
+                        "I'm not sure how long we can keep this up...",
+                        "The wasteland is cruel. We must be careful.",
+                        "Sometimes I wonder if we'll ever see the surface again."
+                    ],
+                    'pragmatic': [
+                        "We need to focus on resource management.",
+                        "Let's stick to the plan and we'll survive.",
+                        "Logic and preparation will see us through."
+                    ]
+                }
+
+                outlook = d['personality']['outlook']
+                response = random.choice(responses[outlook])
+
+                return f"\\n{d['name']}: \\\"{response}\\\"\\n"
+
+        return "Dweller not found. Check spelling!"
+
+    def get_help(self):
+        return """
+╔═══ VAULT 13 HELP ═══╗
+
+COMMANDS:
+• status - View vault stats
+• dwellers - See all dwellers
+• build - Construct rooms
+• explore - Send expedition
+• quests - View missions
+• achievements - See progress
+• rest - Advance time
+• talk [name] - Chat with dweller
+• help - This screen
+
+TIPS:
+🟢 = Excellent stat (8-10)
+🟡 = Good stat (5-7)
+🔴 = Poor stat (1-4)
+
+Assign dwellers to rooms matching
+their best stats for efficiency!
+
+Good luck, Overseer!
+╚═════════════════════╝
+"""
+
+game = EnhancedVault()
+`);
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+
+                const welcome = await pyodide.runPythonAsync('game.get_status()');
+                write(welcome);
+
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 'ERROR: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        document.getElementById('command-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') execute();
+        });
+
+        init();
+    </script>
+</body>
+</html>
