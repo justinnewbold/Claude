@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAULT 13 - Fixed Edition</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ccff;
+            --bg: #0a0a0f;
+            --card: #12121a;
+            --border: #333;
+            --text: #e0e0e0;
+            --dim: #808080;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,255,136,0.6); }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0,255,136,0.6);
+            animation: glow 2s infinite;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .terminal {
+            background: #000;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 20px 0;
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .quick-btn {
+            background: rgba(0,255,136,0.1);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            color: var(--bg);
+            transform: translateY(-2px);
+        }
+
+        .command-bar {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        #command-input {
+            flex: 1;
+            background: #000;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        #command-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: var(--bg);
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0,255,136,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .terminal {
+                font-size: 12px;
+                max-height: 400px;
+                padding: 15px;
+            }
+
+            .quick-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sound-toggle" id="sound-toggle" title="Toggle Sound">🔊</div>
+
+    <div class="container">
+        <header>
+            <h1>⚡ VAULT 13</h1>
+            <div style="color: var(--dim); margin-top: 5px;">Fixed & Working Edition</div>
+            <div class="badge">✅ All Core Features Working</div>
+        </header>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div>Loading VAULT 13...</div>
+        </div>
+
+        <div id="game" style="display: none;">
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="cmd('status')">📊 Status</button>
+                <button class="quick-btn" onclick="cmd('dwellers')">👥 Dwellers</button>
+                <button class="quick-btn" onclick="cmd('build')">🏗️ Build</button>
+                <button class="quick-btn" onclick="cmd('assign')">⚙️ Assign</button>
+                <button class="quick-btn" onclick="cmd('explore')">🗺️ Explore</button>
+                <button class="quick-btn" onclick="cmd('rest')">💤 Rest</button>
+                <button class="quick-btn" onclick="cmd('quests')">🎭 Quests</button>
+                <button class="quick-btn" onclick="cmd('achievements')">🏆 Achievements</button>
+                <button class="quick-btn" onclick="saveGame()">💾 Save</button>
+                <button class="quick-btn" onclick="loadGame()">📂 Load</button>
+                <button class="quick-btn" onclick="cmd('help')">❓ Help</button>
+            </div>
+
+            <div class="terminal" id="terminal"></div>
+
+            <div class="command-bar">
+                <span style="color: var(--primary); padding: 10px; font-weight: bold;">&gt;</span>
+                <input type="text" id="command-input" placeholder="Type command..." autocomplete="off" autofocus>
+                <button class="send-btn" onclick="execute()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pyodide = null;
+        let terminal = null;
+        let soundEnabled = true;
+
+        // Audio Engine
+        const AudioEngine = {
+            context: null,
+            init() {
+                try {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Audio not supported');
+                }
+            },
+            playTone(freq, duration) {
+                if (!soundEnabled || !this.context) return;
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                osc.connect(gain);
+                gain.connect(this.context.destination);
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, this.context.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
+                osc.start();
+                osc.stop(this.context.currentTime + duration);
+            },
+            click() { this.playTone(800, 0.05); },
+            success() { this.playTone(1200, 0.1); },
+            error() { this.playTone(200, 0.15); }
+        };
+
+        document.getElementById('sound-toggle').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-toggle').textContent = soundEnabled ? '🔊' : '🔇';
+        });
+
+        function write(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function cmd(command) {
+            write('> ' + command);
+            AudioEngine.click();
+
+            try {
+                const result = await pyodide.runPythonAsync(`game.handle_command("${command}")`);
+                write(result);
+
+                if (result.includes('✅')) {
+                    AudioEngine.success();
+                } else if (result.includes('❌')) {
+                    AudioEngine.error();
+                }
+
+                // Auto-save after significant actions
+                if (['rest', 'build', 'explore'].includes(command)) {
+                    autoSave();
+                }
+            } catch (error) {
+                write('ERROR: ' + error.message);
+                AudioEngine.error();
+            }
+        }
+
+        async function execute() {
+            const input = document.getElementById('command-input');
+            const command = input.value.trim();
+            if (!command) return;
+            input.value = '';
+            await cmd(command);
+        }
+
+        async function saveGame() {
+            try {
+                const saveData = await pyodide.runPythonAsync('game.save_game()');
+
+                // Extract JSON from output
+                const jsonMatch = saveData.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    localStorage.setItem('vault13_save', jsonMatch[0]);
+                    write('\n✅ Game saved to browser storage!\n');
+                    AudioEngine.success();
+                }
+            } catch (error) {
+                write('\n❌ Save failed: ' + error.message + '\n');
+                AudioEngine.error();
+            }
+        }
+
+        async function autoSave() {
+            try {
+                const saveData = await pyodide.runPythonAsync('game.save_game()');
+                const jsonMatch = saveData.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    localStorage.setItem('vault13_save', jsonMatch[0]);
+                }
+            } catch (error) {
+                console.error('Auto-save failed:', error);
+            }
+        }
+
+        async function loadGame() {
+            const savedData = localStorage.getItem('vault13_save');
+
+            if (!savedData) {
+                write('\n❌ No saved game found!\n');
+                AudioEngine.error();
+                return;
+            }
+
+            try {
+                // Parse and load
+                const data = JSON.parse(savedData);
+
+                await pyodide.runPythonAsync(`
+import json
+saved = json.loads('''${savedData}''')
+
+# Restore game state
+game.day = saved['day']
+game.food = saved['food']
+game.water = saved['water']
+game.power = saved['power']
+game.caps = saved['caps']
+game.vault_tier = saved['vault_tier']
+game.tutorial_active = saved['tutorial_active']
+game.tutorial_stage = saved['tutorial_stage']
+game.total_expeditions = saved['total_expeditions']
+game.deaths = saved['deaths']
+
+# Restore dwellers
+from dataclasses import dataclass
+game.dwellers = []
+for d_data in saved['dwellers']:
+    d = Dweller(**d_data)
+    game.dwellers.append(d)
+
+# Restore rooms
+game.rooms = []
+for r_data in saved['rooms']:
+    r = Room(**r_data)
+    game.rooms.append(r)
+
+# Restore quests
+game.quests = []
+for q_data in saved['quests']:
+    q = Quest(**q_data)
+    game.quests.append(q)
+
+# Restore achievements
+game.achievements = []
+for a_data in saved['achievements']:
+    a = Achievement(**a_data)
+    game.achievements.append(a)
+`);
+
+                terminal.innerHTML = '';
+                write('✅ Game loaded successfully!\n');
+                AudioEngine.success();
+
+                const status = await pyodide.runPythonAsync('game.get_status()');
+                write(status);
+
+            } catch (error) {
+                write('\n❌ Load failed: ' + error.message + '\n');
+                AudioEngine.error();
+            }
+        }
+
+        async function init() {
+            terminal = document.getElementById('terminal');
+            AudioEngine.init();
+
+            try {
+                pyodide = await loadPyodide();
+
+                // Load fixed game code
+                const response = await fetch('/api/vault-fixed.py');
+                const code = await response.text();
+                await pyodide.runPythonAsync(code);
+
+                // Create game instance
+                await pyodide.runPythonAsync('game = VaultGame()');
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+
+                // Show welcome
+                write('╔════════════════════════════════════════════════════════════╗');
+                write('║  VAULT 13 - FIXED & WORKING EDITION                       ║');
+                write('║  ✅ Room production works                                  ║');
+                write('║  ✅ Building system functional                             ║');
+                write('║  ✅ Save/Load implemented                                  ║');
+                write('║  ✅ All commands working                                   ║');
+                write('╚════════════════════════════════════════════════════════════╝');
+                write('');
+
+                // Check for auto-save
+                if (localStorage.getItem('vault13_save')) {
+                    write('💾 Found saved game! Type "load" to continue, or start new game.\n');
+                }
+
+                const status = await pyodide.runPythonAsync('game.get_status()');
+                write(status);
+
+                AudioEngine.success();
+
+            } catch (error) {
+                document.getElementById('loading').innerHTML = '<div style="color: #ff3344;">ERROR: ' + error.message + '</div>';
+                console.error(error);
+            }
+        }
+
+        document.getElementById('command-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') execute();
+        });
+
+        init();
+    </script>
+</body>
+</html>
