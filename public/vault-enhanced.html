@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAULT 13 - Enhanced Edition</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ccff;
+            --warning: #ffaa00;
+            --danger: #ff3344;
+            --bg: #0a0a0f;
+            --card: #12121a;
+            --border: #333;
+            --text: #e0e0e0;
+            --dim: #808080;
+            --green: #00ff88;
+            --yellow: #ffdd00;
+            --red: #ff4444;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,255,136,0.6); }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0,255,136,0.6);
+            margin-bottom: 10px;
+            animation: glow 2s infinite;
+        }
+
+        .subtitle {
+            color: var(--dim);
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Game Container */
+        .game-container {
+            background: var(--card);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Terminal Display */
+        .terminal {
+            background: #000;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 500px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease-out;
+            scroll-behavior: smooth;
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        .output { color: var(--text); }
+        .input-line { color: var(--primary); font-weight: bold; }
+        .error { color: var(--danger); }
+        .success { color: var(--green); }
+        .warning { color: var(--warning); }
+        .quest { color: var(--secondary); }
+
+        /* Command Input */
+        .command-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .prompt {
+            color: var(--primary);
+            font-weight: bold;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        #command-input {
+            flex: 1;
+            background: #000;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            padding: 12px 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #command-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: var(--bg);
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,255,136,0.4);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .quick-btn {
+            background: rgba(0,255,136,0.1);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            color: var(--bg);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,255,136,0.3);
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,204,255,0.1));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--dim);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            background: #222;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid var(--border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg);
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 15px 20px;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .notification.success { border-color: var(--green); }
+        .notification.warning { border-color: var(--warning); }
+        .notification.error { border-color: var(--danger); }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .notification-body {
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        /* Sound Toggle */
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--card);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0,255,136,0.5);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Achievement Popup */
+        .achievement-popup {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(255,215,0,0.5);
+            max-width: 350px;
+            animation: slideIn 0.5s ease-out;
+            z-index: 1000;
+            border: 3px solid #ffa500;
+        }
+
+        .achievement-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .achievement-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .achievement-desc {
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .terminal {
+                font-size: 12px;
+                min-height: 400px;
+                padding: 15px;
+            }
+
+            .quick-actions {
+                gap: 5px;
+            }
+
+            .quick-btn {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            .stats-panel {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .notification,
+            .achievement-popup {
+                right: 10px;
+                left: 10px;
+                max-width: calc(100% - 20px);
+            }
+        }
+
+        /* Vault Tier Badges */
+        .vault-tier {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .tier-struggling {
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .tier-established {
+            background: rgba(255, 221, 0, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .tier-thriving {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--green);
+            border: 1px solid var(--green);
+        }
+
+        .tier-legend {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border: 2px solid #ffa500;
+            animation: glow 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading VAULT 13 Enhanced Edition...</div>
+    </div>
+
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" id="sound-toggle" title="Toggle Sound">
+        🔊
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>⚡ VAULT 13</h1>
+            <div class="subtitle">Enhanced Edition</div>
+            <div class="badge">🎮 All Features Unlocked</div>
+        </header>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel" id="stats-panel" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="stat-dwellers">10</div>
+                <div class="stat-label">Dwellers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">😊</div>
+                <div class="stat-value" id="stat-happiness">70%</div>
+                <div class="stat-label">Happiness</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🍖</div>
+                <div class="stat-value" id="stat-food">50</div>
+                <div class="stat-label">Food</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💧</div>
+                <div class="stat-value" id="stat-water">50</div>
+                <div class="stat-label">Water</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value" id="stat-power">30</div>
+                <div class="stat-label">Power</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" id="stat-caps">100</div>
+                <div class="stat-label">Caps</div>
+            </div>
+        </div>
+
+        <!-- Game Container -->
+        <div class="game-container">
+            <!-- Quick Actions -->
+            <div class="quick-actions" id="quick-actions">
+                <button class="quick-btn" onclick="sendCommand('1')">📊 Status</button>
+                <button class="quick-btn" onclick="sendCommand('2')">🏗️ Build</button>
+                <button class="quick-btn" onclick="sendCommand('3')">👥 Dwellers</button>
+                <button class="quick-btn" onclick="sendCommand('4')">🗺️ Explore</button>
+                <button class="quick-btn" onclick="sendCommand('5')">💤 Rest</button>
+                <button class="quick-btn" onclick="sendCommand('6')">🎭 Quests</button>
+                <button class="quick-btn" onclick="sendCommand('7')">🏆 Achievements</button>
+                <button class="quick-btn" onclick="sendCommand('?')">❓ Help</button>
+            </div>
+
+            <!-- Terminal -->
+            <div class="terminal" id="terminal"></div>
+
+            <!-- Command Input -->
+            <div class="command-bar">
+                <span class="prompt">&gt;</span>
+                <input type="text" id="command-input" placeholder="Type command or press a quick action..." autocomplete="off" autofocus>
+                <button class="send-btn" onclick="executeCommand()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL STATE =====
+        let pyodide = null;
+        let gameState = {
+            initialized: false,
+            soundEnabled: true,
+            musicPlaying: false
+        };
+
+        // ===== AUDIO SYSTEM =====
+        const AudioEngine = {
+            context: null,
+            sounds: {},
+
+            init() {
+                try {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createSounds();
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            },
+
+            createSounds() {
+                // Procedurally generated sound effects using Web Audio API
+                this.sounds = {
+                    click: () => this.playTone(800, 0.1, 'sine'),
+                    success: () => this.playChord([523, 659, 784], 0.3),
+                    error: () => this.playTone(200, 0.2, 'sawtooth'),
+                    achievement: () => this.playMelody([523, 659, 784, 1047], 0.15),
+                    notification: () => this.playTone(660, 0.15, 'sine'),
+                    build: () => this.playTone(440, 0.2, 'square'),
+                    rest: () => this.playChord([220, 277, 330], 0.4)
+                };
+            },
+
+            playTone(frequency, duration, type = 'sine') {
+                if (!gameState.soundEnabled || !this.context) return;
+
+                const oscillator = this.context.createOscillator();
+                const gainNode = this.context.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.context.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+
+                gainNode.gain.setValueAtTime(0.3, this.context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
+
+                oscillator.start(this.context.currentTime);
+                oscillator.stop(this.context.currentTime + duration);
+            },
+
+            playChord(frequencies, duration) {
+                frequencies.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, duration), i * 50);
+                });
+            },
+
+            playMelody(notes, noteDuration) {
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, noteDuration), i * noteDuration * 1000);
+                });
+            },
+
+            play(soundName) {
+                if (this.sounds[soundName]) {
+                    this.sounds[soundName]();
+                }
+            }
+        };
+
+        // ===== NOTIFICATION SYSTEM =====
+        const NotificationSystem = {
+            show(title, body, type = 'success', duration = 3000) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-body">${body}</div>
+                `;
+
+                document.body.appendChild(notification);
+
+                AudioEngine.play('notification');
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+            },
+
+            showAchievement(achievement) {
+                const popup = document.createElement('div');
+                popup.className = 'achievement-popup';
+                popup.innerHTML = `
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-title">Achievement Unlocked!</div>
+                    <div class="achievement-desc">${achievement.name}</div>
+                `;
+
+                document.body.appendChild(popup);
+
+                AudioEngine.play('achievement');
+
+                setTimeout(() => {
+                    popup.style.opacity = '0';
+                    setTimeout(() => popup.remove(), 300);
+                }, 5000);
+            }
+        };
+
+        // ===== TERMINAL SYSTEM =====
+        const Terminal = {
+            element: null,
+
+            init() {
+                this.element = document.getElementById('terminal');
+            },
+
+            write(text, className = 'output') {
+                const line = document.createElement('div');
+                line.className = className;
+                line.textContent = text;
+                this.element.appendChild(line);
+                this.scrollToBottom();
+            },
+
+            writeHTML(html) {
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                this.element.appendChild(div);
+                this.scrollToBottom();
+            },
+
+            clear() {
+                this.element.innerHTML = '';
+            },
+
+            scrollToBottom() {
+                this.element.scrollTop = this.element.scrollHeight;
+            }
+        };
+
+        // ===== STATS UPDATE =====
+        function updateStats(stats) {
+            if (!stats) return;
+
+            document.getElementById('stat-dwellers').textContent = stats.dwellers || 0;
+            document.getElementById('stat-happiness').textContent = (stats.happiness || 0) + '%';
+            document.getElementById('stat-food').textContent = stats.food || 0;
+            document.getElementById('stat-water').textContent = stats.water || 0;
+            document.getElementById('stat-power').textContent = stats.power || 0;
+            document.getElementById('stat-caps').textContent = stats.caps || 0;
+
+            // Show stats panel
+            document.getElementById('stats-panel').style.display = 'grid';
+        }
+
+        // ===== PYODIDE INITIALIZATION =====
+        async function initPyodide() {
+            try {
+                pyodide = await loadPyodide();
+
+                // Load enhanced game code
+                const response = await fetch('/api/enhanced-vault.py');
+                const pythonCode = await response.text();
+
+                await pyodide.runPythonAsync(pythonCode);
+
+                // Initialize game
+                await pyodide.runPythonAsync(`
+from enhanced_vault import EnhancedVaultGame
+game = EnhancedVaultGame()
+`);
+
+                gameState.initialized = true;
+
+                // Hide loading screen
+                document.getElementById('loading-screen').classList.add('hidden');
+
+                // Show welcome message
+                Terminal.write("╔════════════════════════════════════════════════════════════╗", 'success');
+                Terminal.write("║  WELCOME TO VAULT 13 - ENHANCED EDITION                   ║", 'success');
+                Terminal.write("║  All features unlocked! Tutorial, quests, achievements... ║", 'success');
+                Terminal.write("╚════════════════════════════════════════════════════════════╝", 'success');
+                Terminal.write("");
+
+                // Show initial status
+                const status = await pyodide.runPythonAsync('game.get_status()');
+                Terminal.write(status);
+
+                AudioEngine.play('success');
+
+                NotificationSystem.show(
+                    '🎮 Game Ready!',
+                    'VAULT 13 Enhanced Edition loaded successfully!',
+                    'success'
+                );
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                Terminal.write('ERROR: Failed to initialize game - ' + error.message, 'error');
+                NotificationSystem.show('Error', 'Failed to load game', 'error');
+            }
+        }
+
+        // ===== COMMAND EXECUTION =====
+        async function sendCommand(cmd) {
+            if (!gameState.initialized) {
+                NotificationSystem.show('Wait', 'Game is still loading...', 'warning');
+                return;
+            }
+
+            const input = document.getElementById('command-input');
+            const command = cmd || input.value.trim();
+
+            if (!command) return;
+
+            Terminal.write('> ' + command, 'input-line');
+            input.value = '';
+
+            AudioEngine.play('click');
+
+            try {
+                // Parse command
+                let result;
+
+                // Handle numbered commands
+                const commandMap = {
+                    '1': 'status',
+                    '2': 'build',
+                    '3': 'dwellers',
+                    '4': 'explore',
+                    '5': 'rest',
+                    '6': 'quests',
+                    '7': 'achievements',
+                    '?': 'help'
+                };
+
+                const actualCommand = commandMap[command] || command;
+
+                // Execute Python command
+                if (actualCommand === 'status') {
+                    result = await pyodide.runPythonAsync('game.get_status()');
+                } else if (actualCommand === 'build') {
+                    result = await pyodide.runPythonAsync('game.build_room()');
+                    AudioEngine.play('build');
+                } else if (actualCommand === 'dwellers') {
+                    result = await pyodide.runPythonAsync('game.view_dwellers()');
+                } else if (actualCommand === 'explore') {
+                    result = await pyodide.runPythonAsync('game.start_expedition()');
+                    AudioEngine.play('notification');
+                } else if (actualCommand === 'rest') {
+                    result = await pyodide.runPythonAsync('game.rest()');
+                    AudioEngine.play('rest');
+                } else if (actualCommand === 'quests') {
+                    result = await pyodide.runPythonAsync('game.view_quests()');
+                } else if (actualCommand === 'achievements') {
+                    result = await pyodide.runPythonAsync('game.view_achievements()');
+                } else if (actualCommand === 'help' || actualCommand === '?') {
+                    result = await pyodide.runPythonAsync('game.get_help()');
+                } else {
+                    // Generic command
+                    result = await pyodide.runPythonAsync(`game.handle_command("${command.replace(/"/g, '\\"')}")`);
+                }
+
+                Terminal.write(result);
+
+                // Play appropriate sound
+                if (result.includes('✅') || result.includes('UNLOCKED')) {
+                    AudioEngine.play('success');
+                } else if (result.includes('❌') || result.includes('ERROR')) {
+                    AudioEngine.play('error');
+                }
+
+                // Check for achievements in output
+                if (result.includes('ACHIEVEMENT')) {
+                    setTimeout(() => {
+                        NotificationSystem.showAchievement({
+                            name: 'Achievement Unlocked!',
+                            description: 'Check your achievements panel'
+                        });
+                    }, 500);
+                }
+
+            } catch (error) {
+                console.error('Command error:', error);
+                Terminal.write('ERROR: ' + error.message, 'error');
+                AudioEngine.play('error');
+            }
+        }
+
+        function executeCommand() {
+            sendCommand();
+        }
+
+        // ===== EVENT LISTENERS =====
+        document.getElementById('command-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand();
+            }
+        });
+
+        document.getElementById('sound-toggle').addEventListener('click', () => {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            const toggle = document.getElementById('sound-toggle');
+            toggle.textContent = gameState.soundEnabled ? '🔊' : '🔇';
+            NotificationSystem.show(
+                'Sound ' + (gameState.soundEnabled ? 'Enabled' : 'Disabled'),
+                '',
+                'success',
+                1000
+            );
+        });
+
+        // ===== INITIALIZATION =====
+        window.addEventListener('DOMContentLoaded', () => {
+            Terminal.init();
+            AudioEngine.init();
+            initPyodide();
+        });
+    </script>
+</body>
+</html>
