@@ -363,7 +363,23 @@ class GameInfo:
 
 # Registry of all games in the collection
 GAME_REGISTRY: Dict[str, GameInfo] = {
-    # Main Games
+    # Main Games - Primary Entry Point
+    'vault13_progression': GameInfo(
+        id='vault13_progression',
+        name='VAULT 13 - Training Protocol',
+        file='vault13_progression.py',
+        description='12 training vaults leading to the main Vault 13 experience with star ratings and narrative fragments',
+        category='main',
+        version='10.0'
+    ),
+    'vault_shelter_v10': GameInfo(
+        id='vault_shelter_v10',
+        name='VAULT 13 v10.0 - Comprehensive Evolution',
+        file='vault_shelter_v10.py',
+        description='Full vault management with all 10 phases of improvements',
+        category='main',
+        version='10.0'
+    ),
     'vault_shelter_v6': GameInfo(
         id='vault_shelter_v6',
         name='VAULT 13 v9.0 - Ultimate Evolution',

@@ -1,14 +1,43 @@
 # INNOVATIVE GAME COLLECTION
 
-## 🏛️ NEW: VAULT 13 - SURVIVAL PROTOCOL (MAIN GAME)
+## 🏛️ VAULT 13 - THE FULL VAULT SHELTER v10.0
 
-**A full-featured post-apocalyptic vault management simulation inspired by Fallout Shelter!**
+**A complete progression-based experience combining 12 training vaults with the ultimate vault management simulation!**
 
-Manage an underground vault, assign dwellers to production rooms, build facilities, respond to random events, and keep your population alive in the wasteland. Features resource management (Power, Water, Food, Caps), SPECIAL stat system, random events (raiders, fires, infestations), room building, dweller happiness/health tracking, and a complete save/load system.
+### NEW: Training Protocol System
+
+The 12 mini-games are now **training vaults** that lead to the main Vault 13 experience:
+
+```bash
+python3 vault13_progression.py
+```
+
+**Features:**
+- **Linear Unlock with Replay Freedom** - Must beat each vault once to unlock the next, but can replay any unlocked vault
+- **Star Rating System** - Earn 1-3 stars per vault based on performance for mastery and replayability
+- **Fragment Narrative** - Each vault reveals a piece of the Vault 13 story, making progression feel meaningful
+- **12 Training Vaults** - Carefully curated from philosophy, game theory, quantum mechanics, and computation
+- **The Finale** - Complete all 12 vaults to unlock the full Vault 13 management simulation
+
+### Training Vaults (in unlock order):
+1. **Plato's Cave** - Question reality and perception
+2. **Prisoner's Dilemma** - Learn cooperation and trust
+3. **Monty Hall** - Master probability
+4. **Trolley Problem** - Confront moral dilemmas
+5. **The Chinese Room** - Explore consciousness
+6. **Ship of Theseus** - Question identity
+7. **The Butterfly Effect** - Witness chaos theory
+8. **The Halting Problem** - Face computational limits
+9. **Schrodinger's Dungeon** - Navigate quantum superposition
+10. **Echo Chambers** - Traverse parallel timelines
+11. **Bootstrap Paradox** - Unravel time and causality
+12. **Simulation Hypothesis** - Question existence itself
+
+### The Main Game
 
 **[See full documentation: VAULT_SHELTER.md](VAULT_SHELTER.md)**
 
-This is the flagship "main game" - a deep, replayable management sim separate from the philosophical mini-games below.
+After completing all training vaults, unlock the full vault management simulation - a deep, replayable post-apocalyptic experience with resource management, SPECIAL stats, random events, room building, and more.
 
 ---
 
