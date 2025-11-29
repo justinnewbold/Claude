@@ -249,6 +249,58 @@ class C:
 
 
 # =============================================================================
+# MODERN UI HELPERS - Quick feedback without blocking
+# =============================================================================
+
+def quick_feedback(message: str, style: str = "info", duration: float = 1.0):
+    """Show quick non-blocking feedback - auto-dismisses after duration"""
+    colors = {
+        "success": C.SUCCESS,
+        "warning": C.WARNING,
+        "danger": C.DANGER,
+        "info": C.INFO
+    }
+    icons = {
+        "success": "✓",
+        "warning": "⚠",
+        "danger": "✗",
+        "info": "ℹ"
+    }
+    color = colors.get(style, C.INFO)
+    icon = icons.get(style, "•")
+    print(f"\n{color}{icon} {message}{C.RESET}")
+    time.sleep(duration)
+
+
+def confirm_action(message: str, default: bool = False) -> bool:
+    """Quick confirmation prompt with sensible defaults"""
+    default_hint = "[Y/n]" if default else "[y/N]"
+    response = input(f"{C.WARNING}{message} {default_hint}: {C.RESET}").strip().lower()
+    if not response:
+        return default
+    return response in ['y', 'yes', '1', 'true']
+
+
+def wait_or_skip(message: str = "Press Enter to continue (or wait 3s)...", timeout: float = 3.0):
+    """Wait for input or auto-continue after timeout - requires threading"""
+    import sys
+    import select
+
+    print(f"{C.DIM}{message}{C.RESET}", end='', flush=True)
+
+    # Simple fallback - just use shorter wait
+    time.sleep(min(timeout, 1.5))
+    print()  # New line
+
+
+def print_breadcrumb(*path: str):
+    """Print navigation breadcrumb"""
+    crumbs = " > ".join(path)
+    print(f"{C.DIM}📍 {crumbs}{C.RESET}")
+    print(f"{C.DIM}[0] Back  [/] Search  [?] Help{C.RESET}\n")
+
+
+# =============================================================================
 # ENUMS
 # =============================================================================
 
@@ -2880,12 +2932,100 @@ class VaultGame:
         print(f"{C.BOLD}Population:{C.RESET}")
         print(f"  Adults: {C.INFO}{len(adults)}{C.RESET} | Children: {C.INFO}{len(children)}{C.RESET} | On Expedition: {on_exp}")
         print(f"  Happiness: {happiness_color}{avg_happiness}%{C.RESET}")
-        
+
         if self.current_objective:
             obj_type = self.current_objective.objective_type.value
             print(f"  Objective: {C.INFO}{obj_type}{C.RESET}")
-        
+
         print()
+
+    def print_compact_status(self):
+        """Print a compact, visual status dashboard - modern UI improvement"""
+        # Season icons
+        season_icons = {Season.SPRING: "🌸", Season.SUMMER: "☀️", Season.FALL: "🍂", Season.WINTER: "❄️"}
+        season_icon = season_icons.get(self.current_season, "")
+
+        # Calculate stats
+        adults = [d for d in self.dwellers if not d.is_child]
+        children = [d for d in self.dwellers if d.is_child]
+        on_exp = len(self.active_expeditions)
+        idle = len([d for d in adults if d.assigned_room_floor is None and not d.on_expedition])
+        avg_happiness = sum(d.happiness for d in adults) // len(adults) if adults else 0
+        room_count = sum(1 for floor in self.vault_layout for room in floor if room.room_type != RoomType.EMPTY)
+
+        # Resource bars (compact)
+        def mini_bar(current, maximum, width=8):
+            if maximum == 0:
+                return "░" * width
+            filled = int((current / maximum) * width)
+            return "█" * filled + "░" * (width - filled)
+
+        def get_color(current, maximum):
+            ratio = current / maximum if maximum > 0 else 0
+            if ratio < 0.2:
+                return C.DANGER
+            elif ratio < 0.5:
+                return C.WARNING
+            return C.SUCCESS
+
+        # Trend arrows
+        def trend(resource):
+            prev = self.previous_resources.get(resource, 0) if hasattr(self, 'previous_resources') else 0
+            current = getattr(self.resources, resource, 0)
+            if current > prev:
+                return f"{C.SUCCESS}↑{C.RESET}"
+            elif current < prev:
+                return f"{C.DANGER}↓{C.RESET}"
+            return f"{C.DIM}→{C.RESET}"
+
+        # Happiness indicator
+        if avg_happiness >= 70:
+            happy_icon, happy_color = "😊", C.SUCCESS
+        elif avg_happiness >= 40:
+            happy_icon, happy_color = "😐", C.WARNING
+        else:
+            happy_icon, happy_color = "😟", C.DANGER
+
+        # Vault status
+        if len(adults) >= 20:
+            vault_status = "Thriving"
+        elif len(adults) >= 10:
+            vault_status = "Growing"
+        elif len(adults) >= 5:
+            vault_status = "Stable"
+        else:
+            vault_status = "Struggling"
+
+        # Print compact dashboard
+        print(f"{C.BOLD}╔═══════════════════════════════════ DAY {self.day} {season_icon} ═══════════════════════════════════╗{C.RESET}")
+
+        # Resource row
+        power_c = get_color(self.resources.power, self.resources.power_max)
+        water_c = get_color(self.resources.water, self.resources.water_max)
+        food_c = get_color(self.resources.food, self.resources.food_max)
+
+        print(f"║ {C.POWER}⚡{power_c}{mini_bar(self.resources.power, self.resources.power_max)}{C.RESET} {self.resources.power:3d}{trend('power')}", end="")
+        print(f" │ {C.WATER}💧{water_c}{mini_bar(self.resources.water, self.resources.water_max)}{C.RESET} {self.resources.water:3d}{trend('water')}", end="")
+        print(f" │ {C.FOOD}🍖{food_c}{mini_bar(self.resources.food, self.resources.food_max)}{C.RESET} {self.resources.food:3d}{trend('food')}", end="")
+        print(f" │ {C.CAPS}💰{C.RESET} {self.resources.caps:,} ║")
+
+        # Stats row
+        print(f"║ 👥 {len(adults)} dwellers", end="")
+        if children:
+            print(f" +{len(children)}👶", end="")
+        if on_exp:
+            print(f" ({on_exp}🗺️)", end="")
+        if idle > 0:
+            print(f" {C.WARNING}[{idle} idle]{C.RESET}", end="")
+
+        print(f" │ 🏠 {room_count} rooms │ {happy_icon} {happy_color}{avg_happiness}%{C.RESET} │ 📈 {vault_status}", end="")
+
+        # Active quest count
+        if hasattr(self, 'active_quests') and self.active_quests:
+            print(f" │ ⭐ {len(self.active_quests)} quests", end="")
+
+        print(" ║")
+        print(f"{C.BOLD}╚═════════════════════════════════════════════════════════════════════════════════╝{C.RESET}\n")
 
     def print_vault_layout(self):
         """Print vault layout"""
@@ -2951,38 +3091,82 @@ class VaultGame:
         print()
 
     def print_menu(self):
-        """Print main menu with ALL features"""
-        print(f"{C.BOLD}Core:{C.RESET}")
-        print(f"  {C.SUCCESS}[B]{C.RESET} Build  {C.SUCCESS}[U]{C.RESET} Upgrade  {C.SUCCESS}[H]{C.RESET} Rush  {C.SUCCESS}[D]{C.RESET} Dwellers  {C.SUCCESS}[E]{C.RESET} End Turn")
-        
-        print(f"{C.BOLD}v4.0:{C.RESET}")
-        print(f"  {C.QUEST}[Q]{C.RESET} Quests  {C.QUEST}[X]{C.RESET} Expeditions  {C.SKILL}[K]{C.RESET} Skills  {C.INFO}[O]{C.RESET} Objectives")
-        
-        print(f"{C.BOLD}v5.0 NEW:{C.RESET}")
-        print(f"  {C.BOLD}[F]{C.RESET} Families  {C.TECH}[T]{C.RESET} Tech  {C.POLICY}[P]{C.RESET} Policy  {C.TRADE}[M]{C.RESET} Merchant  {C.FACTION}[L]{C.RESET} Factions  {C.BOLD}[C]{C.RESET} Craft  {C.DANGER}[I]{C.RESET} Disaster")
+        """Print main menu - reorganized with user-centric categories and progressive disclosure"""
+        # Contextual action bar - show most relevant actions based on current state
+        self._print_contextual_actions()
 
-        print(f"{C.BOLD}v5.5 ULTIMATE:{C.RESET}")
-        print(f"  {C.TECH}[V]{C.RESET} Vault Expansion  {C.QUEST}[G]{C.RESET} Legendary Items  {C.INFO}[R]{C.RESET} Prestige/Achievements")
+        # Essential actions - always visible
+        print(f"{C.BOLD}━━━ ESSENTIAL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}")
+        print(f"  {C.SUCCESS}[E]{C.RESET} End Turn    {C.SUCCESS}[B]{C.RESET} Build    {C.SUCCESS}[D]{C.RESET} Dwellers    {C.HEADER}[1]{C.RESET} Dashboard    {C.INFO}[?]{C.RESET} Help")
 
-        print(f"{C.BOLD}v6.0 UI (NEW!):{C.RESET}")
-        print(f"  {C.HEADER}[1]{C.RESET} Dashboard  {C.INFO}[?]{C.RESET} Help  {C.SUCCESS}[~]{C.RESET} Quick Actions  {C.INFO}[2]{C.RESET} Details  {C.QUEST}[3]{C.RESET} Timeline  {C.INFO}[4]{C.RESET} Settings")
+        # Management - core gameplay
+        print(f"{C.BOLD}━━━ MANAGEMENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}")
+        print(f"  {C.SUCCESS}[U]{C.RESET} Upgrade    {C.SUCCESS}[H]{C.RESET} Rush    {C.QUEST}[Q]{C.RESET} Quests    {C.TECH}[T]{C.RESET} Tech    {C.BOLD}[C]{C.RESET} Craft")
 
-        print(f"{C.BOLD}Visualizations:{C.RESET}")
-        print(f"  {C.INFO}[5]{C.RESET} Population  {C.FACTION}[6]{C.RESET} Factions  {C.TECH}[7]{C.RESET} Tech Map  {C.SUCCESS}[8]{C.RESET} Export Data")
+        # Progressive disclosure - show advanced features based on day
+        if self.day >= 5:
+            print(f"{C.BOLD}━━━ EXPLORATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.DIM}ᵛ⁴{C.RESET}{C.BOLD}━━━━━━━━━━━━━━━━━{C.RESET}")
+            print(f"  {C.QUEST}[X]{C.RESET} Expeditions    {C.TRADE}[M]{C.RESET} Merchant    {C.FACTION}[L]{C.RESET} Factions    {C.SKILL}[K]{C.RESET} Skills")
 
-        print(f"{C.BOLD}🎭 GRAND BALL:{C.RESET}")
-        print(f"  {C.TECH}[9]{C.RESET} Performance Dashboard  {C.DIM}(Easter eggs: Try typing cheat codes!){C.RESET}")
+        if self.day >= 10:
+            print(f"{C.BOLD}━━━ SOCIETY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.DIM}ᵛ⁵{C.RESET}{C.BOLD}━━━━━━━━━━━━━━━━━{C.RESET}")
+            print(f"  {C.BOLD}[F]{C.RESET} Families    {C.POLICY}[P]{C.RESET} Policy    {C.DANGER}[I]{C.RESET} Disaster    {C.INFO}[O]{C.RESET} Objectives")
 
-        print(f"{C.BOLD}🚀 v8.0 ULTIMATE:{C.RESET}")
-        print(f"  {C.QUEST}[Y]{C.RESET} Pets  {C.INFO}[N]{C.RESET} Challenges  {C.QUEST}[J]{C.RESET} Stories  {C.LEGENDARY}[U]{C.RESET} Hall of Fame")
+        if self.day >= 20:
+            print(f"{C.BOLD}━━━ ADVANCED ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.DIM}ᵛ⁵⁺{C.RESET}{C.BOLD}━━━━━━━━━━━━━━━━{C.RESET}")
+            print(f"  {C.TECH}[V]{C.RESET} Vault Expand    {C.QUEST}[G]{C.RESET} Legendaries    {C.INFO}[R]{C.RESET} Prestige")
 
-        print(f"{C.BOLD}🌟 v9.0 EVOLUTION:{C.RESET}")
-        print(f"  {C.WARNING}[<]{C.RESET} Mental Health  {C.DANGER}[>]{C.RESET} Diseases")
+        if self.day >= 30:
+            print(f"{C.BOLD}━━━ SIMULATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.DIM}ᵛ⁸⁺{C.RESET}{C.BOLD}━━━━━━━━━━━━━━━━{C.RESET}")
+            print(f"  {C.QUEST}[Y]{C.RESET} Pets    {C.INFO}[N]{C.RESET} Challenges    {C.QUEST}[J]{C.RESET} Stories    {C.WARNING}[<]{C.RESET} Mental    {C.DANGER}[>]{C.RESET} Disease")
+
+        # Views & Data - always available but compact
+        print(f"{C.BOLD}━━━ VIEWS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}")
+        print(f"  {C.INFO}[2]{C.RESET} Details  {C.QUEST}[3]{C.RESET} Timeline  {C.INFO}[5]{C.RESET} Population  {C.FACTION}[6]{C.RESET} Factions  {C.TECH}[7]{C.RESET} Tech Map  {C.LEGENDARY}[U]{C.RESET} Hall of Fame")
 
         if AI_ENABLED:
-            print(f"{C.BOLD}AI:{C.RESET} {C.AI}[A]{C.RESET} Advisor  {C.AI}[W]{C.RESET} Talk")
+            print(f"{C.BOLD}━━━ AI ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}")
+            print(f"  {C.AI}[A]{C.RESET} Advisor    {C.AI}[W]{C.RESET} Talk to Dweller")
 
-        print(f"  {C.SUCCESS}[S]{C.RESET} Save  {C.DANGER}[Z]{C.RESET} Quit\n")
+        # Keyboard hint bar
+        print(f"\n{C.DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}")
+        print(f"{C.DIM}[/] Search Commands  [~] Quick Actions  [4] Settings  [S] Save  [Z] Quit{C.RESET}")
+        print(f"{C.DIM}Type command names: 'build', 'quest', 'tech', 'mental', 'disease', etc.{C.RESET}\n")
+
+    def _print_contextual_actions(self):
+        """Show contextual suggestions based on current vault state"""
+        suggestions = []
+
+        # Resource warnings
+        if self.resources.power < 20:
+            suggestions.append(f"{C.DANGER}⚡ Low Power → [B] Build Generator or [H] Rush production{C.RESET}")
+        if self.resources.water < 20:
+            suggestions.append(f"{C.DANGER}💧 Low Water → [B] Build Water Treatment{C.RESET}")
+        if self.resources.food < 20:
+            suggestions.append(f"{C.DANGER}🍖 Low Food → [B] Build Diner or Garden{C.RESET}")
+
+        # Idle dwellers
+        idle_count = len([d for d in self.dwellers if d.assigned_room_floor is None and not d.is_child and not d.on_expedition])
+        if idle_count > 0:
+            suggestions.append(f"{C.WARNING}👥 {idle_count} idle dweller(s) → [D] Assign to rooms{C.RESET}")
+
+        # Active disaster
+        if self.active_disaster:
+            suggestions.append(f"{C.DANGER}⚠️ DISASTER: {self.active_disaster.disaster_type.value} → [I] Manage{C.RESET}")
+
+        # Merchant available
+        if self.current_trades:
+            suggestions.append(f"{C.TRADE}💰 Merchant available → [M] Trade{C.RESET}")
+
+        # Active epidemic
+        if hasattr(self, 'epidemic_active') and self.epidemic_active:
+            suggestions.append(f"{C.DANGER}🦠 EPIDEMIC → [>] Disease Management{C.RESET}")
+
+        if suggestions:
+            print(f"{C.BOLD}━━━ SUGGESTED ACTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}")
+            for s in suggestions[:3]:  # Show top 3 suggestions
+                print(f"  {s}")
+            print()
 
     # =================================================================
     # ENHANCED TURN PROCESSING (with all v5.0 systems)
@@ -3730,21 +3914,24 @@ class VaultGame:
     # =================================================================
 
     def build_menu(self):
-        """Full build menu implementation"""
+        """Full build menu implementation with modern navigation"""
         self.clear_screen()
         self.print_header()
 
-        print(f"{C.SUCCESS}{C.BOLD}🏗️  BUILD MENU{C.RESET}\n")
-        print(f"Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
+        print_breadcrumb("Main", "Build")
+        print(f"{C.SUCCESS}{C.BOLD}🏗️  BUILD MENU{C.RESET}")
+        print(f"💰 Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
 
-        # Show available floors
+        # Show available floors with quick info
         print(f"{C.BOLD}Select Floor:{C.RESET}")
         for i, floor in enumerate(self.vault_layout):
             empty_count = sum(1 for room in floor if room.room_type == RoomType.EMPTY)
-            print(f"  {C.SUCCESS}[{i+1}]{C.RESET} Floor {i+1} - {empty_count} empty slots")
+            rooms = [r.room_type.value[:3] for r in floor if r.room_type != RoomType.EMPTY]
+            room_preview = ", ".join(rooms) if rooms else "empty"
+            print(f"  {C.SUCCESS}[{i+1}]{C.RESET} Floor {i+1} - {empty_count} slots free ({C.DIM}{room_preview}{C.RESET})")
 
-        print(f"\n  {C.DANGER}[0]{C.RESET} Back\n")
-        floor_choice = input("Select floor: ").strip()
+        print(f"\n  {C.DANGER}[0]{C.RESET} Back  {C.DIM}[/] Search{C.RESET}\n")
+        floor_choice = input(f"{C.BOLD}Floor: {C.RESET}").strip()
 
         try:
             floor_idx = int(floor_choice) - 1
@@ -3799,12 +3986,13 @@ class VaultGame:
             pass
 
     def upgrade_menu(self):
-        """Full upgrade menu implementation"""
+        """Full upgrade menu implementation with modern navigation"""
         self.clear_screen()
         self.print_header()
 
-        print(f"{C.TECH}{C.BOLD}⬆️  UPGRADE MENU{C.RESET}\n")
-        print(f"Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
+        print_breadcrumb("Main", "Upgrade")
+        print(f"{C.TECH}{C.BOLD}⬆️  UPGRADE MENU{C.RESET}")
+        print(f"💰 Caps: {C.CAPS}{self.resources.caps}{C.RESET}\n")
 
         # List all upgradeable rooms
         upgradeable = []
@@ -3814,8 +4002,7 @@ class VaultGame:
                     upgradeable.append(room)
 
         if not upgradeable:
-            print(f"{C.WARNING}No rooms available to upgrade{C.RESET}")
-            input(f"\n{C.DIM}Press Enter...{C.RESET}")
+            quick_feedback("No rooms available to upgrade", "warning", 1.0)
             return
 
         for i, room in enumerate(upgradeable, 1):
@@ -3825,7 +4012,7 @@ class VaultGame:
             print(f"  {C.SUCCESS}[{i}]{C.RESET} [{affordable}] {room.room_type.value} Lvl {room.level} {prod_bar} → Lvl {room.level+1} ({cost} caps)")
 
         print(f"\n  {C.DANGER}[0]{C.RESET} Back\n")
-        choice = input("Upgrade room: ").strip()
+        choice = input(f"{C.BOLD}Upgrade: {C.RESET}").strip()
 
         try:
             idx = int(choice) - 1
@@ -5892,6 +6079,149 @@ class VaultGame:
         input(f"\n{C.DIM}Press Enter to return...{C.RESET}")
 
     # =================================================================
+    # COMMAND ALIASES - Type words instead of single letters
+    # =================================================================
+
+    COMMAND_ALIASES = {
+        # Essential
+        'build': 'b', 'construct': 'b', 'room': 'b',
+        'upgrade': 'u', 'improve': 'u', 'level': 'u',
+        'rush': 'h', 'hurry': 'h', 'speed': 'h',
+        'dwellers': 'd', 'dweller': 'd', 'people': 'd', 'assign': 'd',
+        'end': 'e', 'next': 'e', 'turn': 'e', 'advance': 'e',
+        'dashboard': '1', 'status': '1', 'overview': '1',
+        'help': '?',
+
+        # Management
+        'quest': 'q', 'quests': 'q', 'mission': 'q', 'missions': 'q',
+        'expedition': 'x', 'expeditions': 'x', 'explore': 'x', 'wasteland': 'x',
+        'tech': 't', 'technology': 't', 'research': 't', 'science': 't',
+        'craft': 'c', 'crafting': 'c', 'workshop': 'c', 'make': 'c',
+        'skills': 'k', 'skill': 'k', 'abilities': 'k',
+        'objectives': 'o', 'objective': 'o', 'goals': 'o',
+
+        # Society
+        'family': 'f', 'families': 'f', 'relationships': 'f', 'romance': 'f',
+        'policy': 'p', 'policies': 'p', 'government': 'p', 'gov': 'p',
+        'disaster': 'i', 'disasters': 'i', 'emergency': 'i', 'crisis': 'i',
+        'merchant': 'm', 'trade': 'm', 'trading': 'm', 'shop': 'm', 'buy': 'm',
+        'faction': 'l', 'factions': 'l', 'reputation': 'l',
+
+        # Advanced
+        'vault': 'v', 'expand': 'v', 'expansion': 'v', 'floors': 'v',
+        'legendary': 'g', 'legendaries': 'g', 'rare': 'g', 'epic': 'g',
+        'prestige': 'r', 'achievements': 'r', 'achievement': 'r', 'ng+': 'r',
+
+        # Simulation
+        'pets': 'y', 'pet': 'y', 'animals': 'y',
+        'challenges': 'n', 'challenge': 'n', 'daily': 'n',
+        'stories': 'j', 'story': 'j', 'backstory': 'j',
+        'mental': '<', 'stress': '<', 'therapy': '<', 'psychology': '<',
+        'disease': '>', 'diseases': '>', 'health': '>', 'medical': '>', 'epidemic': '>',
+
+        # Views
+        'details': '2', 'detail': '2', 'info': '2',
+        'timeline': '3', 'history': '3', 'log': '3',
+        'settings': '4', 'options': '4', 'config': '4',
+        'population': '5', 'pyramid': '5', 'demographics': '5',
+        'factionview': '6', 'radar': '6',
+        'techmap': '7', 'techtree': '7',
+        'export': '8', 'data': '8',
+        'performance': '9', 'perf': '9',
+        'hall': 'u', 'fame': 'u', 'leaderboard': 'u',
+
+        # System
+        'save': 's',
+        'quit': 'z', 'exit': 'z', 'leave': 'z',
+        'quick': '~', 'actions': '~',
+        'search': '/', 'find': '/', 'commands': '/',
+
+        # AI
+        'advisor': 'a', 'ai': 'a', 'advice': 'a',
+        'talk': 'w', 'chat': 'w', 'speak': 'w',
+    }
+
+    def resolve_command(self, choice: str) -> str:
+        """Resolve word aliases to single-letter commands"""
+        if len(choice) == 1:
+            return choice
+        return self.COMMAND_ALIASES.get(choice, choice)
+
+    def command_palette(self):
+        """Interactive command search - type to filter commands"""
+        self.clear_screen()
+        print(f"{C.HEADER}{C.BOLD}╔════════════════════════════════════════════════════════════════════╗{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}║                    🔍 COMMAND PALETTE                              ║{C.RESET}")
+        print(f"{C.HEADER}{C.BOLD}╚════════════════════════════════════════════════════════════════════╝{C.RESET}\n")
+
+        all_commands = [
+            ("b", "build", "Build new rooms in your vault"),
+            ("u", "upgrade", "Upgrade existing rooms"),
+            ("h", "rush", "Rush production for quick resources"),
+            ("d", "dwellers", "Manage and assign dwellers"),
+            ("e", "end turn", "End the current day"),
+            ("1", "dashboard", "View vault status overview"),
+            ("?", "help", "Show help and documentation"),
+            ("q", "quests", "View and manage quests"),
+            ("x", "expeditions", "Send dwellers to explore"),
+            ("t", "tech", "Research new technologies"),
+            ("c", "craft", "Craft equipment and items"),
+            ("f", "families", "Manage dweller relationships"),
+            ("p", "policy", "Set vault policies and government"),
+            ("m", "merchant", "Trade with visiting merchants"),
+            ("l", "factions", "View faction relationships"),
+            ("i", "disaster", "Manage active disasters"),
+            ("v", "vault expand", "Expand vault with new floors"),
+            ("g", "legendaries", "View legendary items"),
+            ("r", "prestige", "View achievements and prestige"),
+            ("y", "pets", "Manage vault pets"),
+            ("n", "challenges", "View daily challenges"),
+            ("j", "stories", "Read dweller stories"),
+            ("<", "mental health", "Manage dweller mental health"),
+            (">", "disease", "Manage diseases and epidemics"),
+            ("s", "save", "Save your game"),
+            ("z", "quit", "Exit the game"),
+        ]
+
+        print(f"{C.DIM}Type to search, Enter to select, ESC/0 to cancel{C.RESET}\n")
+
+        search = input(f"{C.SUCCESS}> {C.RESET}").strip().lower()
+
+        if search in ['0', '', 'esc', 'cancel', 'back']:
+            return None
+
+        # Filter commands
+        matches = []
+        for key, name, desc in all_commands:
+            if search in name.lower() or search in desc.lower() or search == key:
+                matches.append((key, name, desc))
+
+        if not matches:
+            print(f"\n{C.WARNING}No commands match '{search}'{C.RESET}")
+            time.sleep(1)
+            return None
+
+        if len(matches) == 1:
+            print(f"\n{C.SUCCESS}→ {matches[0][1]}{C.RESET}")
+            time.sleep(0.5)
+            return matches[0][0]
+
+        # Show matches
+        print(f"\n{C.BOLD}Matches:{C.RESET}")
+        for i, (key, name, desc) in enumerate(matches[:10], 1):
+            print(f"  {C.SUCCESS}[{i}]{C.RESET} [{key}] {name} - {C.DIM}{desc}{C.RESET}")
+
+        choice = input(f"\n{C.BOLD}Select (1-{len(matches[:10])}): {C.RESET}").strip()
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(matches[:10]):
+                return matches[idx][0]
+        except ValueError:
+            pass
+
+        return None
+
+    # =================================================================
     # GAME LOOP
     # =================================================================
 
@@ -5900,46 +6230,63 @@ class VaultGame:
         while not self.game_over:
             self.clear_screen()
             self.print_header()
-            self.print_resources()
-            self.print_dweller_info()
+            self.print_compact_status()  # New compact status display
             self.print_vault_layout()
             self.print_event_log()
-            
+
             # Show disaster warning
             if self.active_disaster:
                 print(f"{C.DANGER}⚠️  ACTIVE DISASTER: {self.active_disaster.disaster_type.value}{C.RESET}")
-                print(f"   Press [I] to manage\n")
-            
+                print(f"   Press [I] or type 'disaster' to manage\n")
+
             self.print_menu()
 
-            choice = input(f"{C.BOLD}> {C.RESET}").strip().lower()
-            self.add_command_to_history(choice)  # Track for quick actions
+            raw_choice = input(f"{C.BOLD}> {C.RESET}").strip().lower()
+            self.add_command_to_history(raw_choice)  # Track for quick actions
+
+            # Resolve word aliases to single-letter commands
+            choice = self.resolve_command(raw_choice)
+
+            # Command palette search
+            if choice == '/':
+                result = self.command_palette()
+                if result:
+                    choice = result
+                else:
+                    continue
 
             # 🎮 NINTENDO EASTER EGGS: Check for Konami Code!
-            if self.check_konami_code(choice):
+            if self.check_konami_code(raw_choice):
                 time.sleep(2)
                 continue
 
             # 🎮 EASTER EGG & SPECIAL COMMANDS
-            if choice == "devroom":
+            if raw_choice == "devroom":
                 self.secret_developer_room()
                 continue
-            elif choice == "runner":
+            elif raw_choice == "runner":
                 self.mini_game_wasteland_runner()
                 continue
-            elif choice == "eggs":
+            elif raw_choice == "eggs":
                 self.easter_egg_menu()
                 continue
-            elif choice == "stats":
+            elif raw_choice == "stats":
                 self.stats_screen()  # 📊 ENHANCEMENT: Comprehensive stats!
                 continue
-            elif choice in ["retro", "matrix", "party", "stealth", "bighead"]:
-                self.secret_vault_themes(choice)
+            elif raw_choice in ["retro", "matrix", "party", "stealth", "bighead"]:
+                self.secret_vault_themes(raw_choice)
+                time.sleep(1)
+                continue
+
+            # Show all features (bypass progressive disclosure)
+            elif raw_choice == "all" or raw_choice == "showall":
+                self.day = max(self.day, 30)  # Unlock all menus
+                print(f"{C.SUCCESS}✓ All features unlocked!{C.RESET}")
                 time.sleep(1)
                 continue
 
             # 🎭 GRAND BALL: Check for cheat codes
-            if check_cheat_code(self, choice):
+            if check_cheat_code(self, raw_choice):
                 time.sleep(1)
                 continue
 
@@ -5956,7 +6303,7 @@ class VaultGame:
                 self.process_turn()
                 if self.auto_save:
                     self.add_notification("info", "Auto-saved", self.day, priority=3)
-                time.sleep(1)
+                time.sleep(0.5)  # Reduced from 1s
 
             # v7.0 LIVING VAULT Features (replacing v4.0 stubs!)
             elif choice == 'q':
@@ -5965,11 +6312,11 @@ class VaultGame:
                 self.quests_menu_v7()  # v7.0: Expeditions shown in quests
             elif choice == 'k':
                 print(f"{C.INFO}🌳 Skills system - Coming in next update!{C.RESET}")
-                input("Press Enter...")
+                time.sleep(1)  # Auto-dismiss
             elif choice == 'o':
                 print(f"{C.INFO}🎯 Dynamic objectives - Coming in next update!{C.RESET}")
-                input("Press Enter...")
-            
+                time.sleep(1)  # Auto-dismiss
+
             # v5.0 NEW Features
             elif choice == 'f':
                 self.relationships_menu()
