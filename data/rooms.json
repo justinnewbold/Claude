@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vault Room Configurations",
+  "description": "All room types and their properties for Vault games",
+
+  "rooms": {
+    "POWER_GENERATOR": {
+      "id": "POWER_GENERATOR",
+      "name": "Power Generator",
+      "description": "Generates electrical power for the vault",
+      "cost": 150,
+      "capacity": 2,
+      "production": {
+        "power": 5
+      },
+      "stat_required": "strength",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "⚡",
+      "color": "\u001b[38;5;220m"
+    },
+
+    "WATER_TREATMENT": {
+      "id": "WATER_TREATMENT",
+      "name": "Water Treatment",
+      "description": "Purifies water for drinking and hygiene",
+      "cost": 120,
+      "capacity": 2,
+      "production": {
+        "water": 5
+      },
+      "stat_required": "perception",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "💧",
+      "color": "\u001b[38;5;45m"
+    },
+
+    "DINER": {
+      "id": "DINER",
+      "name": "Diner",
+      "description": "Produces food for vault dwellers",
+      "cost": 100,
+      "capacity": 2,
+      "production": {
+        "food": 5
+      },
+      "stat_required": "agility",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "🍖",
+      "color": "\u001b[38;5;214m"
+    },
+
+    "LIVING_QUARTERS": {
+      "id": "LIVING_QUARTERS",
+      "name": "Living Quarters",
+      "description": "Houses vault dwellers",
+      "cost": 100,
+      "capacity": 4,
+      "production": {},
+      "stat_required": null,
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "🏠",
+      "color": "\u001b[38;5;141m"
+    },
+
+    "STORAGE_ROOM": {
+      "id": "STORAGE_ROOM",
+      "name": "Storage Room",
+      "description": "Increases vault storage capacity",
+      "cost": 80,
+      "capacity": 0,
+      "production": {},
+      "stat_required": null,
+      "storage_bonus": 100,
+      "upgrade_cost_multiplier": 1.3,
+      "icon": "📦",
+      "color": "\u001b[38;5;250m"
+    },
+
+    "MEDBAY": {
+      "id": "MEDBAY",
+      "name": "Medbay",
+      "description": "Heals injured dwellers",
+      "cost": 180,
+      "capacity": 2,
+      "production": {},
+      "stat_required": "intelligence",
+      "healing_rate": 10,
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "⚕️",
+      "color": "\u001b[38;5;46m"
+    },
+
+    "TRAINING_ROOM": {
+      "id": "TRAINING_ROOM",
+      "name": "Training Room",
+      "description": "Trains dweller SPECIAL stats",
+      "cost": 200,
+      "capacity": 2,
+      "production": {},
+      "stat_required": null,
+      "training_speed": 1.0,
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "💪",
+      "color": "\u001b[38;5;118m"
+    },
+
+    "SCIENCE_LAB": {
+      "id": "SCIENCE_LAB",
+      "name": "Science Lab",
+      "description": "Researches new technologies",
+      "cost": 250,
+      "capacity": 2,
+      "production": {},
+      "stat_required": "intelligence",
+      "research_speed": 1.0,
+      "requires_tech": null,
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "🔬",
+      "color": "\u001b[38;5;87m"
+    },
+
+    "RADIO_ROOM": {
+      "id": "RADIO_ROOM",
+      "name": "Radio Room",
+      "description": "Attracts new dwellers to the vault",
+      "cost": 150,
+      "capacity": 1,
+      "production": {},
+      "stat_required": "charisma",
+      "attraction_rate": 0.1,
+      "requires_tech": null,
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "📻",
+      "color": "\u001b[38;5;159m"
+    },
+
+    "WORKSHOP": {
+      "id": "WORKSHOP",
+      "name": "Workshop",
+      "description": "Crafts equipment and items",
+      "cost": 200,
+      "capacity": 2,
+      "production": {},
+      "stat_required": "intelligence",
+      "crafting_speed": 1.0,
+      "requires_tech": "basic_crafting",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "🔧",
+      "color": "\u001b[38;5;208m"
+    },
+
+    "ARMORY": {
+      "id": "ARMORY",
+      "name": "Armory",
+      "description": "Stores and maintains weapons",
+      "cost": 220,
+      "capacity": 2,
+      "production": {},
+      "stat_required": "perception",
+      "weapon_bonus": 0.1,
+      "requires_tech": "advanced_weapons",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "⚔️",
+      "color": "\u001b[38;5;196m"
+    },
+
+    "GARDEN": {
+      "id": "GARDEN",
+      "name": "Garden",
+      "description": "Grows fresh food hydroponically",
+      "cost": 180,
+      "capacity": 2,
+      "production": {
+        "food": 7
+      },
+      "stat_required": "agility",
+      "happiness_bonus": 5,
+      "requires_tech": "hydroponics",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "🌱",
+      "color": "\u001b[38;5;82m"
+    },
+
+    "GYM": {
+      "id": "GYM",
+      "name": "Gym",
+      "description": "Improves dweller physical fitness",
+      "cost": 160,
+      "capacity": 3,
+      "production": {},
+      "stat_required": "strength",
+      "training_speed": 1.2,
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "🏋️",
+      "color": "\u001b[38;5;202m"
+    },
+
+    "ARCHIVES": {
+      "id": "ARCHIVES",
+      "name": "Archives",
+      "description": "Stores knowledge and improves research",
+      "cost": 200,
+      "capacity": 2,
+      "production": {},
+      "stat_required": "intelligence",
+      "research_bonus": 0.2,
+      "requires_tech": "data_storage",
+      "upgrade_cost_multiplier": 1.5,
+      "icon": "📚",
+      "color": "\u001b[38;5;147m"
+    }
+  },
+
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2025-12-04",
+    "total_rooms": 14
+  }
+}
