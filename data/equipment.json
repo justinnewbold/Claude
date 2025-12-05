@@ -1,0 +1,239 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vault Equipment Library",
+  "description": "All weapons and outfits available in Vault games",
+
+  "weapons": {
+    "rusty_pistol": {
+      "id": "rusty_pistol",
+      "name": "Rusty Pistol",
+      "type": "weapon",
+      "damage": 5,
+      "defense": 0,
+      "stat_bonus": {},
+      "rarity": "common",
+      "cost": 50,
+      "level_requirement": 1,
+      "icon": "🔫",
+      "description": "A barely functional pistol. Better than nothing."
+    },
+
+    "laser_rifle": {
+      "id": "laser_rifle",
+      "name": "Laser Rifle",
+      "type": "weapon",
+      "damage": 15,
+      "defense": 0,
+      "stat_bonus": {
+        "perception": 1
+      },
+      "rarity": "uncommon",
+      "cost": 500,
+      "level_requirement": 5,
+      "icon": "⚡",
+      "description": "Pre-war laser technology. Precise and deadly."
+    },
+
+    "plasma_gun": {
+      "id": "plasma_gun",
+      "name": "Plasma Gun",
+      "type": "weapon",
+      "damage": 25,
+      "defense": 0,
+      "stat_bonus": {
+        "perception": 2,
+        "intelligence": 1
+      },
+      "rarity": "rare",
+      "cost": 1500,
+      "level_requirement": 10,
+      "icon": "💚",
+      "description": "Superheated plasma projectiles melt through armor."
+    },
+
+    "combat_rifle": {
+      "id": "combat_rifle",
+      "name": "Combat Rifle",
+      "type": "weapon",
+      "damage": 20,
+      "defense": 0,
+      "stat_bonus": {
+        "perception": 1,
+        "agility": 1
+      },
+      "rarity": "uncommon",
+      "cost": 800,
+      "level_requirement": 7,
+      "craftable": true,
+      "crafting_recipe": {
+        "metal": 3,
+        "electronics": 2,
+        "polymer": 1
+      },
+      "icon": "🔫",
+      "description": "Reliable automatic rifle. Good all-around weapon."
+    },
+
+    "sniper_rifle": {
+      "id": "sniper_rifle",
+      "name": "Sniper Rifle",
+      "type": "weapon",
+      "damage": 30,
+      "defense": 0,
+      "stat_bonus": {
+        "perception": 3
+      },
+      "rarity": "rare",
+      "cost": 2000,
+      "level_requirement": 12,
+      "craftable": true,
+      "crafting_recipe": {
+        "metal": 5,
+        "electronics": 3,
+        "optics": 2
+      },
+      "icon": "🎯",
+      "description": "Long-range precision weapon. One shot, one kill."
+    },
+
+    "gauss_rifle": {
+      "id": "gauss_rifle",
+      "name": "Gauss Rifle",
+      "type": "weapon",
+      "damage": 40,
+      "defense": 0,
+      "stat_bonus": {
+        "perception": 3,
+        "intelligence": 2
+      },
+      "rarity": "legendary",
+      "cost": 5000,
+      "level_requirement": 18,
+      "icon": "⚡",
+      "description": "Electromagnetic railgun. Devastating power."
+    }
+  },
+
+  "outfits": {
+    "vault_suit": {
+      "id": "vault_suit",
+      "name": "Vault Suit",
+      "type": "outfit",
+      "damage": 0,
+      "defense": 2,
+      "stat_bonus": {
+        "endurance": 1
+      },
+      "rarity": "common",
+      "cost": 25,
+      "level_requirement": 1,
+      "icon": "👔",
+      "description": "Standard Vault-Tec jumpsuit. Comfortable and practical."
+    },
+
+    "scientist_coat": {
+      "id": "scientist_coat",
+      "name": "Scientist Coat",
+      "type": "outfit",
+      "damage": 0,
+      "defense": 3,
+      "stat_bonus": {
+        "intelligence": 2
+      },
+      "rarity": "uncommon",
+      "cost": 200,
+      "level_requirement": 3,
+      "icon": "🥼",
+      "description": "Lab coat with radiation shielding."
+    },
+
+    "combat_armor": {
+      "id": "combat_armor",
+      "name": "Combat Armor",
+      "type": "outfit",
+      "damage": 0,
+      "defense": 15,
+      "stat_bonus": {
+        "endurance": 2,
+        "strength": 1
+      },
+      "rarity": "uncommon",
+      "cost": 600,
+      "level_requirement": 6,
+      "icon": "🛡️",
+      "description": "Military-grade body armor. Excellent protection."
+    },
+
+    "reinforced_armor": {
+      "id": "reinforced_armor",
+      "name": "Reinforced Armor",
+      "type": "outfit",
+      "damage": 0,
+      "defense": 20,
+      "stat_bonus": {
+        "endurance": 3,
+        "strength": 1
+      },
+      "rarity": "rare",
+      "cost": 1200,
+      "level_requirement": 10,
+      "craftable": true,
+      "crafting_recipe": {
+        "metal": 4,
+        "cloth": 2,
+        "polymer": 2
+      },
+      "icon": "🛡️",
+      "description": "Enhanced armor with composite plating."
+    },
+
+    "power_armor": {
+      "id": "power_armor",
+      "name": "Power Armor",
+      "type": "outfit",
+      "damage": 0,
+      "defense": 30,
+      "stat_bonus": {
+        "strength": 3,
+        "endurance": 3
+      },
+      "rarity": "legendary",
+      "cost": 5000,
+      "level_requirement": 15,
+      "icon": "🤖",
+      "description": "Powered exoskeleton. The pinnacle of pre-war tech."
+    },
+
+    "stealth_suit": {
+      "id": "stealth_suit",
+      "name": "Stealth Suit",
+      "type": "outfit",
+      "damage": 0,
+      "defense": 10,
+      "stat_bonus": {
+        "agility": 3,
+        "perception": 2
+      },
+      "rarity": "rare",
+      "cost": 1800,
+      "level_requirement": 12,
+      "special_ability": "stealth",
+      "icon": "🥷",
+      "description": "Experimental stealth technology. Nearly invisible."
+    }
+  },
+
+  "rarity_colors": {
+    "common": "\u001b[38;5;250m",
+    "uncommon": "\u001b[38;5;82m",
+    "rare": "\u001b[38;5;51m",
+    "legendary": "\u001b[38;5;226m"
+  },
+
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2025-12-04",
+    "total_weapons": 6,
+    "total_outfits": 6
+  }
+}

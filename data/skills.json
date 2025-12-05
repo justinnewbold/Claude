@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dweller Skills Library",
+  "description": "All learnable skills for vault dwellers",
+
+  "skills": {
+    "power_expert": {
+      "id": "power_expert",
+      "name": "Power Expert",
+      "description": "Master of electrical systems. +30% power production",
+      "category": "production",
+      "stat_requirements": {
+        "strength": 6,
+        "intelligence": 5
+      },
+      "bonus_type": "production_power",
+      "bonus_value": 0.3,
+      "level_requirement": 5,
+      "cost": 500,
+      "icon": "⚡"
+    },
+
+    "water_purifier": {
+      "id": "water_purifier",
+      "name": "Water Purifier",
+      "description": "Expert in water treatment. +30% water production",
+      "category": "production",
+      "stat_requirements": {
+        "perception": 6,
+        "intelligence": 5
+      },
+      "bonus_type": "production_water",
+      "bonus_value": 0.3,
+      "level_requirement": 5,
+      "cost": 500,
+      "icon": "💧"
+    },
+
+    "master_chef": {
+      "id": "master_chef",
+      "name": "Master Chef",
+      "description": "Culinary genius. +30% food production",
+      "category": "production",
+      "stat_requirements": {
+        "agility": 6,
+        "charisma": 5
+      },
+      "bonus_type": "production_food",
+      "bonus_value": 0.3,
+      "level_requirement": 5,
+      "cost": 500,
+      "icon": "🍖"
+    },
+
+    "sharp_shooter": {
+      "id": "sharp_shooter",
+      "name": "Sharp Shooter",
+      "description": "Never misses. +50% weapon damage",
+      "category": "combat",
+      "stat_requirements": {
+        "perception": 7,
+        "agility": 6
+      },
+      "bonus_type": "combat_damage",
+      "bonus_value": 0.5,
+      "level_requirement": 8,
+      "cost": 800,
+      "icon": "🎯"
+    },
+
+    "tank": {
+      "id": "tank",
+      "name": "Tank",
+      "description": "Impervious to damage. -30% damage taken",
+      "category": "combat",
+      "stat_requirements": {
+        "strength": 7,
+        "endurance": 7
+      },
+      "bonus_type": "combat_defense",
+      "bonus_value": 0.3,
+      "level_requirement": 8,
+      "cost": 800,
+      "icon": "🛡️"
+    },
+
+    "wasteland_survivor": {
+      "id": "wasteland_survivor",
+      "name": "Wasteland Survivor",
+      "description": "Thrives in harsh conditions. -25% expedition time",
+      "category": "exploration",
+      "stat_requirements": {
+        "endurance": 6,
+        "luck": 6
+      },
+      "bonus_type": "exploration_speed",
+      "bonus_value": 0.25,
+      "level_requirement": 6,
+      "cost": 600,
+      "icon": "🏜️"
+    },
+
+    "scavenger": {
+      "id": "scavenger",
+      "name": "Scavenger",
+      "description": "Finds treasure in trash. +50% loot found",
+      "category": "exploration",
+      "stat_requirements": {
+        "perception": 6,
+        "luck": 7
+      },
+      "bonus_type": "exploration_loot",
+      "bonus_value": 0.5,
+      "level_requirement": 6,
+      "cost": 600,
+      "icon": "🔍"
+    },
+
+    "leader": {
+      "id": "leader",
+      "name": "Leader",
+      "description": "Inspires others. +10% happiness aura",
+      "category": "utility",
+      "stat_requirements": {
+        "charisma": 8,
+        "intelligence": 6
+      },
+      "bonus_type": "happiness_aura",
+      "bonus_value": 0.1,
+      "level_requirement": 10,
+      "cost": 1000,
+      "icon": "👑"
+    },
+
+    "medic": {
+      "id": "medic",
+      "name": "Medic",
+      "description": "Heals faster and can treat others. +30% healing",
+      "category": "utility",
+      "stat_requirements": {
+        "intelligence": 7,
+        "charisma": 5
+      },
+      "bonus_type": "healing",
+      "bonus_value": 0.3,
+      "level_requirement": 7,
+      "cost": 700,
+      "icon": "⚕️"
+    },
+
+    "engineer": {
+      "id": "engineer",
+      "name": "Engineer",
+      "description": "Master builder. -20% construction time",
+      "category": "utility",
+      "stat_requirements": {
+        "intelligence": 7,
+        "perception": 6
+      },
+      "bonus_type": "construction_speed",
+      "bonus_value": 0.2,
+      "level_requirement": 7,
+      "cost": 700,
+      "icon": "🔧"
+    },
+
+    "scientist": {
+      "id": "scientist",
+      "name": "Scientist",
+      "description": "Brilliant researcher. +40% research speed",
+      "category": "utility",
+      "stat_requirements": {
+        "intelligence": 8,
+        "perception": 6
+      },
+      "bonus_type": "research_speed",
+      "bonus_value": 0.4,
+      "level_requirement": 9,
+      "cost": 900,
+      "icon": "🔬"
+    },
+
+    "diplomat": {
+      "id": "diplomat",
+      "name": "Diplomat",
+      "description": "Silver tongue. +20% trade prices, improved faction relations",
+      "category": "utility",
+      "stat_requirements": {
+        "charisma": 8,
+        "intelligence": 6
+      },
+      "bonus_type": "trade",
+      "bonus_value": 0.2,
+      "level_requirement": 10,
+      "cost": 1000,
+      "icon": "🤝"
+    }
+  },
+
+  "categories": {
+    "production": {
+      "name": "Production",
+      "color": "\u001b[38;5;82m",
+      "description": "Skills that improve resource production"
+    },
+    "combat": {
+      "name": "Combat",
+      "color": "\u001b[38;5;196m",
+      "description": "Skills that enhance combat effectiveness"
+    },
+    "exploration": {
+      "name": "Exploration",
+      "color": "\u001b[38;5;226m",
+      "description": "Skills that help with wasteland expeditions"
+    },
+    "utility": {
+      "name": "Utility",
+      "color": "\u001b[38;5;51m",
+      "description": "Miscellaneous useful skills"
+    }
+  },
+
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2025-12-04",
+    "total_skills": 12
+  }
+}
