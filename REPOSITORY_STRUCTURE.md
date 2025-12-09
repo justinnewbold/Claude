@@ -1,6 +1,6 @@
 # Repository Structure
 
-This document explains the organization of the Vault 13 Game Development Framework repository after Round 6 refactoring.
+This document explains the organization of the Vault 67 Game Development Framework repository after Round 6 refactoring.
 
 ## Overview
 

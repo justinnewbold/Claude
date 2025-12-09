@@ -1,5 +1,5 @@
 """
-Vault 13 Game Development Framework
+Vault 67 Game Development Framework
 ====================================
 Core infrastructure for building text-based games.
 """

@@ -234,7 +234,7 @@ class VaultShelterRefactored(TurnBasedGame):
 ╚═══════════════════════════════════════════════════════════╝
 
 The year is 2077. Nuclear war has devastated the world.
-You are the Overseer of Vault 13, humanity's last hope.
+You are the Overseer of Vault 67, humanity's last hope.
 
 Your mission:
 • Manage vault resources (power, water, food)
