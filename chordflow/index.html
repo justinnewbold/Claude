@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChordFlow | Chord Progression Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</head>
+<body style="font-family: 'Outfit', sans-serif; background: #0a0a0f; color: #ffffff; min-height: 100vh;">
+    <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at 20% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(247, 197, 159, 0.05) 0%, transparent 50%);"></div>
+    <div style="position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 2rem;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <h1 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 2px; background: linear-gradient(135deg, #ff6b35, #f7c59f); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CHORDFLOW</h1>
+            <button onclick="generateProgression()" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 12px; background: linear-gradient(135deg, #ff6b35, #ff8c5a); color: white; border: none; cursor: pointer; font-weight: 500;">🎲 Generate</button>
+        </header>
+        <div id="chordDisplay" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin: 2rem 0;"></div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 2rem 0;">
+            <button id="playBtn" onclick="togglePlayback()" style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #ff6b35, #ff8c5a); display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 1.5rem; color: white;">▶</button>
+        </div>
+    </div>
+    <script>
+        const state = { currentProgression: [], isPlaying: false, synth: null };
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const PROGRESSIONS = [['C','G','Am','F'],['Am','F','C','G'],['C','Am','F','G'],['F','G','C','Am']];
+        
+        function init() {
+            state.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            generateProgression();
+        }
+        
+        function generateProgression() {
+            const prog = PROGRESSIONS[Math.floor(Math.random() * PROGRESSIONS.length)];
+            state.currentProgression = prog.map(name => ({
+                name,
+                notes: name.includes('m') ? [name.replace('m',''), NOTES[(NOTES.indexOf(name.replace('m',''))+3)%12], NOTES[(NOTES.indexOf(name.replace('m',''))+7)%12]] : [name, NOTES[(NOTES.indexOf(name)+4)%12], NOTES[(NOTES.indexOf(name)+7)%12]]
+            }));
+            renderProgression();
+        }
+        
+        function renderProgression() {
+            document.getElementById('chordDisplay').innerHTML = state.currentProgression.map((chord, i) => 
+                '<div onclick="playChord('+i+')" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(247, 197, 159, 0.02)); border: 1px solid #1f1f2e; border-radius: 16px; padding: 1.5rem; text-align: center; cursor: pointer;"><div style="font-family: Bebas Neue, sans-serif; font-size: 2rem;">'+chord.name+'</div></div>'
+            ).join('');
+        }
+        
+        async function playChord(i) {
+            await Tone.start();
+            state.synth.triggerAttackRelease(state.currentProgression[i].notes.map(n => n + '4'), '2n');
+        }
+        
+        function togglePlayback() {
+            if (state.isPlaying) { state.isPlaying = false; return; }
+            state.isPlaying = true;
+            let i = 0;
+            const play = () => { if (!state.isPlaying || i >= state.currentProgression.length) { state.isPlaying = false; return; } playChord(i++); setTimeout(play, 1000); };
+            play();
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
