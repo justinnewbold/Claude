@@ -75,8 +75,9 @@ class LaplacesDemon:
         
     def show_intro(self):
         self.clear_screen()
+        title = "LAPLACE'S DEMON"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'LAPLACE\\'S DEMON'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.DEMON}"We may regard the present state of the universe as the effect

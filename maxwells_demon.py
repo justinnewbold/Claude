@@ -97,8 +97,9 @@ class MaxwellsDemon:
         
     def show_intro(self):
         self.clear_screen()
+        title = "MAXWELL'S DEMON"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'MAXWELL\\'S DEMON'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.DEMON}\"Can we violate the Second Law of Thermodynamics?\"{C.RESET}
@@ -404,7 +405,7 @@ Information is not free.{C.RESET}
                     else:
                         print(f"{C.WARNING}Memory full! Erase memory first.{C.RESET}")
                     time.sleep(0.5)
-                except:
+                except ValueError:
                     pass
             elif choice == 'D':
                 self.door_open = not self.door_open

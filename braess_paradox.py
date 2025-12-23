@@ -19,6 +19,7 @@ class C:
     TRAFFIC = '\033[38;5;203m'
     HEADER = '\033[38;5;87m'
     SYSTEM = '\033[38;5;243m'
+    DIM = '\033[2m'
 
 class BraessParadox:
     def clear_screen(self):
@@ -39,7 +40,8 @@ class BraessParadox:
     def play(self):
         self.clear_screen()
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'BRAESS\\'S PARADOX'.center(70)}{C.RESET}")
+        title = "BRAESS'S PARADOX"
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"{C.BOLD}Before: Two roads, balanced traffic{C.RESET}")

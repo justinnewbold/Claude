@@ -1521,9 +1521,9 @@ Return ONLY valid JSON:
                 rewards=quest_data.get("rewards", {"caps": 100}),
                 created_day=game.day
             )
-    except:
+    except Exception:
         pass
-    
+
     return Quest(id=f"quest_{game.day}", title="Vault Emergency", 
                 description="Handle crisis.", steps=[{"description": "Survive", "type": "survival"}],
                 rewards={"caps": 150}, created_day=game.day)
@@ -2460,7 +2460,7 @@ class VaultGame:
                         print(f"\n{C.SUCCESS}✓ Room merged! +50% production{C.RESET}")
                     else:
                         print(f"\n{C.WARNING}Room already merged{C.RESET}")
-                except:
+                except (ValueError, IndexError):
                     print(f"\n{C.DANGER}Invalid input{C.RESET}")
             else:
                 print(f"\n{C.WARNING}Need {self.vault_expansion.merge_cost} caps{C.RESET}")
@@ -3850,7 +3850,7 @@ class VaultGame:
                 print(f"{C.BOLD}Combat Power:{C.RESET} {d.get_combat_power(self.legendary_inventory)}")
 
                 input(f"\n{C.DIM}Press Enter...{C.RESET}")
-        except:
+        except (ValueError, IndexError):
             pass
 
     def timeline_view(self):
@@ -3982,7 +3982,7 @@ class VaultGame:
                         else:
                             print(f"\n{C.WARNING}Not enough caps!{C.RESET}")
                             time.sleep(1)
-        except:
+        except (ValueError, IndexError, KeyError):
             pass
 
     def upgrade_menu(self):
@@ -4028,7 +4028,7 @@ class VaultGame:
                 else:
                     print(f"\n{C.WARNING}Not enough caps!{C.RESET}")
                     time.sleep(1)
-        except:
+        except (ValueError, IndexError):
             pass
 
     def dwellers_menu(self):
@@ -4107,7 +4107,7 @@ class VaultGame:
                 print(f"  {'Combat Power':20} {d1.get_combat_power(self.legendary_inventory):5} {'←' if d1.get_combat_power(self.legendary_inventory) > d2.get_combat_power(self.legendary_inventory) else '→':^10} {d2.get_combat_power(self.legendary_inventory):5}")
 
                 input(f"\n{C.DIM}Press Enter...{C.RESET}")
-        except:
+        except (ValueError, IndexError):
             pass
 
     # =================================================================

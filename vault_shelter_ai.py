@@ -561,7 +561,7 @@ If the command is unclear or impossible, use action: "clarify" and explain what'
             json_str = response[json_start:json_end]
             return json.loads(json_str)
         return {"action": "unknown", "message": response}
-    except:
+    except (json.JSONDecodeError, ValueError, KeyError) as e:
         return {"action": "error", "message": "Couldn't parse command. Try: 'assign Sarah to power generator' or 'view food status'"}
 
 

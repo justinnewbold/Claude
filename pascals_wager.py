@@ -29,8 +29,9 @@ class PascalsWager:
         
     def play(self):
         self.clear_screen()
+        title = "PASCAL'S WAGER"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'PASCAL\\'S WAGER'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.DIVINE}\"Bet on God's existence.\"{C.RESET}
