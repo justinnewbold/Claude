@@ -12,20 +12,29 @@ Game theory meets traffic engineering.
 """
 
 import os
+from typing import ClassVar
+
 
 class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    ROAD = '\033[38;5;226m'
-    TRAFFIC = '\033[38;5;203m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    DIM = '\033[2m'
+    """Terminal color codes."""
+    RESET: ClassVar[str] = '\033[0m'
+    BOLD: ClassVar[str] = '\033[1m'
+    ROAD: ClassVar[str] = '\033[38;5;226m'
+    TRAFFIC: ClassVar[str] = '\033[38;5;203m'
+    HEADER: ClassVar[str] = '\033[38;5;87m'
+    SYSTEM: ClassVar[str] = '\033[38;5;243m'
+    DIM: ClassVar[str] = '\033[2m'
+
 
 class BraessParadox:
-    def clear_screen(self):
+    """Braess's Paradox demonstration game."""
+
+    def clear_screen(self) -> None:
+        """Clear the terminal screen."""
         os.system('clear' if os.name != 'nt' else 'cls')
-        
-    def show_network(self, has_shortcut):
+
+    def show_network(self, has_shortcut: bool) -> None:
+        """Display the traffic network."""
         if not has_shortcut:
             print(f"\n{C.ROAD}Network:{C.RESET}")
             print(f"  START → [A] → END (50 min)")
@@ -37,7 +46,8 @@ class BraessParadox:
             print(f"\n{C.TRAFFIC}Everyone uses shortcut!{C.RESET}")
             print(f"{C.BOLD}Average time: 80 minutes!{C.RESET}\n")
             
-    def play(self):
+    def play(self) -> None:
+        """Run the main game demonstration."""
         self.clear_screen()
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
         title = "BRAESS'S PARADOX"
@@ -68,7 +78,8 @@ class BraessParadox:
         print(f"{C.DIM}- Seoul, South Korea (removed highway, traffic improved){C.RESET}")
         print(f"{C.DIM}- New York City (closed 42nd St, traffic improved){C.RESET}\n")
 
-def main():
+def main() -> None:
+    """Main entry point."""
     game = BraessParadox()
     game.play()
 

@@ -17,9 +17,100 @@ import hashlib
 
 from logging_config import get_logger
 from error_handling import GameError, error_context
+import re
 
 
 logger = get_logger(__name__)
+
+
+# =============================================================================
+# INPUT VALIDATION
+# =============================================================================
+
+# Characters allowed in save filenames (alphanumeric, underscore, hyphen, dot)
+SAFE_FILENAME_PATTERN = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
+MAX_FILENAME_LENGTH = 100
+RESERVED_NAMES = {'CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4',
+                  'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2',
+                  'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'}
+
+
+def sanitize_filename(name: str, allow_path: bool = False) -> str:
+    """
+    Sanitize a filename to prevent path traversal and invalid characters.
+
+    Args:
+        name: The filename or identifier to sanitize
+        allow_path: Whether to allow path separators (default: False)
+
+    Returns:
+        Sanitized filename
+
+    Raises:
+        GameError: If the name is invalid or potentially dangerous
+    """
+    if not name:
+        raise GameError("Filename cannot be empty")
+
+    # Check length
+    if len(name) > MAX_FILENAME_LENGTH:
+        raise GameError(f"Filename too long (max {MAX_FILENAME_LENGTH} characters)")
+
+    # Check for path traversal attempts
+    if '..' in name:
+        raise GameError("Invalid filename: path traversal detected")
+
+    if not allow_path:
+        # Check for path separators
+        if '/' in name or '\\' in name:
+            raise GameError("Invalid filename: path separators not allowed")
+
+    # Check for Windows reserved names
+    base_name = name.upper().split('.')[0]
+    if base_name in RESERVED_NAMES:
+        raise GameError(f"Invalid filename: '{name}' is a reserved name")
+
+    # Check for safe characters
+    if not SAFE_FILENAME_PATTERN.match(name):
+        raise GameError(
+            f"Invalid filename: '{name}' contains invalid characters. "
+            "Only alphanumeric, underscore, hyphen, and dot are allowed."
+        )
+
+    return name
+
+
+def validate_save_name(save_name: str) -> str:
+    """
+    Validate and sanitize a save name.
+
+    Args:
+        save_name: User-provided save name
+
+    Returns:
+        Validated save name
+
+    Raises:
+        GameError: If the save name is invalid
+    """
+    if not save_name or not save_name.strip():
+        raise GameError("Save name cannot be empty")
+
+    # Strip whitespace
+    save_name = save_name.strip()
+
+    # Check length
+    if len(save_name) > 50:
+        raise GameError("Save name too long (max 50 characters)")
+
+    # Allow spaces and common punctuation in save names, but sanitize for display
+    # Replace potentially problematic characters
+    sanitized = re.sub(r'[^\w\s\-\.]', '', save_name)
+
+    if not sanitized:
+        raise GameError("Save name must contain at least one valid character")
+
+    return sanitized
 
 
 @dataclass
@@ -336,10 +427,12 @@ class SaveSystem:
         return True
 
     def _get_save_filename(self, game_id: str, save_slot: int, auto_save: bool) -> str:
-        """Generate save filename"""
+        """Generate save filename with sanitization"""
+        # Sanitize game_id to prevent path traversal
+        safe_game_id = sanitize_filename(game_id)
         prefix = "auto" if auto_save else "save"
         extension = ".sav.gz" if self.compression else ".sav"
-        return f"{game_id}_{prefix}_{save_slot:02d}{extension}"
+        return f"{safe_game_id}_{prefix}_{save_slot:02d}{extension}"
 
     def _write_save_file(self, path: Path, save_file: SaveFile):
         """Write save file to disk"""

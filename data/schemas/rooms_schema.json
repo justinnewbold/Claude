@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Rooms Schema",
+  "description": "Schema for validating rooms.json",
+  "type": "object",
+  "required": ["rooms"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "rooms": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/room"
+      }
+    }
+  },
+  "definitions": {
+    "room": {
+      "type": "object",
+      "required": ["id", "name", "description", "cost", "capacity"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "cost": {"type": "integer", "minimum": 0},
+        "capacity": {"type": "integer", "minimum": 0},
+        "production": {
+          "type": "object",
+          "properties": {
+            "power": {"type": "integer"},
+            "water": {"type": "integer"},
+            "food": {"type": "integer"}
+          }
+        },
+        "stat_required": {"type": ["string", "null"]},
+        "upgrade_cost_multiplier": {"type": "number", "minimum": 1.0},
+        "storage_bonus": {"type": "integer", "minimum": 0},
+        "healing_rate": {"type": "integer", "minimum": 0},
+        "training_types": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "icon": {"type": "string"},
+        "color": {"type": "string"}
+      }
+    }
+  }
+}

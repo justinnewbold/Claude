@@ -15,6 +15,8 @@ Decision theory meets theology.
 """
 
 import os
+from typing import ClassVar
+
 
 class C:
     RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
@@ -24,10 +26,14 @@ class C:
     SYSTEM = '\033[38;5;243m'
 
 class PascalsWager:
-    def clear_screen(self):
+    """Pascal's Wager philosophical thought experiment game."""
+
+    def clear_screen(self) -> None:
+        """Clear the terminal screen."""
         os.system('clear' if os.name != 'nt' else 'cls')
-        
-    def play(self):
+
+    def play(self) -> None:
+        """Run the main game."""
         self.clear_screen()
         title = "PASCAL'S WAGER"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
@@ -85,7 +91,8 @@ class PascalsWager:
         
         print(f"{C.MATH}Decision theory breaks down with multiple infinities.{C.RESET}\n")
 
-def main():
+def main() -> None:
+    """Main entry point."""
     game = PascalsWager()
     game.play()
 
