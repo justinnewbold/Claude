@@ -15,7 +15,6 @@ Decision theory meets theology.
 """
 
 import os
-from typing import ClassVar
 
 
 class C:

@@ -1369,7 +1369,7 @@ Commands: switch, stay, stats"""
                     s['revealed'] = random.choice(options)
                     s['phase'] = 'switch'
                     return self.show_monty()
-            except:
+            except (ValueError, IndexError, KeyError):
                 pass
             return "Pick a door: pick 1, pick 2, or pick 3"
 
