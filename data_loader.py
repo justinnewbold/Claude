@@ -331,11 +331,148 @@ class DataLoader:
 
 
 # =============================================================================
+# LAZY LOADING SUPPORT
+# =============================================================================
+
+class LazyData:
+    """
+    Lazy loading wrapper for data files.
+
+    Data is only loaded when first accessed, reducing startup time.
+
+    Usage:
+        lazy_rooms = LazyData('rooms.json')
+        # Data not loaded yet
+        actual_data = lazy_rooms.data  # Data loaded now
+    """
+
+    def __init__(self, filename: str, loader: Optional['DataLoader'] = None):
+        """
+        Initialize lazy data wrapper.
+
+        Args:
+            filename: Name of JSON file to load
+            loader: DataLoader instance (uses global if None)
+        """
+        self._filename = filename
+        self._loader = loader
+        self._data: Optional[Dict[str, Any]] = None
+        self._loaded = False
+
+    @property
+    def data(self) -> Dict[str, Any]:
+        """Get data, loading on first access."""
+        if not self._loaded:
+            loader = self._loader or get_data_loader()
+            self._data = loader._load_json(self._filename)
+            self._loaded = True
+        return self._data
+
+    @property
+    def is_loaded(self) -> bool:
+        """Check if data has been loaded."""
+        return self._loaded
+
+    def reload(self) -> Dict[str, Any]:
+        """Force reload data from disk."""
+        loader = self._loader or get_data_loader()
+        self._data = loader._load_json(self._filename, use_cache=False)
+        self._loaded = True
+        return self._data
+
+    def __repr__(self) -> str:
+        status = "loaded" if self._loaded else "not loaded"
+        return f"LazyData({self._filename!r}, {status})"
+
+
+class LazyDataLoader:
+    """
+    Data loader with lazy loading for improved startup performance.
+
+    Unlike DataLoader which caches after first explicit load,
+    LazyDataLoader doesn't load anything until accessed.
+
+    Usage:
+        lazy_loader = LazyDataLoader()
+        # Nothing loaded yet
+
+        rooms = lazy_loader.rooms  # Rooms loaded now
+        weapons = lazy_loader.weapons  # Equipment loaded now
+    """
+
+    def __init__(self, data_dir: Optional[Path] = None, validate: bool = True):
+        """
+        Initialize lazy data loader.
+
+        Args:
+            data_dir: Directory containing JSON files
+            validate: Whether to validate data against schemas
+        """
+        self._inner_loader = DataLoader(data_dir, validate)
+
+        # Create lazy wrappers for each data file
+        self._lazy_rooms = LazyData('rooms.json', self._inner_loader)
+        self._lazy_equipment = LazyData('equipment.json', self._inner_loader)
+        self._lazy_skills = LazyData('skills.json', self._inner_loader)
+
+        logger.info("LazyDataLoader initialized (data will load on first access)")
+
+    @property
+    def rooms(self) -> Dict[str, Any]:
+        """Get rooms data (lazy loaded)."""
+        return self._lazy_rooms.data
+
+    @property
+    def weapons(self) -> Dict[str, Any]:
+        """Get weapons data (lazy loaded)."""
+        return self._lazy_equipment.data.get('weapons', {})
+
+    @property
+    def outfits(self) -> Dict[str, Any]:
+        """Get outfits data (lazy loaded)."""
+        return self._lazy_equipment.data.get('outfits', {})
+
+    @property
+    def equipment(self) -> Dict[str, Any]:
+        """Get full equipment data (lazy loaded)."""
+        return self._lazy_equipment.data
+
+    @property
+    def skills(self) -> Dict[str, Any]:
+        """Get skills data (lazy loaded)."""
+        return self._lazy_skills.data
+
+    def get_loading_status(self) -> Dict[str, bool]:
+        """Get loading status of all data files."""
+        return {
+            'rooms': self._lazy_rooms.is_loaded,
+            'equipment': self._lazy_equipment.is_loaded,
+            'skills': self._lazy_skills.is_loaded,
+        }
+
+    def preload_all(self) -> None:
+        """Force load all data files (useful for testing)."""
+        _ = self.rooms
+        _ = self.equipment
+        _ = self.skills
+        logger.info("All data preloaded")
+
+    def reload_all(self) -> None:
+        """Force reload all data from disk."""
+        self._lazy_rooms.reload()
+        self._lazy_equipment.reload()
+        self._lazy_skills.reload()
+        logger.info("All data reloaded")
+
+
+# =============================================================================
 # GLOBAL INSTANCE
 # =============================================================================
 
 # Create global instance for convenience
 _loader_instance: Optional[DataLoader] = None
+_lazy_loader_instance: Optional[LazyDataLoader] = None
+
 
 def get_data_loader() -> DataLoader:
     """Get global DataLoader instance"""
@@ -343,6 +480,14 @@ def get_data_loader() -> DataLoader:
     if _loader_instance is None:
         _loader_instance = DataLoader()
     return _loader_instance
+
+
+def get_lazy_loader() -> LazyDataLoader:
+    """Get global LazyDataLoader instance for optimized loading"""
+    global _lazy_loader_instance
+    if _lazy_loader_instance is None:
+        _lazy_loader_instance = LazyDataLoader()
+    return _lazy_loader_instance
 
 
 # =============================================================================
