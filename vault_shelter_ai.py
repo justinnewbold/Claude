@@ -17,7 +17,7 @@ import os
 import sys
 import json
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from enum import Enum
 
 # AI Integration - graceful fallback if not available
@@ -561,7 +561,7 @@ If the command is unclear or impossible, use action: "clarify" and explain what'
             json_str = response[json_start:json_end]
             return json.loads(json_str)
         return {"action": "unknown", "message": response}
-    except:
+    except (json.JSONDecodeError, ValueError, KeyError) as e:
         return {"action": "error", "message": "Couldn't parse command. Try: 'assign Sarah to power generator' or 'view food status'"}
 
 
@@ -894,11 +894,210 @@ class VaultGame:
             print(f"{C.AI}{analysis}{C.RESET}")
         else:
             # Execute the parsed action
-            print(f"{C.SUCCESS}{result.get('message', 'Command executed')}{C.RESET}")
-            # TODO: Actually execute the actions based on result["action"] and result["parameters"]
-            # This would require implementing action handlers
+            success = self._execute_action(result["action"], result.get("parameters", {}))
+            if success:
+                print(f"{C.SUCCESS}{result.get('message', 'Command executed')}{C.RESET}")
+            else:
+                print(f"{C.WARNING}Could not execute: {result.get('message', 'Unknown action')}{C.RESET}")
 
         input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
+
+    def _execute_action(self, action: str, params: Dict[str, Any]) -> bool:
+        """Execute a parsed action from natural language command"""
+        try:
+            if action == "assign_dweller":
+                return self._action_assign_dweller(params)
+            elif action == "rush_room":
+                return self._action_rush_room(params)
+            elif action == "upgrade_room":
+                return self._action_upgrade_room(params)
+            elif action == "build_room":
+                return self._action_build_room(params)
+            elif action == "view_status":
+                return self._action_view_status(params)
+            elif action == "end_turn":
+                return self._action_end_turn()
+            elif action == "equip_item":
+                print(f"{C.INFO}Equipment system not implemented in this version.{C.RESET}")
+                return False
+            else:
+                print(f"{C.WARNING}Unknown action: {action}{C.RESET}")
+                return False
+        except Exception as e:
+            print(f"{C.DANGER}Error executing action: {e}{C.RESET}")
+            return False
+
+    def _find_dweller_by_name(self, name: str) -> Optional[Dweller]:
+        """Find dweller by name (case-insensitive partial match)"""
+        name_lower = name.lower()
+        for dweller in self.dwellers:
+            if name_lower in dweller.name.lower():
+                return dweller
+        return None
+
+    def _find_room_by_type(self, room_type_str: str) -> Optional[Room]:
+        """Find first room matching type string"""
+        room_type_str = room_type_str.lower().replace(" ", "_")
+        for floor in self.vault_layout:
+            for room in floor:
+                if room.room_type != RoomType.EMPTY:
+                    if room_type_str in room.room_type.value.lower():
+                        return room
+        return None
+
+    def _action_assign_dweller(self, params: Dict[str, Any]) -> bool:
+        """Assign a dweller to a room"""
+        dweller_name = params.get("dweller", params.get("name", ""))
+        room_type = params.get("room", params.get("room_type", ""))
+
+        if not dweller_name or not room_type:
+            print(f"{C.WARNING}Need both dweller name and room type{C.RESET}")
+            return False
+
+        dweller = self._find_dweller_by_name(dweller_name)
+        if not dweller:
+            print(f"{C.WARNING}Dweller '{dweller_name}' not found{C.RESET}")
+            return False
+
+        room = self._find_room_by_type(room_type)
+        if not room:
+            print(f"{C.WARNING}Room '{room_type}' not found{C.RESET}")
+            return False
+
+        if not room.can_assign_dweller():
+            print(f"{C.WARNING}Room is at full capacity{C.RESET}")
+            return False
+
+        # Remove from previous assignment
+        if dweller.assigned_room is not None:
+            for floor in self.vault_layout:
+                for r in floor:
+                    if dweller in r.assigned_dwellers:
+                        r.assigned_dwellers.remove(dweller)
+
+        room.assigned_dwellers.append(dweller)
+        dweller.assigned_room = room.room_type.value
+        print(f"{C.SUCCESS}Assigned {dweller.name} to {room.room_type.value}{C.RESET}")
+        return True
+
+    def _action_rush_room(self, params: Dict[str, Any]) -> bool:
+        """Rush a room's production"""
+        room_type = params.get("room", params.get("room_type", ""))
+        room = self._find_room_by_type(room_type)
+
+        if not room:
+            print(f"{C.WARNING}Room '{room_type}' not found{C.RESET}")
+            return False
+
+        if not room.can_rush():
+            print(f"{C.WARNING}Room cannot be rushed (cooldown or no workers){C.RESET}")
+            return False
+
+        # Rush logic: 40% base success, risk of incident
+        import random
+        success_chance = 0.4 + (len(room.assigned_dwellers) * 0.1)
+
+        if random.random() < success_chance:
+            production = room.get_production(room.assigned_dwellers)
+            for resource, amount in production.items():
+                self.resources.add(resource, amount)
+            room.rush_cooldown = 3
+            print(f"{C.SUCCESS}Rush successful! Bonus resources gained.{C.RESET}")
+            return True
+        else:
+            room.has_incident = True
+            print(f"{C.DANGER}Rush failed! Incident occurred.{C.RESET}")
+            return True  # Still executed, just failed
+
+    def _action_upgrade_room(self, params: Dict[str, Any]) -> bool:
+        """Upgrade a room"""
+        room_type = params.get("room", params.get("room_type", ""))
+        room = self._find_room_by_type(room_type)
+
+        if not room:
+            print(f"{C.WARNING}Room '{room_type}' not found{C.RESET}")
+            return False
+
+        if room.level >= 3:
+            print(f"{C.WARNING}Room is already at max level{C.RESET}")
+            return False
+
+        cost = room.get_upgrade_cost()
+        if not self.resources.has_enough("caps", cost):
+            print(f"{C.WARNING}Not enough caps ({cost} required){C.RESET}")
+            return False
+
+        self.resources.remove("caps", cost)
+        room.level += 1
+        print(f"{C.SUCCESS}Upgraded {room.room_type.value} to level {room.level}{C.RESET}")
+        return True
+
+    def _action_build_room(self, params: Dict[str, Any]) -> bool:
+        """Build a new room"""
+        room_type_str = params.get("room", params.get("room_type", ""))
+
+        # Find matching room type
+        target_type = None
+        for rt in RoomType:
+            if room_type_str.lower().replace(" ", "_") in rt.value.lower():
+                target_type = rt
+                break
+
+        if not target_type or target_type == RoomType.EMPTY:
+            print(f"{C.WARNING}Unknown room type: {room_type_str}{C.RESET}")
+            return False
+
+        # Find empty slot
+        empty_slot = None
+        for floor_idx, floor in enumerate(self.vault_layout):
+            for room_idx, room in enumerate(floor):
+                if room.room_type == RoomType.EMPTY:
+                    empty_slot = (floor_idx, room_idx)
+                    break
+            if empty_slot:
+                break
+
+        if not empty_slot:
+            print(f"{C.WARNING}No empty room slots available{C.RESET}")
+            return False
+
+        cost = ROOM_CONFIGS[target_type].cost
+        if not self.resources.has_enough("caps", cost):
+            print(f"{C.WARNING}Not enough caps ({cost} required){C.RESET}")
+            return False
+
+        self.resources.remove("caps", cost)
+        self.vault_layout[empty_slot[0]][empty_slot[1]] = Room(target_type)
+        print(f"{C.SUCCESS}Built {target_type.value} at floor {empty_slot[0]+1}{C.RESET}")
+        return True
+
+    def _action_view_status(self, params: Dict[str, Any]) -> bool:
+        """View status of a resource, dweller, or room"""
+        target = params.get("target", params.get("what", ""))
+
+        if "food" in target.lower():
+            print(f"{C.INFO}Food: {self.resources.food}/{self.resources.max_food}{C.RESET}")
+        elif "water" in target.lower():
+            print(f"{C.INFO}Water: {self.resources.water}/{self.resources.max_water}{C.RESET}")
+        elif "power" in target.lower():
+            print(f"{C.INFO}Power: {self.resources.power}/{self.resources.max_power}{C.RESET}")
+        elif "caps" in target.lower():
+            print(f"{C.INFO}Caps: {self.resources.caps}{C.RESET}")
+        elif "dweller" in target.lower() or any(d.name.lower() in target.lower() for d in self.dwellers):
+            for d in self.dwellers:
+                if target.lower() == "dweller" or d.name.lower() in target.lower():
+                    print(f"{C.INFO}{d.name}: HP {d.health}, Happiness {d.happiness}, "
+                          f"Assigned: {d.assigned_room or 'None'}{C.RESET}")
+        else:
+            print(f"{C.INFO}Resources: Power {self.resources.power}, Water {self.resources.water}, "
+                  f"Food {self.resources.food}, Caps {self.resources.caps}{C.RESET}")
+        return True
+
+    def _action_end_turn(self) -> bool:
+        """End the current turn"""
+        self.day += 1
+        print(f"{C.INFO}Advanced to Day {self.day}{C.RESET}")
+        return True
 
     # Continue with existing methods (process_turn, etc.)
     # For brevity, I'll include just the modified game_loop

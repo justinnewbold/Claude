@@ -27,8 +27,9 @@ class MarysRoom:
         
     def play(self):
         self.clear_screen()
+        title = "MARY'S ROOM"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'MARY\\'S ROOM'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"{C.BW}You are Mary.{C.RESET}\n")

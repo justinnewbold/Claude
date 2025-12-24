@@ -2,8 +2,69 @@
 """
 Cross-Platform Utilities for VAULT 13 Game Collection
 ======================================================
-Provides platform-agnostic utilities for terminal handling, paths, and system operations.
-Supports: Windows, macOS, Linux
+
+Provides platform-agnostic utilities for terminal handling, paths, and system
+operations. This module ensures consistent behavior across Windows, macOS, and Linux.
+
+SUPPORTED PLATFORMS
+-------------------
+- Windows 10+ (with Windows Terminal or cmd.exe with VT100 support)
+- macOS 10.12+
+- Linux (any modern distribution with a terminal emulator)
+
+TERMINAL COLOR SUPPORT
+----------------------
+Colors are handled differently on each platform:
+
+**Windows:**
+  1. Uses colorama package (preferred) - automatically converts ANSI codes
+  2. Falls back to Windows VT100 mode via ctypes if colorama unavailable
+  3. Final fallback: os.system('') trick to enable ANSI support
+
+**Unix (Linux/macOS):**
+  - Native ANSI escape code support in all modern terminals
+  - No special initialization required
+
+**Disabling Colors:**
+  - Set environment variable NO_COLOR=1 to disable all color output
+  - Set TERM=dumb to simulate a dumb terminal
+
+KEYBOARD INPUT
+--------------
+Non-blocking keyboard input works differently:
+
+**Windows:**
+  - Uses msvcrt.getch() and msvcrt.kbhit()
+  - No special terminal mode changes required
+
+**Unix:**
+  - Uses termios to set terminal to raw mode
+  - Falls back to regular input() if termios unavailable
+  - Requires proper cleanup via try/finally or context manager
+
+ASYNC SUPPORT
+-------------
+Async/event-driven I/O via eventlet is Unix-only. Windows uses threading fallback.
+
+UNICODE
+-------
+- Windows: Ensure UTF-8 console mode with `chcp 65001` or Python UTF-8 mode
+- Unix: Usually UTF-8 by default, respects LANG/LC_* environment variables
+
+USAGE EXAMPLE
+-------------
+    from platform_utils import init_terminal, clear_screen, is_windows
+
+    # Initialize terminal (required for Windows color support)
+    init_terminal()
+
+    # Clear screen (works cross-platform)
+    clear_screen()
+
+    # Platform-specific code
+    if is_windows():
+        # Windows-specific behavior
+        pass
 """
 
 import os

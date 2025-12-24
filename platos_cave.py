@@ -24,8 +24,9 @@ class PlatosCave:
         
     def play(self):
         self.clear_screen()
+        title = "PLATO'S CAVE"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'PLATO\\'S CAVE'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.SHADOW}You are chained in a cave.{C.RESET}
@@ -87,9 +88,11 @@ You think shadows ARE reality.{C.RESET}
         print(f'{C.SHADOW}"I saw true reality! Sunlight! Real objects!"{C.RESET}\n')
         
         print(f"{C.DIM}Other prisoners:{C.RESET}")
-        print(f'{C.SHADOW}"You\\'re crazy. Shadows are all that exist."{C.RESET}')
+        crazy = "You're crazy. Shadows are all that exist."
+        nonsense = "Don't speak of this nonsense."
+        print(f'{C.SHADOW}"{crazy}"{C.RESET}')
         print(f'{C.SHADOW}"Your eyes were damaged. You see illusions."{C.RESET}')
-        print(f'{C.SHADOW}"Don\\'t speak of this nonsense."{C.RESET}\n')
+        print(f'{C.SHADOW}"{nonsense}"{C.RESET}\n')
         
         print(f"{C.BOLD}They don't believe you.{C.RESET}\n")
         

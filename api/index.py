@@ -1,7 +1,70 @@
 from http.server import BaseHTTPRequestHandler
+import json
+import re
+from urllib.parse import urlparse, parse_qs
+
+# Input validation patterns
+SAFE_INPUT_PATTERN = re.compile(r'^[a-zA-Z0-9\s\-_.,!?]+$')
+MAX_INPUT_LENGTH = 500
+
+
+def sanitize_game_input(user_input: str) -> str:
+    """Sanitize user input for game commands."""
+    if not user_input:
+        return ""
+    # Limit length
+    user_input = user_input[:MAX_INPUT_LENGTH]
+    # Strip whitespace
+    user_input = user_input.strip()
+    # Remove any potential script injection
+    user_input = re.sub(r'<[^>]*>', '', user_input)
+    return user_input
+
+
+def validate_game_id(game_id: str) -> bool:
+    """Validate game ID is a known game."""
+    valid_games = {'vault', 'echo', 'chinese_room', 'trolley', 'prisoners', 'monty'}
+    return game_id in valid_games
+
 
 class handler(BaseHTTPRequestHandler):
+    def send_json_response(self, status_code: int, data: dict) -> None:
+        """Send a JSON response."""
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+
     def do_GET(self):
+        parsed_path = urlparse(self.path)
+        path = parsed_path.path
+
+        # Health check endpoint
+        if path == '/health' or path == '/api/health':
+            self.send_json_response(200, {
+                'status': 'healthy',
+                'service': 'vault13-games',
+                'version': '6.0.0',
+                'games_available': 6
+            })
+            return
+
+        # API info endpoint
+        if path == '/api' or path == '/api/':
+            self.send_json_response(200, {
+                'name': 'Vault 13: Survival Protocol API',
+                'version': '6.0.0',
+                'endpoints': {
+                    '/': 'Game interface (HTML)',
+                    '/health': 'Health check',
+                    '/api': 'API information'
+                },
+                'games': ['vault', 'echo', 'chinese_room', 'trolley', 'prisoners', 'monty']
+            })
+            return
+
+        # Main game interface
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -1369,7 +1432,7 @@ Commands: switch, stay, stats"""
                     s['revealed'] = random.choice(options)
                     s['phase'] = 'switch'
                     return self.show_monty()
-            except:
+            except (ValueError, IndexError, KeyError):
                 pass
             return "Pick a door: pick 1, pick 2, or pick 3"
 

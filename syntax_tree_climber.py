@@ -238,7 +238,7 @@ class SyntaxTreeClimber:
         """Convert AST node to string"""
         try:
             return ast.unparse(node)
-        except:
+        except (ValueError, TypeError, RecursionError):
             return f"<{self.get_node_type(node)}>"
 
     def op_to_string(self, op: ast.operator) -> str:
@@ -365,7 +365,7 @@ class SyntaxTreeClimber:
                 # Recompile code
                 self.code = ast.unparse(self.tree)
                 return True
-            except:
+            except (ValueError, TypeError, RecursionError):
                 return False
 
         return False

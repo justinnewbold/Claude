@@ -391,7 +391,7 @@ Your future creates your past.{C.RESET}
             if ch.lower() == 'n':
                 self.level_num += 1
                 self.setup_level(self.level_num)
-        except:
+        except (ImportError, AttributeError, OSError):
             cmd = input().strip().lower()
             if cmd == 'n':
                 self.level_num += 1
@@ -467,7 +467,7 @@ The future shaped the past.{C.RESET}
                 elif ch.lower() == 'q':
                     self.game_over = True
 
-            except:
+            except (ImportError, AttributeError, OSError):
                 cmd = input(f"\n{C.SYSTEM}Command: {C.RESET}").lower().strip()
 
                 if cmd in ['w', 'up']:

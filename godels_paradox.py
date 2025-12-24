@@ -63,8 +63,9 @@ class GodelsParadox:
         
     def show_intro(self):
         self.clear_screen()
+        title = "GÖDEL'S PARADOX"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'GÖDEL\\'S PARADOX'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.PARADOX}"This statement is unprovable."{C.RESET}

@@ -103,11 +103,56 @@ import time
 import os
 import sys
 import json
+import logging
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
 from datetime import datetime, timedelta
 from collections import defaultdict
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+
+# Set up game logger
+game_logger = logging.getLogger('vault13')
+game_logger.setLevel(logging.DEBUG)
+
+# Create file handler for game events (if log directory exists)
+try:
+    log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, 'vault13_game.log')
+    file_handler = logging.FileHandler(log_file, encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    ))
+    game_logger.addHandler(file_handler)
+except (OSError, PermissionError):
+    # If we can't create log file, continue without file logging
+    pass
+
+# Create console handler for errors only (to not interfere with game display)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.ERROR)
+console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+game_logger.addHandler(console_handler)
+
+
+def log_game_event(event_type: str, message: str, data: Optional[Dict] = None) -> None:
+    """Log a game event with optional structured data."""
+    log_msg = f"[{event_type}] {message}"
+    if data:
+        log_msg += f" | {json.dumps(data, default=str)}"
+    game_logger.info(log_msg)
+
+
+def log_error(context: str, error: Exception) -> None:
+    """Log an error with context."""
+    game_logger.error(f"[ERROR] {context}: {error}", exc_info=True)
 
 # AI Integration
 AI_ENABLED = False
@@ -1521,9 +1566,9 @@ Return ONLY valid JSON:
                 rewards=quest_data.get("rewards", {"caps": 100}),
                 created_day=game.day
             )
-    except:
+    except Exception:
         pass
-    
+
     return Quest(id=f"quest_{game.day}", title="Vault Emergency", 
                 description="Handle crisis.", steps=[{"description": "Survive", "type": "survival"}],
                 rewards={"caps": 150}, created_day=game.day)
@@ -2460,7 +2505,7 @@ class VaultGame:
                         print(f"\n{C.SUCCESS}✓ Room merged! +50% production{C.RESET}")
                     else:
                         print(f"\n{C.WARNING}Room already merged{C.RESET}")
-                except:
+                except (ValueError, IndexError):
                     print(f"\n{C.DANGER}Invalid input{C.RESET}")
             else:
                 print(f"\n{C.WARNING}Need {self.vault_expansion.merge_cost} caps{C.RESET}")
@@ -3850,7 +3895,7 @@ class VaultGame:
                 print(f"{C.BOLD}Combat Power:{C.RESET} {d.get_combat_power(self.legendary_inventory)}")
 
                 input(f"\n{C.DIM}Press Enter...{C.RESET}")
-        except:
+        except (ValueError, IndexError):
             pass
 
     def timeline_view(self):
@@ -3982,7 +4027,7 @@ class VaultGame:
                         else:
                             print(f"\n{C.WARNING}Not enough caps!{C.RESET}")
                             time.sleep(1)
-        except:
+        except (ValueError, IndexError, KeyError):
             pass
 
     def upgrade_menu(self):
@@ -4028,7 +4073,7 @@ class VaultGame:
                 else:
                     print(f"\n{C.WARNING}Not enough caps!{C.RESET}")
                     time.sleep(1)
-        except:
+        except (ValueError, IndexError):
             pass
 
     def dwellers_menu(self):
@@ -4107,7 +4152,7 @@ class VaultGame:
                 print(f"  {'Combat Power':20} {d1.get_combat_power(self.legendary_inventory):5} {'←' if d1.get_combat_power(self.legendary_inventory) > d2.get_combat_power(self.legendary_inventory) else '→':^10} {d2.get_combat_power(self.legendary_inventory):5}")
 
                 input(f"\n{C.DIM}Press Enter...{C.RESET}")
-        except:
+        except (ValueError, IndexError):
             pass
 
     # =================================================================
@@ -6497,6 +6542,8 @@ def show_launcher():
 
 def save_game(game, filename="vault_save.json"):
     """Save game to JSON file"""
+    log_game_event("SAVE", f"Saving game to {filename}", {"day": game.day, "dwellers": len(game.dwellers)})
+
     save_data = {
         "version": "6.0_GRAND_BALL",
         "day": game.day,
@@ -6523,23 +6570,30 @@ def save_game(game, filename="vault_save.json"):
     try:
         with open(filename, 'w') as f:
             json.dump(save_data, f, indent=2)
+        log_game_event("SAVE", "Game saved successfully")
         return True
     except Exception as e:
+        log_error("save_game", e)
         print(f"{C.DANGER}Save failed: {e}{C.RESET}")
         return False
 
 def load_game(filename="vault_save.json"):
     """Load game from JSON file"""
+    log_game_event("LOAD", f"Loading game from {filename}")
+
     try:
         with open(filename, 'r') as f:
             save_data = json.load(f)
 
+        log_game_event("LOAD", f"Game loaded successfully", {"day": save_data['day']})
         print(f"{C.SUCCESS}✓ Game loaded from day {save_data['day']}!{C.RESET}")
         return save_data
     except FileNotFoundError:
+        game_logger.warning(f"Save file not found: {filename}")
         print(f"{C.WARNING}No save file found.{C.RESET}")
         return None
     except Exception as e:
+        log_error("load_game", e)
         print(f"{C.DANGER}Load failed: {e}{C.RESET}")
         return None
 
@@ -6715,11 +6769,14 @@ def show_performance_dashboard(game):
 
 def main():
     """Main entry point with launcher"""
+    log_game_event("STARTUP", "Vault 13: Survival Protocol starting")
+
     while True:
         choice = show_launcher()
 
         if choice == '1':
             # New Game
+            log_game_event("GAME", "Starting new game")
             print(f"\n{C.HEADER}Loading VAULT 13 v6.0 GRAND BALL EDITION...{C.RESET}\n")
             time.sleep(1.5)
             game = VaultGame()
@@ -6801,6 +6858,7 @@ def main():
 
         elif choice == '0':
             # Exit
+            log_game_event("SHUTDOWN", "Game exiting normally")
             print(f"\n{C.INFO}Thank you for playing VAULT 13 v6.0 GRAND BALL EDITION!{C.RESET}\n")
             print(f"{C.DIM}See you at the ball! 🎭{C.RESET}\n")
             break

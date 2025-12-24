@@ -69,8 +69,9 @@ class PrisonersDilemma:
             
     def show_intro(self):
         self.clear_screen()
+        title = "THE PRISONER'S DILEMMA TOURNAMENT"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'THE PRISONER\\'S DILEMMA TOURNAMENT'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.BOLD}Two prisoners, separate cells.{C.RESET}

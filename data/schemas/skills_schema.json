@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Skills Schema",
+  "description": "Schema for validating skills.json",
+  "type": "object",
+  "required": ["skills"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "skills": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/skill"
+      }
+    }
+  },
+  "definitions": {
+    "skill": {
+      "type": "object",
+      "required": ["id", "name", "description", "category", "bonus_type", "bonus_value", "cost"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "category": {
+          "type": "string",
+          "enum": ["production", "combat", "exploration", "social", "survival", "special"]
+        },
+        "stat_requirements": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 1, "maximum": 10}
+        },
+        "bonus_type": {"type": "string"},
+        "bonus_value": {"type": "number"},
+        "level_requirement": {"type": "integer", "minimum": 1},
+        "cost": {"type": "integer", "minimum": 0},
+        "icon": {"type": "string"},
+        "prerequisites": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

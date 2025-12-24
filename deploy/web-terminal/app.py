@@ -50,7 +50,7 @@ class Terminal:
         if self.fd:
             try:
                 return os.read(self.fd, 10240).decode('utf-8', errors='replace')
-            except:
+            except OSError:
                 return None
         return None
 
@@ -129,7 +129,7 @@ def handle_disconnect():
         if terminal.child_pid:
             try:
                 os.kill(terminal.child_pid, 9)
-            except:
+            except (ProcessLookupError, OSError):
                 pass
         if terminal.fd:
             os.close(terminal.fd)
@@ -149,7 +149,7 @@ def read_output(session_id):
                         socketio.emit('output', {'output': output}, room=session_id)
                     else:
                         break
-            except:
+            except (OSError, ValueError):
                 break
 
 if __name__ == '__main__':

@@ -46,8 +46,9 @@ class ZenosRunner:
         
     def show_intro(self):
         self.clear_screen()
+        title = "ZENO'S RUNNER"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'ZENO\\'S RUNNER'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.PARADOX}\"That which is in locomotion must arrive at the halfway 
@@ -219,8 +220,9 @@ Q - Quit
     def show_ending(self):
         """Show philosophical conclusion"""
         self.clear_screen()
+        title = "ZENO'S PARADOXES RESOLVED"
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
-        print(f"{C.BOLD}{C.HEADER}{'ZENO\\'S PARADOXES RESOLVED'.center(70)}{C.RESET}")
+        print(f"{C.BOLD}{C.HEADER}{title.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
         
         print(f"""{C.SUCCESS}You've proven motion is possible!{C.RESET}

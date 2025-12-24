@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Equipment Schema",
+  "description": "Schema for validating equipment.json",
+  "type": "object",
+  "required": ["weapons", "outfits"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "weapons": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/weapon"
+      }
+    },
+    "outfits": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/outfit"
+      }
+    }
+  },
+  "definitions": {
+    "weapon": {
+      "type": "object",
+      "required": ["id", "name", "type", "damage", "rarity", "cost"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "type": {"type": "string", "enum": ["weapon"]},
+        "damage": {"type": "integer", "minimum": 0},
+        "defense": {"type": "integer", "minimum": 0},
+        "stat_bonus": {
+          "type": "object",
+          "additionalProperties": {"type": "integer"}
+        },
+        "rarity": {"type": "string", "enum": ["common", "uncommon", "rare", "legendary"]},
+        "cost": {"type": "integer", "minimum": 0},
+        "level_requirement": {"type": "integer", "minimum": 1},
+        "craftable": {"type": "boolean"},
+        "crafting_recipe": {
+          "type": "object",
+          "additionalProperties": {"type": "integer"}
+        },
+        "icon": {"type": "string"},
+        "description": {"type": "string"}
+      }
+    },
+    "outfit": {
+      "type": "object",
+      "required": ["id", "name", "type", "defense", "rarity", "cost"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "type": {"type": "string", "enum": ["outfit"]},
+        "damage": {"type": "integer", "minimum": 0},
+        "defense": {"type": "integer", "minimum": 0},
+        "stat_bonus": {
+          "type": "object",
+          "additionalProperties": {"type": "integer"}
+        },
+        "rarity": {"type": "string", "enum": ["common", "uncommon", "rare", "legendary"]},
+        "cost": {"type": "integer", "minimum": 0},
+        "level_requirement": {"type": "integer", "minimum": 1},
+        "icon": {"type": "string"},
+        "description": {"type": "string"}
+      }
+    }
+  }
+}

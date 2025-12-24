@@ -7,8 +7,10 @@ Universal game launcher with main menu and game selection.
 
 import sys
 import os
+import json
+from pathlib import Path
 from typing import List, Dict, Optional, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import importlib.util
 
 from config import GameConfig
@@ -19,6 +21,9 @@ from platform_utils import clear_screen, print_header
 
 
 logger = get_logger(__name__)
+
+# Preferences file location
+PREFERENCES_FILE = Path.home() / ".vault13_launcher_preferences.json"
 
 
 @dataclass
@@ -117,15 +122,34 @@ class GameLauncher:
         self.logger.info(f"Loaded {len(self.games)} games")
 
     def _load_preferences(self):
-        """Load user preferences (recent games, favorites)"""
-        # TODO: Load from save file
+        """Load user preferences (recent games, favorites) from file"""
         self.recent_games = []
         self.favorites = []
 
+        try:
+            if PREFERENCES_FILE.exists():
+                with open(PREFERENCES_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.recent_games = data.get('recent_games', [])
+                    self.favorites = data.get('favorites', [])
+                    self.logger.info(f"Loaded preferences: {len(self.recent_games)} recent, {len(self.favorites)} favorites")
+        except json.JSONDecodeError as e:
+            self.logger.warning(f"Invalid preferences file, resetting: {e}")
+        except Exception as e:
+            self.logger.warning(f"Could not load preferences: {e}")
+
     def _save_preferences(self):
-        """Save user preferences"""
-        # TODO: Save to file
-        pass
+        """Save user preferences to file"""
+        try:
+            data = {
+                'recent_games': self.recent_games,
+                'favorites': self.favorites,
+            }
+            with open(PREFERENCES_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2)
+            self.logger.info("Preferences saved successfully")
+        except Exception as e:
+            self.logger.warning(f"Could not save preferences: {e}")
 
     def run(self):
         """Main launcher loop"""
