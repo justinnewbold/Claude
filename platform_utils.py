@@ -353,6 +353,13 @@ def set_title(title: str):
         print(f'\033]0;{title}\007', end='', flush=True)
 
 
+def print_header(text: str, width: int = 60):
+    """Print a stylized header with box characters."""
+    print(f"\n{'═' * width}")
+    print(f"{text.center(width)}")
+    print(f"{'═' * width}\n")
+
+
 # =============================================================================
 # COLOR SUPPORT
 # =============================================================================
