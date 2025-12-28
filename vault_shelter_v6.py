@@ -103,6 +103,7 @@ import time
 import sys
 import json
 import logging
+import os
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Optional, Tuple, Set, Any
 from enum import Enum
@@ -770,6 +771,8 @@ class Dweller:
     happiness: int = 50
     health: int = 100
     assigned_room: Optional[Tuple[int, int]] = None
+    assigned_room_floor: Optional[int] = None
+    assigned_room_pos: Optional[int] = None
     weapon: Optional[str] = None
     outfit: Optional[str] = None
     # AI Personality (v3.0)
@@ -2725,7 +2728,10 @@ class VaultGame:
             success_chance = min(80, len([d for d in self.dwellers if "medic" in d.learned_skills]) * 20)
         elif disaster.disaster_type == DisasterType.MELTDOWN:
             # Need engineers
-            success_chance = min(80, sum(d.intelligence for d in self.dwellers if not d.is_child) // len(self.dwellers) * 10)
+            if self.dwellers:
+                success_chance = min(80, sum(d.intelligence for d in self.dwellers if not d.is_child) // len(self.dwellers) * 10)
+            else:
+                success_chance = 50
         else:
             success_chance = 50
 

@@ -253,8 +253,17 @@ class GameLauncher:
         print(f"\n🚀 Launching {game.name}...\n")
 
         with error_context(f"launching {game.name}"):
+            # Validate module path to prevent path traversal
+            if '..' in game.module_path or game.module_path.startswith('/'):
+                raise GameError(f"Invalid module path: {game.module_path}")
+
             # Try to import and run the game
-            module_path = os.path.join(os.getcwd(), game.module_path)
+            base_dir = os.getcwd()
+            module_path = os.path.normpath(os.path.join(base_dir, game.module_path))
+
+            # Ensure the resolved path is within the base directory
+            if not module_path.startswith(base_dir):
+                raise GameError(f"Module path escapes base directory: {game.module_path}")
 
             if not os.path.exists(module_path):
                 raise GameError(f"Game file not found: {game.module_path}")

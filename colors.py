@@ -218,6 +218,32 @@ class Colors:
     ENEMY_DEAD: ClassVar[str] = '\033[38;5;240m'    # Dark gray
     EMPTY: ClassVar[str] = '\033[38;5;243m'         # Gray
 
+    # ==========================================================================
+    # VAULT SHELTER EXTENDED COLORS
+    # ==========================================================================
+    QUEST: ClassVar[str] = '\033[38;5;214m'         # Orange for quests
+    TECH: ClassVar[str] = '\033[38;5;39m'           # Blue for technology
+    FACTION: ClassVar[str] = '\033[38;5;141m'       # Purple for factions
+    SKILL: ClassVar[str] = '\033[38;5;118m'         # Green for skills
+    TRADE: ClassVar[str] = '\033[38;5;226m'         # Gold for trading
+    LEGENDARY: ClassVar[str] = '\033[38;5;201m'     # Magenta for legendary items
+    SAFE: ClassVar[str] = '\033[38;5;46m'           # Green for safe status
+
+    # ==========================================================================
+    # PARADOX GAMES COLORS
+    # ==========================================================================
+    # Monty Hall
+    DOOR: ClassVar[str] = '\033[38;5;94m'           # Brown for doors
+    CAR: ClassVar[str] = '\033[38;5;226m'           # Gold for car prize
+    GOAT: ClassVar[str] = '\033[38;5;252m'          # White for goats
+
+    # Newcomb's Paradox
+    PREDICT: ClassVar[str] = '\033[38;5;141m'       # Purple for predictor
+    MONEY: ClassVar[str] = '\033[38;5;226m'         # Gold for money
+
+    # Black & White mode
+    BW: ClassVar[str] = '\033[38;5;252m'            # Light gray for B&W mode
+
     @classmethod
     def rgb(cls, r: int, g: int, b: int) -> str:
         """Generate 24-bit RGB color code."""

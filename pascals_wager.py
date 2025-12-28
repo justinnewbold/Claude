@@ -14,7 +14,8 @@ But which God? Many gods problem.
 Decision theory meets theology.
 """
 
-import os
+from colors import C
+from platform_utils import clear_screen
 
 
 

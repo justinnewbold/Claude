@@ -449,7 +449,9 @@ class NetworkGame:
             return
 
         if message.msg_type == MessageType.PONG.value:
-            self.latency_ms = (time.time() - message.data.get("ping_time", 0)) * 1000
+            ping_time = message.data.get("ping_time")
+            if ping_time is not None:
+                self.latency_ms = (time.time() - ping_time) * 1000
             return
 
         if message.msg_type == MessageType.DISCONNECT.value:
