@@ -12,18 +12,12 @@ One day, she sees red for the first time.
 Does she learn something new?
 """
 
-import os, time
+import time
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    BW = '\033[38;5;250m'
-    RED = '\033[38;5;196m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class MarysRoom:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

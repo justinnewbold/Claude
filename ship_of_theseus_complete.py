@@ -12,15 +12,8 @@ Persistence through replacement.
 Based on Plutarch's ancient paradox.
 """
 
-import os, random
+import random
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    SHIP = '\033[38;5;51m'
-    OLD = '\033[38;5;203m'
-    NEW = '\033[38;5;46m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class ShipOfTheseus:
     def __init__(self):
@@ -31,7 +24,7 @@ class ShipOfTheseus:
         self.rebuilt_ship_planks = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def show_intro(self):
         self.clear_screen()

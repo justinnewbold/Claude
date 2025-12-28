@@ -12,21 +12,15 @@ Your categories determine what things ARE.
 Ontology as a game mechanic.
 """
 
-import os, random
+import random
 
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    CAT = '\033[38;5;141m'
-    ITEM = '\033[38;5;226m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class TheCategorizer:
     def __init__(self):
         self.categories = {}
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

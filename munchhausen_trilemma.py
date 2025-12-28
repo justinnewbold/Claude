@@ -16,17 +16,10 @@ Can you justify anything?
 
 import os
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    REGRESS = '\033[38;5;203m'
-    CIRCULAR = '\033[38;5;141m'
-    FOUNDATIONAL = '\033[38;5;226m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class MunchhausenTrilemma:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

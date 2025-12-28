@@ -13,18 +13,12 @@ Centuries later, you read it and travel back to give it to him.
 Where did the book come from?
 """
 
-import os
-
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    TIME = '\033[38;5;141m'
-    OBJECT = '\033[38;5;226m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
+from colors import C
+from platform_utils import clear_screen
 
 class BootstrapParadox:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

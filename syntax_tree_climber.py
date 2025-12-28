@@ -22,29 +22,7 @@ from typing import List, Dict, Optional, Any, Tuple
 from enum import Enum
 
 from platform_utils import clear_screen
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # AST Node types
-    FUNCTION = '\033[38;5;51m'      # Cyan - function
-    CLASS = '\033[38;5;141m'        # Purple - class
-    CONTROL = '\033[38;5;214m'      # Orange - if/while/for
-    ASSIGN = '\033[38;5;46m'        # Green - assignment
-    EXPR = '\033[38;5;243m'         # Gray - expression
-    LITERAL = '\033[38;5;226m'      # Yellow - literal value
-    PLAYER = '\033[38;5;201m'       # Magenta - your position
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    CODE = '\033[38;5;117m'
-    META = '\033[38;5;171m'
+from colors import C
 
 
 class NodeType(Enum):

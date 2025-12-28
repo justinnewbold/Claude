@@ -15,12 +15,6 @@ But you have free will... right?
 
 import os
 
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    MONEY = '\033[38;5;226m'
-    PREDICT = '\033[38;5;141m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class NewcombsParadox:
     def __init__(self):
@@ -28,7 +22,7 @@ class NewcombsParadox:
         self.total_won = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play_game(self):
         self.clear_screen()

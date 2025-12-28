@@ -17,19 +17,13 @@ Decision theory meets theology.
 import os
 
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    DIVINE = '\033[38;5;226m'
-    MATH = '\033[38;5;51m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class PascalsWager:
     """Pascal's Wager philosophical thought experiment game."""
 
     def clear_screen(self) -> None:
         """Clear the terminal screen."""
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def play(self) -> None:
         """Run the main game."""

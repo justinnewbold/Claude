@@ -12,15 +12,8 @@ Counter-intuitive probability.
 Switching DOUBLES your odds.
 """
 
-import os, random
+import random
 
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    CAR = '\033[38;5;226m'
-    GOAT = '\033[38;5;203m'
-    DOOR = '\033[38;5;51m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class MontyHall:
     def __init__(self):
@@ -29,7 +22,7 @@ class MontyHall:
         self.games_played = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play_round(self):
         # Setup

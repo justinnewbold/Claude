@@ -14,32 +14,7 @@ from enum import Enum
 import sys
 
 from platform_utils import clear_screen
-
-# ANSI color codes for terminal
-class Color:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Timeline colors
-    TIMELINE_1 = '\033[38;5;51m'   # Cyan
-    TIMELINE_2 = '\033[38;5;213m'  # Pink
-    TIMELINE_3 = '\033[38;5;228m'  # Yellow
-    TIMELINE_4 = '\033[38;5;118m'  # Green
-    TIMELINE_5 = '\033[38;5;141m'  # Purple
-
-    # Status colors
-    HEALTHY = '\033[38;5;46m'      # Bright green
-    DECAYING = '\033[38;5;208m'    # Orange
-    CORRUPTED = '\033[38;5;196m'   # Red
-    ENTANGLED = '\033[38;5;201m'   # Magenta
-
-    # UI colors
-    HEADER = '\033[38;5;87m'
-    CHOICE = '\033[38;5;226m'
-    ECHO = '\033[38;5;147m'
-    MEMORY = '\033[38;5;183m'
-    SYSTEM = '\033[38;5;243m'
+from colors import Colors as Color, C
 
 
 class TimelineState(Enum):

@@ -11,18 +11,13 @@ Because random brains are easier to create than entire universes.
 Thermodynamic absurdity meets anthropic reasoning.
 """
 
-import os, random
-
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    BRAIN = '\033[38;5;141m'
-    UNIVERSE = '\033[38;5;51m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
+import random
+from colors import C
+from platform_utils import clear_screen
 
 class BoltzmannBrains:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

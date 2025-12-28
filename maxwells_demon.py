@@ -14,24 +14,13 @@ and Landauer's Principle (1961):
 Erasing one bit of information dissipates at least kT ln(2) energy.
 """
 
-import os, random, time, math
+import random, time, math
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    HOT = '\033[38;5;196m'
-    COLD = '\033[38;5;51m'
-    PARTICLE = '\033[38;5;226m'
-    DEMON = '\033[38;5;141m'
-    INFO = '\033[38;5;87m'
-    ENERGY = '\033[38;5;46m'
-    ENTROPY = '\033[38;5;203m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    WARNING = '\033[38;5;214m'
 
 @dataclass
 class Particle:
@@ -93,7 +82,7 @@ class MaxwellsDemon:
             self.particles.append(Particle(speed, position, direction))
             
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def show_intro(self):
         self.clear_screen()

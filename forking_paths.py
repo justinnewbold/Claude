@@ -18,30 +18,9 @@ import time
 import os
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Path colors
-    SUCCESS = '\033[38;5;46m'      # Green - leads to goal
-    FAILURE = '\033[38;5;196m'     # Red - leads to death/failure
-    UNKNOWN = '\033[38;5;243m'     # Gray - unexplored
-    CURRENT = '\033[38;5;226m'     # Yellow - current position
-    POSSIBLE = '\033[38;5;87m'     # Cyan - possible futures
-
-    # Special
-    GOAL = '\033[38;5;201m'        # Magenta - the goal
-    PARADOX = '\033[38;5;141m'     # Purple - temporal paradox
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    HIGHLIGHT = '\033[38;5;226m'
-    SYSTEM = '\033[38;5;243m'
-    LORE = '\033[38;5;183m'
 
 
 class OutcomeType(Enum):
@@ -96,7 +75,7 @@ class GardenOfForkingPaths:
         self.setup_game()
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_slow(self, text, delay=0.02):
         for char in text:

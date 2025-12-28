@@ -13,16 +13,12 @@ Based on Robert Axelrod's tournaments (1980s).
 What strategy survives?
 """
 
-import os, random
+import random
 from dataclasses import dataclass
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
 
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    COOP = '\033[38;5;46m'
-    DEFECT = '\033[38;5;203m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class Move(Enum):
     COOPERATE = "C"
@@ -54,7 +50,7 @@ class PrisonersDilemma:
         ]
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def payoff(self, m1, m2):
         """Payoff matrix"""
