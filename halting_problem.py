@@ -16,23 +16,13 @@ No algorithm can determine, for all programs,
 whether they will halt or loop forever.
 """
 
-import os, random, time
+import random, time
 from dataclasses import dataclass, field
 from typing import List, Optional, Callable
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    HALT = '\033[38;5;46m'
-    LOOP = '\033[38;5;203m'
-    ORACLE = '\033[38;5;141m'
-    CODE = '\033[38;5;87m'
-    PARADOX = '\033[38;5;201m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    WARNING = '\033[38;5;214m'
 
 class Prediction(Enum):
     HALTS = "halts"
@@ -62,7 +52,7 @@ class HaltingProblem:
         self.paradox_encountered = False
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def show_intro(self):
         self.clear_screen()

@@ -110,6 +110,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 from platform_utils import clear_screen as _clear_screen
+from colors import C
 
 # =============================================================================
 # LOGGING CONFIGURATION
@@ -252,11 +253,6 @@ def create_sparkline(values: List[int], width: int = 10) -> str:
     return result.ljust(width)
 
 
-class C:
-    """ANSI Color codes"""
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
 
     # UI Colors
     HEADER = '\033[38;5;51m'

@@ -12,14 +12,8 @@ Who is actually younger when they reunite?
 Special relativity puzzle.
 """
 
-import os, time
+import time
 
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    EARTH = '\033[38;5;46m'
-    SPACE = '\033[38;5;141m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class TwinParadox:
     def __init__(self):
@@ -28,7 +22,7 @@ class TwinParadox:
         self.years_traveled = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

@@ -17,22 +17,13 @@ Based on John Searle's Chinese Room Argument (1980):
 A thought experiment about AI, consciousness, and understanding.
 """
 
-import os, random, time
+import random
+import time
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 from enum import Enum
-
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    SYMBOL = '\033[38;5;226m'
-    RULE = '\033[38;5;51m'
-    UNDERSTANDING = '\033[38;5;141m'
-    INPUT = '\033[38;5;87m'
-    OUTPUT = '\033[38;5;46m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
+from colors import C
+from platform_utils import clear_screen
 
 @dataclass
 class Symbol:

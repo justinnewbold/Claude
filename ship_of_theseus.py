@@ -19,35 +19,9 @@ import time
 import os
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Identity colors (fade as you become less "original")
-    ORIGINAL = '\033[38;5;51m'      # Bright cyan - 100% original
-    MOSTLY_YOU = '\033[38;5;45m'    # Cyan - 75% original
-    HALF_YOU = '\033[38;5;39m'      # Blue-cyan - 50% original
-    BARELY_YOU = '\033[38;5;33m'    # Blue - 25% original
-    NOT_YOU = '\033[38;5;240m'      # Gray - 0% original
-
-    # Parts
-    PART_OLD = '\033[38;5;243m'     # Gray - old discarded
-    PART_NEW = '\033[38;5;46m'      # Green - new upgrade
-
-    # Clones
-    CLONE = '\033[38;5;196m'        # Red - assembled from your parts
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    IDENTITY = '\033[38;5;141m'
-    GOAL = '\033[38;5;226m'
 
 
 class PartType(Enum):
@@ -136,7 +110,7 @@ class ShipOfTheseus:
         self.setup_level()
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")

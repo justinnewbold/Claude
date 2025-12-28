@@ -11,19 +11,8 @@ All drivers end up worse off.
 Game theory meets traffic engineering.
 """
 
-import os
-from typing import ClassVar
-
-
-class C:
-    """Terminal color codes."""
-    RESET: ClassVar[str] = '\033[0m'
-    BOLD: ClassVar[str] = '\033[1m'
-    ROAD: ClassVar[str] = '\033[38;5;226m'
-    TRAFFIC: ClassVar[str] = '\033[38;5;203m'
-    HEADER: ClassVar[str] = '\033[38;5;87m'
-    SYSTEM: ClassVar[str] = '\033[38;5;243m'
-    DIM: ClassVar[str] = '\033[2m'
+from colors import C
+from platform_utils import clear_screen as _clear_screen
 
 
 class BraessParadox:
@@ -31,7 +20,7 @@ class BraessParadox:
 
     def clear_screen(self) -> None:
         """Clear the terminal screen."""
-        os.system('clear' if os.name != 'nt' else 'cls')
+        _clear_screen()
 
     def show_network(self, has_shortcut: bool) -> None:
         """Display the traffic network."""

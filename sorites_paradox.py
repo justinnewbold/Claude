@@ -14,15 +14,10 @@ Vagueness breaks logic.
 
 import os
 
-class C:
-    RESET, BOLD = '\033[0m', '\033[1m'
-    SAND = '\033[38;5;226m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class SoritesParadox:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

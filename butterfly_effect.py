@@ -22,28 +22,7 @@ from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
 
 from platform_utils import clear_screen
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Elements
-    PARTICLE = '\033[38;5;51m'      # Cyan - particle
-    WALL = '\033[38;5;240m'         # Gray - wall
-    GOAL = '\033[38;5;46m'          # Green - goal
-    DANGER = '\033[38;5;203m'       # Red - danger
-    AGENT = '\033[38;5;226m'        # Yellow - agent
-    INTERVENTION = '\033[38;5;141m' # Purple - intervention
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    CHAOS = '\033[38;5;201m'
-    WARNING = '\033[38;5;214m'
+from colors import C
 
 
 class CellType(Enum):

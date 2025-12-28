@@ -12,18 +12,13 @@ Therefore, humanity ends soon.
 Anthropic reasoning about the apocalypse.
 """
 
-import os, random
-
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    DOOM = '\033[38;5;203m'
-    HUMAN = '\033[38;5;226m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
+import random
+from colors import C
+from platform_utils import clear_screen
 
 class DoomsdayArgument:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

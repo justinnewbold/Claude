@@ -11,14 +11,8 @@ You wake up. What's the probability it was HEADS?
 Self-locating belief puzzle.
 """
 
-import os, random
+import random
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    HEADS = '\033[38;5;226m'
-    TAILS = '\033[38;5;51m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class SleepingBeauty:
     def __init__(self):
@@ -26,7 +20,7 @@ class SleepingBeauty:
         self.thirder_score = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play_round(self):
         # Flip coin

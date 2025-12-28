@@ -17,29 +17,7 @@ from typing import List, Dict, Optional, Tuple, Any
 from enum import Enum
 
 from platform_utils import clear_screen
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Civilization types
-    ANCIENT = '\033[38;5;180m'
-    MACHINE = '\033[38;5;51m'
-    ORGANIC = '\033[38;5;120m'
-    ETHEREAL = '\033[38;5;141m'
-    CHAOTIC = '\033[38;5;196m'
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    CODE = '\033[38;5;229m'
-    ERROR = '\033[38;5;203m'
-    SUCCESS = '\033[38;5;46m'
-    LORE = '\033[38;5;183m'
-    SYSTEM = '\033[38;5;243m'
-    HIGHLIGHT = '\033[38;5;226m'
-    COMMENT = '\033[38;5;245m'
+from colors import C
 
 
 class ParadigmType(Enum):

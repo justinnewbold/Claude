@@ -18,35 +18,11 @@ This is quantum correlation as a puzzle mechanic.
 """
 
 import random
-import os
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Entanglement pairs (matching colors)
-    PAIR_A = '\033[38;5;51m'        # Cyan pair
-    PAIR_B = '\033[38;5;201m'       # Magenta pair
-    PAIR_C = '\033[38;5;226m'       # Yellow pair
-    PAIR_D = '\033[38;5;46m'        # Green pair
-
-    # Elements
-    WALL = '\033[38;5;240m'         # Gray
-    GOAL = '\033[38;5;214m'         # Orange
-    PLAYER = '\033[38;5;255m'       # White
-    LINK = '\033[38;5;141m'         # Purple - entanglement link
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    QUANTUM = '\033[38;5;171m'
+from colors import C
+from platform_utils import clear_screen
 
 
 class BlockType(Enum):

@@ -20,41 +20,9 @@ import os
 import copy
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Depth colors (get darker/more corrupted as you go deeper)
-    DEPTH_0 = '\033[38;5;51m'   # Bright cyan
-    DEPTH_1 = '\033[38;5;45m'   # Cyan
-    DEPTH_2 = '\033[38;5;39m'   # Blue-cyan
-    DEPTH_3 = '\033[38;5;33m'   # Blue
-    DEPTH_4 = '\033[38;5;27m'   # Dark blue
-    DEPTH_5 = '\033[38;5;21m'   # Darker blue
-    DEPTH_6 = '\033[38;5;53m'   # Purple-blue
-    DEPTH_7 = '\033[38;5;89m'   # Purple
-    DEPTH_8 = '\033[38;5;125m'  # Dark purple
-    DEPTH_9 = '\033[38;5;161m'  # Magenta-red
-    DEPTH_OVERFLOW = '\033[38;5;196m'  # Red
-
-    # Game elements
-    PLAYER = '\033[38;5;226m'   # Yellow
-    EXIT = '\033[38;5;46m'      # Green
-    RETURN = '\033[38;5;48m'    # Return value
-    PARAM = '\033[38;5;87m'     # Parameter
-    WALL = '\033[38;5;240m'     # Gray
-    CORRUPTION = '\033[38;5;196m'  # Red
-    BASE_CASE = '\033[38;5;46m'    # Green
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    ERROR = '\033[38;5;203m'
-    SUCCESS = '\033[38;5;46m'
 
 
 class TileType(Enum):
@@ -95,7 +63,7 @@ class LastRecursion:
         self.setup_game()
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_slow(self, text, delay=0.02):
         for char in text:

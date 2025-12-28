@@ -16,21 +16,13 @@ The dichotomy paradox, Achilles and the tortoise, the arrow paradox.
 How do you complete infinitely many tasks in finite time?
 """
 
-import os, time, math
+import time, math
 from dataclasses import dataclass
 from typing import Optional
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    RUNNER = '\033[38;5;46m'
-    GOAL = '\033[38;5;226m'
-    STEP = '\033[38;5;51m'
-    INFINITE = '\033[38;5;141m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    PARADOX = '\033[38;5;201m'
 
 class ZenosRunner:
     def __init__(self):
@@ -42,7 +34,7 @@ class ZenosRunner:
         self.level = 1
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def show_intro(self):
         self.clear_screen()

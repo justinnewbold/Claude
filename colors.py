@@ -140,6 +140,84 @@ class Colors:
     AI: ClassVar[str] = '\033[38;5;177m'       # Purple for AI responses
     USER: ClassVar[str] = '\033[38;5;87m'      # Cyan for user input
 
+    # ==========================================================================
+    # GAME-SPECIFIC COLORS (consolidated from individual games)
+    # ==========================================================================
+    # Butterfly Effect
+    PARTICLE: ClassVar[str] = '\033[38;5;51m'       # Cyan
+    WALL: ClassVar[str] = '\033[38;5;240m'          # Gray
+    GOAL: ClassVar[str] = '\033[38;5;46m'           # Green
+    AGENT: ClassVar[str] = '\033[38;5;226m'         # Yellow
+    INTERVENTION: ClassVar[str] = '\033[38;5;141m'  # Purple
+    CHAOS: ClassVar[str] = '\033[38;5;201m'         # Magenta
+    ERROR: ClassVar[str] = '\033[38;5;203m'         # Red-orange
+
+    # Infinite Library
+    SHELF: ClassVar[str] = '\033[38;5;94m'          # Brown
+    BOOK: ClassVar[str] = '\033[38;5;220m'          # Gold
+    TEXT: ClassVar[str] = '\033[38;5;252m'          # Light gray
+    SPECIAL: ClassVar[str] = '\033[38;5;141m'       # Purple
+    PROPHECY: ClassVar[str] = '\033[38;5;201m'      # Bright magenta
+    TRUTH: ClassVar[str] = '\033[38;5;46m'          # Bright green
+    NONSENSE: ClassVar[str] = '\033[38;5;243m'      # Dark gray
+
+    # Syntax Tree Climber
+    FUNCTION: ClassVar[str] = '\033[38;5;51m'       # Cyan
+    CLASS: ClassVar[str] = '\033[38;5;141m'         # Purple
+    CONTROL: ClassVar[str] = '\033[38;5;214m'       # Orange
+    ASSIGN: ClassVar[str] = '\033[38;5;46m'         # Green
+    EXPR: ClassVar[str] = '\033[38;5;243m'          # Gray
+    LITERAL: ClassVar[str] = '\033[38;5;226m'       # Yellow
+    PLAYER: ClassVar[str] = '\033[38;5;201m'        # Magenta
+    CODE: ClassVar[str] = '\033[38;5;117m'          # Light blue
+    META: ClassVar[str] = '\033[38;5;171m'          # Pink
+
+    # Schrodinger's Dungeon
+    SUPERPOSITION: ClassVar[str] = '\033[38;5;201m' # Magenta
+    OBSERVED: ClassVar[str] = '\033[38;5;252m'      # White-ish
+    UNOBSERVED: ClassVar[str] = '\033[38;5;240m'    # Dark gray
+    WAVE: ClassVar[str] = '\033[38;5;51m'           # Cyan
+
+    # Code Archaeology
+    ANCIENT: ClassVar[str] = '\033[38;5;130m'       # Brown/rust
+    MODERN: ClassVar[str] = '\033[38;5;39m'         # Blue
+    ARTIFACT: ClassVar[str] = '\033[38;5;226m'      # Gold
+
+    # Generic game colors
+    ENEMY: ClassVar[str] = '\033[38;5;196m'         # Red
+    ALLY: ClassVar[str] = '\033[38;5;46m'           # Green
+    NEUTRAL: ClassVar[str] = '\033[38;5;243m'       # Gray
+    TREASURE: ClassVar[str] = '\033[38;5;226m'      # Gold
+    PORTAL: ClassVar[str] = '\033[38;5;201m'        # Magenta
+
+    # Echo Chambers / Timeline colors
+    TIMELINE_1: ClassVar[str] = '\033[38;5;51m'     # Cyan
+    TIMELINE_2: ClassVar[str] = '\033[38;5;213m'    # Pink
+    TIMELINE_3: ClassVar[str] = '\033[38;5;228m'    # Yellow
+    TIMELINE_4: ClassVar[str] = '\033[38;5;118m'    # Green
+    TIMELINE_5: ClassVar[str] = '\033[38;5;141m'    # Purple
+    HEALTHY: ClassVar[str] = '\033[38;5;46m'        # Bright green
+    DECAYING: ClassVar[str] = '\033[38;5;208m'      # Orange
+    CORRUPTED: ClassVar[str] = '\033[38;5;196m'     # Red
+    ENTANGLED: ClassVar[str] = '\033[38;5;201m'     # Magenta
+    CHOICE: ClassVar[str] = '\033[38;5;226m'        # Yellow
+    ECHO: ClassVar[str] = '\033[38;5;147m'          # Light purple
+    MEMORY: ClassVar[str] = '\033[38;5;183m'        # Pink
+
+    # Code Archaeology specific
+    MACHINE: ClassVar[str] = '\033[38;5;51m'        # Cyan
+    ORGANIC: ClassVar[str] = '\033[38;5;120m'       # Light green
+    ETHEREAL: ClassVar[str] = '\033[38;5;141m'      # Purple
+    CHAOTIC: ClassVar[str] = '\033[38;5;196m'       # Red
+    LORE: ClassVar[str] = '\033[38;5;183m'          # Pink
+    COMMENT: ClassVar[str] = '\033[38;5;245m'       # Gray
+
+    # Schrodinger's Dungeon specific
+    SUPERPOSED: ClassVar[str] = '\033[38;5;141m'    # Purple
+    ENEMY_ALIVE: ClassVar[str] = '\033[38;5;196m'   # Red
+    ENEMY_DEAD: ClassVar[str] = '\033[38;5;240m'    # Dark gray
+    EMPTY: ClassVar[str] = '\033[38;5;243m'         # Gray
+
     @classmethod
     def rgb(cls, r: int, g: int, b: int) -> str:
         """Generate 24-bit RGB color code."""

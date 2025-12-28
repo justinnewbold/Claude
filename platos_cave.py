@@ -9,18 +9,12 @@ Returns to tell others.
 They don't believe him.
 """
 
-import os, time
+import time
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    SHADOW = '\033[38;5;243m'
-    LIGHT = '\033[38;5;226m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class PlatosCave:
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def play(self):
         self.clear_screen()

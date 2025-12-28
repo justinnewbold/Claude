@@ -11,18 +11,12 @@ Free will in a deterministic universe?
 Based on Pierre-Simon Laplace's thought experiment (1814).
 """
 
-import os, random, time
+import random, time
 from dataclasses import dataclass, field
 from typing import List
+from colors import C
+from platform_utils import clear_screen
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    PAST = '\033[38;5;51m'
-    PRESENT = '\033[38;5;226m'
-    FUTURE = '\033[38;5;203m'
-    DEMON = '\033[38;5;141m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 @dataclass
 class Particle:
@@ -43,7 +37,7 @@ class LaplacesDemon:
         self.tick = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def init_universe(self):
         """Create initial deterministic universe"""

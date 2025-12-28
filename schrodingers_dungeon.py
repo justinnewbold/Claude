@@ -21,29 +21,7 @@ from enum import Enum
 import copy
 
 from platform_utils import clear_screen
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Quantum states
-    SUPERPOSED = '\033[38;5;141m'    # Purple - superposition
-    OBSERVED = '\033[38;5;51m'       # Cyan - collapsed/observed
-    PLAYER = '\033[38;5;226m'        # Yellow
-    ENEMY_ALIVE = '\033[38;5;196m'   # Red
-    ENEMY_DEAD = '\033[38;5;240m'    # Dark gray
-    TREASURE = '\033[38;5;220m'      # Gold
-    EMPTY = '\033[38;5;243m'         # Gray
-    WALL = '\033[38;5;237m'          # Dark gray
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    QUANTUM = '\033[38;5;201m'
+from colors import C
 
 
 class TileState(Enum):

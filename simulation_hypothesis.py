@@ -11,22 +11,15 @@ Therefore: You're probably in a simulation.
 Look for glitches. Find the limits. Wake up.
 """
 
-import os, random, time
+import random, time
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    REAL = '\033[38;5;46m'
-    SIM = '\033[38;5;141m'
-    GLITCH = '\033[38;5;203m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
 
 class SimulationHypothesis:
     def __init__(self):
         self.glitches_found = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def check_for_glitches(self):
         glitches = [

@@ -125,3 +125,39 @@ class TestColorize:
         """Test colorizing empty text"""
         result = colorize("", C.RED)
         assert result == '\033[31m\033[0m'
+
+
+class TestColorsInGames:
+    """Test colors are properly used in game files"""
+
+    def test_butterfly_effect_imports_colors(self):
+        """Test butterfly_effect uses centralized colors"""
+        from butterfly_effect import C as game_C
+        assert game_C is Colors
+
+    def test_schrodingers_dungeon_imports_colors(self):
+        """Test schrodingers_dungeon uses centralized colors"""
+        from schrodingers_dungeon import C as game_C
+        assert game_C is Colors
+
+    def test_forking_paths_imports_colors(self):
+        """Test forking_paths uses centralized colors"""
+        from forking_paths import C as game_C
+        assert game_C is Colors
+
+    def test_game_specific_colors_exist(self):
+        """Test game-specific colors are defined in Colors"""
+        # Butterfly Effect colors
+        assert hasattr(Colors, 'PARTICLE')
+        assert hasattr(Colors, 'WALL')
+        assert hasattr(Colors, 'CHAOS')
+
+        # Infinite Library colors
+        assert hasattr(Colors, 'SHELF')
+        assert hasattr(Colors, 'BOOK')
+        assert hasattr(Colors, 'PROPHECY')
+
+        # Schrodinger's Dungeon colors
+        assert hasattr(Colors, 'SUPERPOSED')
+        assert hasattr(Colors, 'OBSERVED')
+        assert hasattr(Colors, 'QUANTUM')

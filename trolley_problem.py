@@ -16,31 +16,9 @@ import os
 import random
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Ethics
-    UTILITARIAN = '\033[38;5;46m'   # Green - greatest good
-    DEONTOLOGICAL = '\033[38;5;51m' # Cyan - duty/rules
-    VIRTUE = '\033[38;5;141m'       # Purple - character
-    NEUTRAL = '\033[38;5;243m'      # Gray
-
-    # People
-    PERSON = '\033[38;5;226m'       # Yellow - individual
-    GROUP = '\033[38;5;214m'        # Orange - many people
-    DANGER = '\033[38;5;203m'       # Red - threat
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS = '\033[38;5;46m'
-    ERROR = '\033[38;5;203m'
-    ETHICS = '\033[38;5;171m'
 
 
 class EthicalFramework(Enum):
@@ -96,7 +74,7 @@ class TrolleyProblemEngine:
         self.max_depth = 5
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")

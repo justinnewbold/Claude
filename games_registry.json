@@ -1,0 +1,353 @@
+{
+  "version": "1.0",
+  "description": "Unified game registry for VAULT 13 collection",
+  "games": {
+    "vault_shelter": {
+      "id": "vault_shelter",
+      "name": "VAULT 13 - Survival Protocol",
+      "description": "Ultimate post-apocalyptic vault management simulator with 50+ features",
+      "module_path": "vault_shelter_v6.py",
+      "main_function": "main",
+      "version": "9.0",
+      "category": "main",
+      "tags": ["simulation", "management", "main"]
+    },
+    "echo_chambers": {
+      "id": "echo_chambers",
+      "name": "Echo Chambers",
+      "description": "Exist across multiple parallel timelines simultaneously",
+      "module_path": "echo_chambers.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["quantum", "narrative", "philosophical"]
+    },
+    "schrodingers_dungeon": {
+      "id": "schrodingers_dungeon",
+      "name": "Schr\u00f6dinger's Dungeon",
+      "description": "Navigate a dungeon where reality is probabilistic until observed",
+      "module_path": "schrodingers_dungeon.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["quantum", "dungeon", "philosophical"]
+    },
+    "code_archaeology": {
+      "id": "code_archaeology",
+      "name": "Code Archaeology",
+      "description": "Debug code from extinct alien civilizations",
+      "module_path": "code_archaeology.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["puzzle", "programming", "philosophical"]
+    },
+    "infinite_library": {
+      "id": "infinite_library",
+      "name": "The Infinite Library",
+      "description": "Explore Borges' Library of Babel - every possible book exists",
+      "module_path": "infinite_library.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["exploration", "philosophical", "borges"]
+    },
+    "butterfly_effect": {
+      "id": "butterfly_effect",
+      "name": "The Butterfly Effect",
+      "description": "Chaos theory puzzle - tiny changes create vastly different outcomes",
+      "module_path": "butterfly_effect.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["chaos", "puzzle", "philosophical"]
+    },
+    "syntax_tree_climber": {
+      "id": "syntax_tree_climber",
+      "name": "Syntax Tree Climber",
+      "description": "Navigate the AST of living code - meta-programming as gameplay",
+      "module_path": "syntax_tree_climber.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["programming", "meta", "philosophical"]
+    },
+    "ship_of_theseus": {
+      "id": "ship_of_theseus",
+      "name": "Ship of Theseus",
+      "description": "Explore identity through gradual replacement",
+      "module_path": "ship_of_theseus.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["identity", "philosophical", "puzzle"]
+    },
+    "trolley_problem": {
+      "id": "trolley_problem",
+      "name": "Trolley Problem",
+      "description": "Face ethical dilemmas with branching consequences",
+      "module_path": "trolley_problem.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["ethics", "philosophical", "choice"]
+    },
+    "prisoners_dilemma": {
+      "id": "prisoners_dilemma",
+      "name": "Prisoner's Dilemma",
+      "description": "Game theory exploration of cooperation vs betrayal",
+      "module_path": "prisoners_dilemma.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["game-theory", "philosophical", "strategy"]
+    },
+    "chinese_room": {
+      "id": "chinese_room",
+      "name": "Chinese Room",
+      "description": "Explore Searle's thought experiment on consciousness",
+      "module_path": "chinese_room.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["consciousness", "philosophical", "ai"]
+    },
+    "platos_cave": {
+      "id": "platos_cave",
+      "name": "Plato's Cave",
+      "description": "Escape the shadows and discover true reality",
+      "module_path": "platos_cave.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["reality", "philosophical", "allegory"]
+    },
+    "simulation_hypothesis": {
+      "id": "simulation_hypothesis",
+      "name": "Simulation Hypothesis",
+      "description": "Are you in a simulation? Find out.",
+      "module_path": "simulation_hypothesis.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["reality", "philosophical", "simulation"]
+    },
+    "marys_room": {
+      "id": "marys_room",
+      "name": "Mary's Room",
+      "description": "Explore qualia and the knowledge argument",
+      "module_path": "marys_room.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["consciousness", "philosophical", "qualia"]
+    },
+    "halting_problem": {
+      "id": "halting_problem",
+      "name": "The Halting Problem",
+      "description": "Navigate Turing's undecidable territory",
+      "module_path": "halting_problem.py",
+      "main_function": "main",
+      "category": "philosophical",
+      "tags": ["computation", "philosophical", "turing"]
+    },
+    "monty_hall": {
+      "id": "monty_hall",
+      "name": "Monty Hall",
+      "description": "The classic probability paradox - switch or stay?",
+      "module_path": "monty_hall.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["probability", "paradox", "puzzle"]
+    },
+    "newcombs_paradox": {
+      "id": "newcombs_paradox",
+      "name": "Newcomb's Paradox",
+      "description": "One box or two? Challenge a perfect predictor",
+      "module_path": "newcombs_paradox.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["decision-theory", "paradox", "puzzle"]
+    },
+    "pascals_wager": {
+      "id": "pascals_wager",
+      "name": "Pascal's Wager",
+      "description": "Bet on existence with infinite stakes",
+      "module_path": "pascals_wager.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["decision-theory", "paradox", "philosophy"]
+    },
+    "sleeping_beauty": {
+      "id": "sleeping_beauty",
+      "name": "Sleeping Beauty",
+      "description": "The probability puzzle of uncertain awakening",
+      "module_path": "sleeping_beauty.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["probability", "paradox", "puzzle"]
+    },
+    "zenos_runner": {
+      "id": "zenos_runner",
+      "name": "Zeno's Runner",
+      "description": "Race against infinite divisions of space",
+      "module_path": "zenos_runner.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["infinity", "paradox", "runner"]
+    },
+    "bootstrap_paradox": {
+      "id": "bootstrap_paradox",
+      "name": "Bootstrap Paradox",
+      "description": "Time loop puzzle - where did it begin?",
+      "module_path": "bootstrap_paradox.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["time", "paradox", "puzzle"]
+    },
+    "twin_paradox": {
+      "id": "twin_paradox",
+      "name": "Twin Paradox",
+      "description": "Relativistic time dilation adventure",
+      "module_path": "twin_paradox.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["relativity", "paradox", "physics"]
+    },
+    "braess_paradox": {
+      "id": "braess_paradox",
+      "name": "Braess's Paradox",
+      "description": "When adding roads makes traffic worse",
+      "module_path": "braess_paradox.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["networks", "paradox", "puzzle"]
+    },
+    "sorites_paradox": {
+      "id": "sorites_paradox",
+      "name": "Sorites Paradox",
+      "description": "The heap paradox - how many grains make a heap?",
+      "module_path": "sorites_paradox.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["logic", "paradox", "vagueness"]
+    },
+    "godels_paradox": {
+      "id": "godels_paradox",
+      "name": "G\u00f6del's Paradox",
+      "description": "Navigate incompleteness and self-reference",
+      "module_path": "godels_paradox.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["logic", "paradox", "math"]
+    },
+    "munchhausen_trilemma": {
+      "id": "munchhausen_trilemma",
+      "name": "M\u00fcnchhausen Trilemma",
+      "description": "The problem of infinite regress in justification",
+      "module_path": "munchhausen_trilemma.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["epistemology", "paradox", "philosophy"]
+    },
+    "doomsday_argument": {
+      "id": "doomsday_argument",
+      "name": "Doomsday Argument",
+      "description": "Probabilistic reasoning about human extinction",
+      "module_path": "doomsday_argument.py",
+      "main_function": "main",
+      "category": "paradox",
+      "tags": ["probability", "paradox", "anthropic"]
+    },
+    "maxwells_demon": {
+      "id": "maxwells_demon",
+      "name": "Maxwell's Demon",
+      "description": "Sort molecules and challenge the second law",
+      "module_path": "maxwells_demon.py",
+      "main_function": "main",
+      "category": "physics",
+      "tags": ["physics", "thermodynamics", "puzzle"]
+    },
+    "laplaces_demon": {
+      "id": "laplaces_demon",
+      "name": "Laplace's Demon",
+      "description": "Perfect knowledge, perfect prediction",
+      "module_path": "laplaces_demon.py",
+      "main_function": "main",
+      "category": "physics",
+      "tags": ["determinism", "physics", "puzzle"]
+    },
+    "quantum_eraser": {
+      "id": "quantum_eraser",
+      "name": "Quantum Eraser",
+      "description": "Manipulate quantum information and causality",
+      "module_path": "quantum_eraser.py",
+      "main_function": "main",
+      "category": "physics",
+      "tags": ["quantum", "physics", "puzzle"]
+    },
+    "entanglement": {
+      "id": "entanglement",
+      "name": "Entanglement",
+      "description": "Quantum entanglement puzzle game",
+      "module_path": "entanglement.py",
+      "main_function": "main",
+      "category": "physics",
+      "tags": ["quantum", "physics", "puzzle"]
+    },
+    "boltzmann_brains": {
+      "id": "boltzmann_brains",
+      "name": "Boltzmann Brains",
+      "description": "Statistical fluctuations and consciousness",
+      "module_path": "boltzmann_brains.py",
+      "main_function": "main",
+      "category": "physics",
+      "tags": ["physics", "consciousness", "probability"]
+    },
+    "forking_paths": {
+      "id": "forking_paths",
+      "name": "Garden of Forking Paths",
+      "description": "Borgesian labyrinth of branching narratives",
+      "module_path": "forking_paths.py",
+      "main_function": "main",
+      "category": "narrative",
+      "tags": ["narrative", "borges", "adventure"]
+    },
+    "last_recursion": {
+      "id": "last_recursion",
+      "name": "The Last Recursion",
+      "description": "Recursive narrative descent",
+      "module_path": "last_recursion.py",
+      "main_function": "main",
+      "category": "narrative",
+      "tags": ["recursion", "narrative", "puzzle"]
+    },
+    "emergence_engine": {
+      "id": "emergence_engine",
+      "name": "Emergence Engine",
+      "description": "Watch complex behavior emerge from simple rules",
+      "module_path": "emergence_engine.py",
+      "main_function": "main",
+      "category": "narrative",
+      "tags": ["emergence", "simulation", "complexity"]
+    },
+    "the_categorizer": {
+      "id": "the_categorizer",
+      "name": "The Categorizer",
+      "description": "Classification and taxonomy puzzle",
+      "module_path": "the_categorizer.py",
+      "main_function": "main",
+      "category": "narrative",
+      "tags": ["logic", "puzzle", "classification"]
+    }
+  },
+  "categories": {
+    "main": {
+      "name": "Main Games",
+      "description": "Core games in the VAULT 13 collection"
+    },
+    "philosophical": {
+      "name": "Philosophical Games",
+      "description": "Games exploring philosophical concepts and thought experiments"
+    },
+    "paradox": {
+      "name": "Paradox Games",
+      "description": "Games based on famous paradoxes"
+    },
+    "physics": {
+      "name": "Physics/Science Games",
+      "description": "Games exploring physics and scientific concepts"
+    },
+    "narrative": {
+      "name": "Narrative/Adventure Games",
+      "description": "Story-driven games with branching narratives"
+    }
+  }
+}

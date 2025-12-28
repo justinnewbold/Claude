@@ -19,14 +19,11 @@ import sys
 import json
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Optional, Tuple
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
 
 
-class C:
-    """ANSI Color codes for terminal styling"""
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
 
     # UI Colors
     HEADER = '\033[38;5;51m'
@@ -420,7 +417,7 @@ class VaultGame:
 
     def clear_screen(self):
         """Clear terminal screen"""
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_header(self):
         """Print game header"""

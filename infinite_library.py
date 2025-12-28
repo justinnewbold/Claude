@@ -22,28 +22,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
 
 from platform_utils import clear_screen
-
-# ANSI colors
-class C:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    DIM = '\033[2m'
-
-    # Library colors
-    SHELF = '\033[38;5;94m'       # Brown
-    BOOK = '\033[38;5;220m'       # Gold
-    TEXT = '\033[38;5;252m'       # Light gray
-    SPECIAL = '\033[38;5;141m'    # Purple
-    PROPHECY = '\033[38;5;201m'   # Bright magenta
-    TRUTH = '\033[38;5;46m'       # Bright green
-    NONSENSE = '\033[38;5;243m'   # Dark gray
-
-    # UI
-    HEADER = '\033[38;5;87m'
-    HIGHLIGHT = '\033[38;5;226m'
-    SYSTEM = '\033[38;5;243m'
-    ERROR = '\033[38;5;203m'
-    SUCCESS = '\033[38;5;46m'
+from colors import C
 
 
 @dataclass

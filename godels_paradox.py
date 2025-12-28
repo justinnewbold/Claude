@@ -13,20 +13,13 @@ This game IS its own formal system.
 And it is incomplete.
 """
 
-import os, random
+import random
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
+from colors import C
+from platform_utils import clear_screen
 from enum import Enum
 
-class C:
-    RESET, BOLD, DIM = '\033[0m', '\033[1m', '\033[2m'
-    PROOF = '\033[38;5;46m'
-    AXIOM = '\033[38;5;51m'
-    PARADOX = '\033[38;5;201m'
-    META = '\033[38;5;141m'
-    HEADER = '\033[38;5;87m'
-    SYSTEM = '\033[38;5;243m'
-    SUCCESS, ERROR = '\033[38;5;46m', '\033[38;5;203m'
 
 class RuleType(Enum):
     MOVE = "move"
@@ -59,7 +52,7 @@ class GodelsParadox:
         self.puzzles_solved = 0
         
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
         
     def show_intro(self):
         self.clear_screen()
