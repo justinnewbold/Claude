@@ -134,6 +134,11 @@ class SaveMetadata:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'SaveMetadata':
         """Create from dictionary"""
+        required_fields = {'game_id', 'game_name', 'save_name', 'save_slot',
+                          'timestamp', 'play_time', 'game_version'}
+        missing = required_fields - set(data.keys())
+        if missing:
+            raise GameError(f"Missing required fields in save metadata: {missing}")
         return cls(**data)
 
 
@@ -153,6 +158,8 @@ class SaveFile:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'SaveFile':
         """Create from dictionary"""
+        if 'metadata' not in data or 'data' not in data:
+            raise GameError("Invalid save file format: missing 'metadata' or 'data'")
         return cls(
             metadata=SaveMetadata.from_dict(data['metadata']),
             data=data['data']

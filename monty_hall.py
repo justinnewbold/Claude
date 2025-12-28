@@ -13,6 +13,8 @@ Switching DOUBLES your odds.
 """
 
 import random
+from colors import C
+from platform_utils import clear_screen
 
 
 class MontyHall:

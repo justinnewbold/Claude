@@ -184,10 +184,12 @@ def test_achievement_unlock_flow(temp_dirs):
 
 def test_configuration_persistence(temp_dirs):
     """Test configuration saves and loads"""
+    from config_manager import Difficulty, TextSpeed
+
     # Create and modify config
     config1 = ConfigManager(config_dir=temp_dirs['config'])
-    config1.gameplay.difficulty = config1.gameplay.difficulty.__class__('hard')
-    config1.display.text_speed = config1.display.text_speed.__class__(0.01)
+    config1.gameplay.difficulty = Difficulty.HARD
+    config1.display.text_speed = TextSpeed.FAST
     config1.save()
 
     # Load in new instance

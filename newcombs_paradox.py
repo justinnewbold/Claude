@@ -13,7 +13,8 @@ The Predictor is never wrong.
 But you have free will... right?
 """
 
-import os
+from colors import C
+from platform_utils import clear_screen
 
 
 class NewcombsParadox:

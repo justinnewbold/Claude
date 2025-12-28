@@ -112,6 +112,8 @@ class DemoScenario:
             metadata=data.get('metadata', {})
         )
         for action_data in data.get('actions', []):
+            if 'type' not in action_data:
+                raise ValueError("Demo action missing required 'type' field")
             scenario.actions.append(DemoAction(
                 action_type=action_data['type'],
                 value=action_data.get('value', ''),
@@ -245,12 +247,12 @@ class DemoRunner:
                 moves = get_valid_moves()
                 if moves:
                     move = self._choose_smart_move(moves)
-                    action = DemoAction('input', move, self.speed.value)
+                    action = DemoAction('input', move, 1.0)
                     self._execute_action(action)
                     self._action_count += 1
             else:
                 # Generic demo move
-                action = DemoAction('input', '1', self.speed.value)
+                action = DemoAction('input', '1', 1.0)
                 self._execute_action(action)
                 self._action_count += 1
 
