@@ -1,0 +1,483 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "VAULT 13 Games API",
+    "description": "API for the VAULT 13 philosophical game collection. Provides access to 36+ text-based games exploring philosophical concepts, paradoxes, and thought experiments.",
+    "version": "6.0.0",
+    "contact": {
+      "name": "VAULT 13 Support"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "API base path"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Check if the API service is healthy and running",
+        "operationId": "healthCheck",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "healthy",
+                  "service": "vault13-games",
+                  "version": "6.0.0",
+                  "games_available": 36
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "API Information",
+        "description": "Get information about the API and available endpoints",
+        "operationId": "getApiInfo",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "API information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games": {
+      "get": {
+        "summary": "List Games",
+        "description": "Get list of all available games with metadata",
+        "operationId": "listGames",
+        "tags": ["Games"],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by category",
+            "schema": {
+              "type": "string",
+              "enum": ["philosophical", "paradox", "physics", "narrative", "main"]
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "Filter by tag",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of games",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GamesListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{gameId}": {
+      "get": {
+        "summary": "Get Game Details",
+        "description": "Get detailed information about a specific game",
+        "operationId": "getGame",
+        "tags": ["Games"],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "description": "Game identifier",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Game details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Game not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{gameId}/start": {
+      "post": {
+        "summary": "Start Game Session",
+        "description": "Initialize a new game session",
+        "operationId": "startGame",
+        "tags": ["Game Sessions"],
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameStartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Game session started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/input": {
+      "post": {
+        "summary": "Send Game Input",
+        "description": "Send player input to an active game session",
+        "operationId": "sendInput",
+        "tags": ["Game Sessions"],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameInputRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Input processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameOutputResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "List Categories",
+        "description": "Get list of game categories",
+        "operationId": "listCategories",
+        "tags": ["Games"],
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "unhealthy"]
+          },
+          "service": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "games_available": {
+            "type": "integer"
+          }
+        },
+        "required": ["status", "service", "version"]
+      },
+      "ApiInfoResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "endpoints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "GameInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique game identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["main", "philosophical", "paradox", "physics", "narrative"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "name", "description"]
+      },
+      "GameDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GameInfo"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "module_path": {
+                "type": "string"
+              },
+              "main_function": {
+                "type": "string"
+              },
+              "controls": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "difficulty": {
+                "type": "string",
+                "enum": ["easy", "medium", "hard"]
+              }
+            }
+          }
+        ]
+      },
+      "GamesListResponse": {
+        "type": "object",
+        "properties": {
+          "games": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameInfo"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "CategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "game_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GameStartRequest": {
+        "type": "object",
+        "properties": {
+          "demo_mode": {
+            "type": "boolean",
+            "default": false
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": ["easy", "normal", "hard"]
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Random seed for reproducible games"
+          }
+        }
+      },
+      "GameSessionResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "game_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "completed", "error"]
+          },
+          "output": {
+            "type": "string",
+            "description": "Initial game output"
+          }
+        }
+      },
+      "GameInputRequest": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Player input/command",
+            "maxLength": 500
+          }
+        },
+        "required": ["input"]
+      },
+      "GameOutputResponse": {
+        "type": "object",
+        "properties": {
+          "output": {
+            "type": "string",
+            "description": "Game response"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "completed", "game_over"]
+          },
+          "score": {
+            "type": "integer"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          }
+        },
+        "required": ["error", "message"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "System",
+      "description": "System and health endpoints"
+    },
+    {
+      "name": "Games",
+      "description": "Game listing and information"
+    },
+    {
+      "name": "Game Sessions",
+      "description": "Active game session management"
+    }
+  ]
+}
