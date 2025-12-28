@@ -316,7 +316,8 @@ Until you look.{C.RESET}
 
             # Handle exits
             if entity.collapsed_state and "exit" in entity.collapsed_state:
-                direction = entity.collapsed_state.split("_")[1]
+                parts = entity.collapsed_state.split("_")
+                direction = parts[1] if len(parts) > 1 else "unknown"
                 self.handle_exit(direction)
                 return
 

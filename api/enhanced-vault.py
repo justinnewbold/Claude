@@ -20,7 +20,7 @@ Complete implementation of all game improvements:
 import random
 import json
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from enum import Enum
 
 # ============================================================================
@@ -117,7 +117,7 @@ class Achievement:
     name: str
     description: str
     unlocked: bool = False
-    bonus: Dict[str, any] = None
+    bonus: Dict[str, Any] = None
     icon: str = "🏆"
 
 @dataclass
@@ -132,7 +132,7 @@ class DailyChallenge:
 class Event:
     title: str
     description: str
-    choices: List[Dict[str, any]]
+    choices: List[Dict[str, Any]]
 
 # ============================================================================
 # DWELLER GENERATOR WITH PERSONALITIES AND BACKSTORIES
@@ -666,10 +666,12 @@ Commands: 1)Status 2)Build 3)Dwellers 4)Explore 5)Rest 6)Quests 7)Achievements ?
             if top_relationships:
                 output += f"   "
                 for name, score in top_relationships:
+                    # Safely get first name, defaulting to full name if no space
+                    display_name = name.split()[0] if name and ' ' in name else name
                     if score > 50:
-                        output += f"❤️ {name.split()[0]} "
+                        output += f"❤️ {display_name} "
                     elif score < -50:
-                        output += f"⚔️ {name.split()[0]} "
+                        output += f"⚔️ {display_name} "
 
         output += "\n╚══════════════════════╝\n"
         output += "Type dweller number for details, or 'back' to return\n"

@@ -13,9 +13,14 @@ import select
 import termios
 import struct
 import fcntl
+from pathlib import Path
+
+# Get the project root directory (two levels up from this file)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
+# Use environment variable for secret key, with a fallback for development only
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 class Terminal:
@@ -31,7 +36,8 @@ class Terminal:
 
         if child_pid == 0:
             # Child process - run the game
-            os.execvp('python3', ['python3', f'/home/user/Claude/{game_file}'])
+            game_path = str(PROJECT_ROOT / game_file)
+            os.execvp('python3', ['python3', game_path])
         else:
             # Parent process - store the terminal
             self.child_pid = child_pid
