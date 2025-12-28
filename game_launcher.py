@@ -70,53 +70,306 @@ class GameLauncher:
 
     def _load_games(self):
         """Load all available games"""
-        # Manually registered games (you can add auto-discovery later)
+        # Complete list of all games in the collection
         self.games = {
+            # === MAIN GAMES ===
             'vault_shelter': GameInfo(
                 id='vault_shelter',
-                name='Vault Shelter Simulator',
-                description='Manage a post-apocalyptic vault shelter',
+                name='VAULT 13 - Survival Protocol',
+                description='Ultimate post-apocalyptic vault management simulator with 50+ features',
                 module_path='vault_shelter_v6.py',
                 main_function='main',
-                version='6.0',
-                tags=['simulation', 'management', 'fallout']
+                version='9.0',
+                tags=['simulation', 'management', 'main']
             ),
+
+            # === PHILOSOPHICAL GAMES ===
             'echo_chambers': GameInfo(
                 id='echo_chambers',
                 name='Echo Chambers',
-                description='Quantum timeline exploration game',
+                description='Exist across multiple parallel timelines simultaneously',
                 module_path='echo_chambers.py',
                 main_function='main',
-                version='1.0',
-                tags=['sci-fi', 'text-adventure', 'quantum']
+                tags=['quantum', 'narrative', 'philosophical']
             ),
-            'space_explorer': GameInfo(
-                id='space_explorer',
-                name='Space Explorer',
-                description='Explore the cosmos',
-                module_path='space_explorer.py',
+            'schrodingers_dungeon': GameInfo(
+                id='schrodingers_dungeon',
+                name="Schrödinger's Dungeon",
+                description='Navigate a dungeon where reality is probabilistic until observed',
+                module_path='schrodingers_dungeon.py',
                 main_function='main',
-                version='1.0',
-                tags=['space', 'exploration']
+                tags=['quantum', 'dungeon', 'philosophical']
             ),
-            'dungeon_crawler': GameInfo(
-                id='dungeon_crawler',
-                name='Dungeon Crawler',
-                description='Classic dungeon exploration',
-                module_path='dungeon_crawler.py',
+            'code_archaeology': GameInfo(
+                id='code_archaeology',
+                name='Code Archaeology',
+                description='Debug code from extinct alien civilizations',
+                module_path='code_archaeology.py',
                 main_function='main',
-                version='1.0',
-                tags=['fantasy', 'rpg', 'dungeon']
+                tags=['puzzle', 'programming', 'philosophical']
             ),
-            'trading_post': GameInfo(
-                id='trading_post',
-                name='Trading Post',
-                description='Resource trading simulation',
-                module_path='trading_post.py',
+            'infinite_library': GameInfo(
+                id='infinite_library',
+                name='The Infinite Library',
+                description="Explore Borges' Library of Babel - every possible book exists",
+                module_path='infinite_library.py',
                 main_function='main',
-                version='1.0',
-                tags=['trading', 'economy']
-            )
+                tags=['exploration', 'philosophical', 'borges']
+            ),
+            'butterfly_effect': GameInfo(
+                id='butterfly_effect',
+                name='The Butterfly Effect',
+                description='Chaos theory puzzle - tiny changes create vastly different outcomes',
+                module_path='butterfly_effect.py',
+                main_function='main',
+                tags=['chaos', 'puzzle', 'philosophical']
+            ),
+            'syntax_tree_climber': GameInfo(
+                id='syntax_tree_climber',
+                name='Syntax Tree Climber',
+                description='Navigate the AST of living code - meta-programming as gameplay',
+                module_path='syntax_tree_climber.py',
+                main_function='main',
+                tags=['programming', 'meta', 'philosophical']
+            ),
+            'ship_of_theseus': GameInfo(
+                id='ship_of_theseus',
+                name='Ship of Theseus',
+                description='Explore identity through gradual replacement',
+                module_path='ship_of_theseus.py',
+                main_function='main',
+                tags=['identity', 'philosophical', 'puzzle']
+            ),
+            'trolley_problem': GameInfo(
+                id='trolley_problem',
+                name='Trolley Problem',
+                description='Face ethical dilemmas with branching consequences',
+                module_path='trolley_problem.py',
+                main_function='main',
+                tags=['ethics', 'philosophical', 'choice']
+            ),
+            'prisoners_dilemma': GameInfo(
+                id='prisoners_dilemma',
+                name="Prisoner's Dilemma",
+                description='Game theory exploration of cooperation vs betrayal',
+                module_path='prisoners_dilemma.py',
+                main_function='main',
+                tags=['game-theory', 'philosophical', 'strategy']
+            ),
+            'chinese_room': GameInfo(
+                id='chinese_room',
+                name='Chinese Room',
+                description="Explore Searle's thought experiment on consciousness",
+                module_path='chinese_room.py',
+                main_function='main',
+                tags=['consciousness', 'philosophical', 'ai']
+            ),
+            'platos_cave': GameInfo(
+                id='platos_cave',
+                name="Plato's Cave",
+                description='Escape the shadows and discover true reality',
+                module_path='platos_cave.py',
+                main_function='main',
+                tags=['reality', 'philosophical', 'allegory']
+            ),
+            'simulation_hypothesis': GameInfo(
+                id='simulation_hypothesis',
+                name='Simulation Hypothesis',
+                description='Are you in a simulation? Find out.',
+                module_path='simulation_hypothesis.py',
+                main_function='main',
+                tags=['reality', 'philosophical', 'simulation']
+            ),
+            'marys_room': GameInfo(
+                id='marys_room',
+                name="Mary's Room",
+                description='Explore qualia and the knowledge argument',
+                module_path='marys_room.py',
+                main_function='main',
+                tags=['consciousness', 'philosophical', 'qualia']
+            ),
+            'halting_problem': GameInfo(
+                id='halting_problem',
+                name='The Halting Problem',
+                description="Navigate Turing's undecidable territory",
+                module_path='halting_problem.py',
+                main_function='main',
+                tags=['computation', 'philosophical', 'turing']
+            ),
+
+            # === PARADOX GAMES ===
+            'monty_hall': GameInfo(
+                id='monty_hall',
+                name='Monty Hall',
+                description='The classic probability paradox - switch or stay?',
+                module_path='monty_hall.py',
+                main_function='main',
+                tags=['probability', 'paradox', 'puzzle']
+            ),
+            'newcombs_paradox': GameInfo(
+                id='newcombs_paradox',
+                name="Newcomb's Paradox",
+                description='One box or two? Challenge a perfect predictor',
+                module_path='newcombs_paradox.py',
+                main_function='main',
+                tags=['decision-theory', 'paradox', 'puzzle']
+            ),
+            'pascals_wager': GameInfo(
+                id='pascals_wager',
+                name="Pascal's Wager",
+                description='Bet on existence with infinite stakes',
+                module_path='pascals_wager.py',
+                main_function='main',
+                tags=['decision-theory', 'paradox', 'philosophy']
+            ),
+            'sleeping_beauty': GameInfo(
+                id='sleeping_beauty',
+                name='Sleeping Beauty',
+                description='The probability puzzle of uncertain awakening',
+                module_path='sleeping_beauty.py',
+                main_function='main',
+                tags=['probability', 'paradox', 'puzzle']
+            ),
+            'zenos_runner': GameInfo(
+                id='zenos_runner',
+                name="Zeno's Runner",
+                description='Race against infinite divisions of space',
+                module_path='zenos_runner.py',
+                main_function='main',
+                tags=['infinity', 'paradox', 'runner']
+            ),
+            'bootstrap_paradox': GameInfo(
+                id='bootstrap_paradox',
+                name='Bootstrap Paradox',
+                description='Time loop puzzle - where did it begin?',
+                module_path='bootstrap_paradox.py',
+                main_function='main',
+                tags=['time', 'paradox', 'puzzle']
+            ),
+            'twin_paradox': GameInfo(
+                id='twin_paradox',
+                name='Twin Paradox',
+                description='Relativistic time dilation adventure',
+                module_path='twin_paradox.py',
+                main_function='main',
+                tags=['relativity', 'paradox', 'physics']
+            ),
+            'braess_paradox': GameInfo(
+                id='braess_paradox',
+                name="Braess's Paradox",
+                description='When adding roads makes traffic worse',
+                module_path='braess_paradox.py',
+                main_function='main',
+                tags=['networks', 'paradox', 'puzzle']
+            ),
+            'sorites_paradox': GameInfo(
+                id='sorites_paradox',
+                name='Sorites Paradox',
+                description='The heap paradox - how many grains make a heap?',
+                module_path='sorites_paradox.py',
+                main_function='main',
+                tags=['logic', 'paradox', 'vagueness']
+            ),
+            'godels_paradox': GameInfo(
+                id='godels_paradox',
+                name="Gödel's Paradox",
+                description='Navigate incompleteness and self-reference',
+                module_path='godels_paradox.py',
+                main_function='main',
+                tags=['logic', 'paradox', 'math']
+            ),
+            'munchhausen_trilemma': GameInfo(
+                id='munchhausen_trilemma',
+                name='Münchhausen Trilemma',
+                description='The problem of infinite regress in justification',
+                module_path='munchhausen_trilemma.py',
+                main_function='main',
+                tags=['epistemology', 'paradox', 'philosophy']
+            ),
+            'doomsday_argument': GameInfo(
+                id='doomsday_argument',
+                name='Doomsday Argument',
+                description='Probabilistic reasoning about human extinction',
+                module_path='doomsday_argument.py',
+                main_function='main',
+                tags=['probability', 'paradox', 'anthropic']
+            ),
+
+            # === PHYSICS/SCIENCE GAMES ===
+            'maxwells_demon': GameInfo(
+                id='maxwells_demon',
+                name="Maxwell's Demon",
+                description='Sort molecules and challenge the second law',
+                module_path='maxwells_demon.py',
+                main_function='main',
+                tags=['physics', 'thermodynamics', 'puzzle']
+            ),
+            'laplaces_demon': GameInfo(
+                id='laplaces_demon',
+                name="Laplace's Demon",
+                description='Perfect knowledge, perfect prediction',
+                module_path='laplaces_demon.py',
+                main_function='main',
+                tags=['determinism', 'physics', 'puzzle']
+            ),
+            'quantum_eraser': GameInfo(
+                id='quantum_eraser',
+                name='Quantum Eraser',
+                description='Manipulate quantum information and causality',
+                module_path='quantum_eraser.py',
+                main_function='main',
+                tags=['quantum', 'physics', 'puzzle']
+            ),
+            'entanglement': GameInfo(
+                id='entanglement',
+                name='Entanglement',
+                description='Quantum entanglement puzzle game',
+                module_path='entanglement.py',
+                main_function='main',
+                tags=['quantum', 'physics', 'puzzle']
+            ),
+            'boltzmann_brains': GameInfo(
+                id='boltzmann_brains',
+                name='Boltzmann Brains',
+                description='Statistical fluctuations and consciousness',
+                module_path='boltzmann_brains.py',
+                main_function='main',
+                tags=['physics', 'consciousness', 'probability']
+            ),
+
+            # === NARRATIVE/ADVENTURE GAMES ===
+            'forking_paths': GameInfo(
+                id='forking_paths',
+                name='Garden of Forking Paths',
+                description='Borgesian labyrinth of branching narratives',
+                module_path='forking_paths.py',
+                main_function='main',
+                tags=['narrative', 'borges', 'adventure']
+            ),
+            'last_recursion': GameInfo(
+                id='last_recursion',
+                name='The Last Recursion',
+                description='Recursive narrative descent',
+                module_path='last_recursion.py',
+                main_function='main',
+                tags=['recursion', 'narrative', 'puzzle']
+            ),
+            'emergence_engine': GameInfo(
+                id='emergence_engine',
+                name='Emergence Engine',
+                description='Watch complex behavior emerge from simple rules',
+                module_path='emergence_engine.py',
+                main_function='main',
+                tags=['emergence', 'simulation', 'complexity']
+            ),
+            'the_categorizer': GameInfo(
+                id='the_categorizer',
+                name='The Categorizer',
+                description='Classification and taxonomy puzzle',
+                module_path='the_categorizer.py',
+                main_function='main',
+                tags=['logic', 'puzzle', 'classification']
+            ),
         }
 
         self.logger.info(f"Loaded {len(self.games)} games")
