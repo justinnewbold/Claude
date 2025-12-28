@@ -10,7 +10,7 @@ import time
 import os
 import json
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional, Set, Any
 from enum import Enum
 import sys
 
@@ -56,7 +56,7 @@ class Echo:
     timeline_origin: int
     turn_created: int
     propagation_chance: float
-    effects: Dict[str, any] = field(default_factory=dict)
+    effects: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -73,8 +73,8 @@ class Event:
     """An event that can occur in a timeline"""
     name: str
     description: str
-    choices: List[Dict[str, any]]
-    conditions: Dict[str, any] = field(default_factory=dict)
+    choices: List[Dict[str, Any]]
+    conditions: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -87,8 +87,8 @@ class Timeline:
     created_at: int
     events_experienced: List[str] = field(default_factory=list)
     echoes_present: List[Echo] = field(default_factory=list)
-    properties: Dict[str, any] = field(default_factory=dict)
-    narrative_state: Dict[str, any] = field(default_factory=dict)
+    properties: Dict[str, Any] = field(default_factory=dict)
+    narrative_state: Dict[str, Any] = field(default_factory=dict)
     decay_level: float = 0.0
     entangled_with: Set[int] = field(default_factory=set)
 

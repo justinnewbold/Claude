@@ -105,7 +105,7 @@ import sys
 import json
 import logging
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Tuple, Set
+from typing import List, Dict, Optional, Tuple, Set, Any
 from enum import Enum
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -624,7 +624,7 @@ class Technology:
     cost: int  # research points
     prerequisites: List[str] = field(default_factory=list)
     unlocks: List[str] = field(default_factory=list)  # room types, policies, etc.
-    bonus: Optional[Dict[str, any]] = None
+    bonus: Optional[Dict[str, Any]] = None
     icon: str = "🔬"
 
 
@@ -663,7 +663,7 @@ class Policy:
     """Vault policy"""
     name: str
     description: str
-    effects: Dict[str, any]
+    effects: Dict[str, Any]
     cost: int = 0  # influence cost
     requires_government: Optional[GovernmentType] = None
     icon: str = "📜"
@@ -731,7 +731,7 @@ class Disaster:
     severity: int  # 1-10
     start_day: int
     duration: int  # days
-    effects: Dict[str, any] = field(default_factory=dict)
+    effects: Dict[str, Any] = field(default_factory=dict)
     resolved: bool = False
 
 
@@ -1116,8 +1116,8 @@ class VaultObjective:
     """Victory objective"""
     objective_type: ObjectiveType
     description: str
-    requirements: Dict[str, any]
-    progress: Dict[str, any] = field(default_factory=dict)
+    requirements: Dict[str, Any]
+    progress: Dict[str, Any] = field(default_factory=dict)
     completed: bool = False
 
     def check_completion(self, game) -> bool:
@@ -1158,7 +1158,7 @@ class RushAttempt:
 class QuestStep:
     """Individual step in a quest"""
     description: str
-    requirements: Dict[str, any]
+    requirements: Dict[str, Any]
     completed: bool = False
 
 @dataclass
@@ -1182,7 +1182,7 @@ class ExpeditionEncounter:
     encounter_type: str  # "combat", "loot", "choice", "trap", "discovery"
     description: str
     choices: List[str]
-    outcomes: Dict[str, Dict[str, any]]
+    outcomes: Dict[str, Dict[str, Any]]
 
 @dataclass
 class ActiveExpedition:
@@ -1204,8 +1204,8 @@ class SkillNode:
     skill_id: str
     name: str
     description: str
-    requirements: Dict[str, any]  # stat requirements, prerequisite skills
-    effects: Dict[str, any]  # bonuses when unlocked
+    requirements: Dict[str, Any]  # stat requirements, prerequisite skills
+    effects: Dict[str, Any]  # bonuses when unlocked
     unlocked: bool = False
 
 @dataclass
@@ -1230,7 +1230,7 @@ class EventChain:
     chain_id: str
     title: str
     current_stage: int = 0
-    stages: List[Dict[str, any]] = field(default_factory=list)  # Each stage has description, choices, outcomes
+    stages: List[Dict[str, Any]] = field(default_factory=list)  # Each stage has description, choices, outcomes
     completed: bool = False
     player_choices: List[str] = field(default_factory=list)
 
@@ -1240,7 +1240,7 @@ class EndgameScenario:
     scenario_id: str
     name: str
     description: str
-    requirements: Dict[str, any]
+    requirements: Dict[str, Any]
     unlocked: bool = False
     active: bool = False
     progress: float = 0.0
@@ -1304,7 +1304,7 @@ class HallOfFameEntry:
     title: str
     description: str
     day_achieved: int
-    stats: Dict[str, any] = field(default_factory=dict)
+    stats: Dict[str, Any] = field(default_factory=dict)
 
 # =============================================================================
 # 🌟 v9.0 ULTIMATE EVOLUTION - NEW DATA STRUCTURES
@@ -1464,7 +1464,7 @@ class VaultAutomation:
     rule_id: str
     rule_type: str  # "auto_assign", "auto_build", "resource_balance"
     enabled: bool = True
-    parameters: Dict[str, any] = field(default_factory=dict)
+    parameters: Dict[str, Any] = field(default_factory=dict)
     last_executed_day: int = 0
 
 @dataclass
@@ -1704,7 +1704,7 @@ class VaultGame:
         }
 
         # Notifications system
-        self.notifications: List[Dict[str, any]] = []  # {type, message, day, priority}
+        self.notifications: List[Dict[str, Any]] = []  # {type, message, day, priority}
         self.max_notifications = 5
 
         # UI Settings
@@ -1721,7 +1721,7 @@ class VaultGame:
         self.current_save_slot = "default"
 
         # Timeline/History for replay
-        self.major_events: List[Dict[str, any]] = []  # {day, type, description}
+        self.major_events: List[Dict[str, Any]] = []  # {day, type, description}
 
         # NEW v7.0 THE LIVING VAULT Features
         # Rush System
@@ -1813,7 +1813,7 @@ class VaultGame:
 
         # Tactical Combat System
         self.active_combat: Optional[CombatEncounter] = None
-        self.combat_history: List[Dict[str, any]] = []
+        self.combat_history: List[Dict[str, Any]] = []
         self.combat_victories: int = 0
         self.combat_defeats: int = 0
 
@@ -1826,7 +1826,7 @@ class VaultGame:
         self.deaths_natural: int = 0
         self.deaths_combat: int = 0
         self.deaths_disease: int = 0
-        self.cemetery: List[Dict[str, any]] = []  # Record of deceased
+        self.cemetery: List[Dict[str, Any]] = []  # Record of deceased
         self.generation_count: int = 1
 
         # Education System
@@ -1880,7 +1880,7 @@ class VaultGame:
         self.infinite_mode_difficulty: float = 1.0
 
         # Photo Mode / Vault History
-        self.vault_snapshots: List[Dict[str, any]] = []
+        self.vault_snapshots: List[Dict[str, Any]] = []
         self.max_snapshots: int = 20
 
         # Initialize
@@ -2191,7 +2191,9 @@ class VaultGame:
         first_names_f = ["Sally", "Mary", "Jenny", "Annie"]
         
         first_name = random.choice(first_names_m if gender == "M" else first_names_f)
-        last_name = mother.name.split()[-1]
+        # Safely get last name, defaulting to mother's full name if no space
+        name_parts = mother.name.split()
+        last_name = name_parts[-1] if name_parts else "Unknown"
         child_name = f"{first_name} {last_name}"
         
         # Inherit stats (average of parents with variation)
@@ -2435,7 +2437,7 @@ class VaultGame:
         
         input(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
 
-    def get_policy_bonuses(self) -> Dict[str, any]:
+    def get_policy_bonuses(self) -> Dict[str, Any]:
         """Get all active policy bonuses"""
         bonuses = {}
         for policy_id in self.active_policies:
@@ -6895,7 +6897,7 @@ class DwellerTrait:
     name: str
     description: str
     trait_type: TraitType
-    effects: Dict[str, any]
+    effects: Dict[str, Any]
     inheritable: bool = False
     icon: str = "✨"
     rarity: int = 1
@@ -6907,7 +6909,7 @@ class LegendaryItem:
     base_item: str
     rarity: EquipmentRarity
     special_power: str
-    power_effect: Dict[str, any]
+    power_effect: Dict[str, Any]
     lore: str
     icon: str = "⚡"
 
@@ -6921,8 +6923,8 @@ class QuestChain:
     current_quest_index: int = 0
     completed: bool = False
     unlocked: bool = False
-    unlock_requirement: Optional[Dict[str, any]] = None
-    final_reward: Dict[str, any] = field(default_factory=dict)
+    unlock_requirement: Optional[Dict[str, Any]] = None
+    final_reward: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class VaultExpansion:

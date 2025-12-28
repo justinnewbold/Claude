@@ -14,7 +14,7 @@ import os
 import time
 import json
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from enum import Enum
 
 # ANSI colors
@@ -73,7 +73,7 @@ class CodeArtifact:
     civilization: str
     paradigm: ParadigmType
     code: List[str]
-    bugs: List[Dict[str, any]]
+    bugs: List[Dict[str, Any]]
     lore_reward: str
     difficulty: int
     debugged: bool = False
