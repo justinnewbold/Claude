@@ -17,10 +17,11 @@ Or lose yourself in infinity.
 import random
 import hashlib
 import time
-import os
 import re
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
+
+from platform_utils import clear_screen
 
 # ANSI colors
 class C:
@@ -98,7 +99,7 @@ class InfiniteLibrary:
         self.setup_game()
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_slow(self, text, delay=0.02):
         for char in text:

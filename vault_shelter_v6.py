@@ -100,7 +100,6 @@ REQUIRES: pip install anthropic (optional for AI features)
 
 import random
 import time
-import os
 import sys
 import json
 import logging
@@ -109,6 +108,8 @@ from typing import List, Dict, Optional, Tuple, Set, Any
 from enum import Enum
 from datetime import datetime, timedelta
 from collections import defaultdict
+
+from platform_utils import clear_screen as _clear_screen
 
 # =============================================================================
 # LOGGING CONFIGURATION
@@ -2918,7 +2919,7 @@ class VaultGame:
 
     def clear_screen(self):
         """Clear screen"""
-        os.system('clear' if os.name != 'nt' else 'cls')
+        _clear_screen()
 
     def print_header(self):
         """Print game header with v6.0 info"""
@@ -4926,7 +4927,7 @@ class VaultGame:
 
     def unlock_easter_egg_animation(self, title: str):
         """Show special animation for easter egg unlock"""
-        os.system('clear' if os.name != 'nt' else 'cls')
+        _clear_screen()
 
         frames = [
             f"""
@@ -4951,7 +4952,7 @@ class VaultGame:
 
         for _ in range(3):
             for frame in frames:
-                os.system('clear' if os.name != 'nt' else 'cls')
+                _clear_screen()
                 print(f"{C.QUEST}{C.BOLD}{frame}{C.RESET}")
                 time.sleep(0.3)
 
@@ -6508,7 +6509,7 @@ class VaultGame:
 
 def show_launcher():
     """Beautiful game launcher screen"""
-    os.system('clear' if os.name != 'nt' else 'cls')
+    _clear_screen()
 
     print(f"{C.HEADER}{C.BOLD}")
     print("╔═══════════════════════════════════════════════════════════════════════╗")
@@ -6605,7 +6606,7 @@ def load_game(filename="vault_save.json"):
 
 def show_tutorial():
     """Interactive tutorial for new players"""
-    os.system('clear' if os.name != 'nt' else 'cls')
+    _clear_screen()
 
     print(f"{C.INFO}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
     print(f"{C.INFO}{C.BOLD}║              🎓 VAULT 13 INTERACTIVE TUTORIAL                 ║{C.RESET}")
@@ -6657,7 +6658,7 @@ def show_tutorial():
         print(content)
         print(f"\n{C.DIM}Press Enter to continue...{C.RESET}")
         input()
-        os.system('clear' if os.name != 'nt' else 'cls')
+        _clear_screen()
         print(f"{C.INFO}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
         print(f"{C.INFO}{C.BOLD}║              🎓 VAULT 13 INTERACTIVE TUTORIAL                 ║{C.RESET}")
         print(f"{C.INFO}{C.BOLD}╚═══════════════════════════════════════════════════════════════╝{C.RESET}\n")
@@ -6671,7 +6672,7 @@ def show_tutorial():
 
 def show_achievement_animation(achievement_name: str):
     """Show ASCII fireworks animation for achievement"""
-    os.system('clear' if os.name != 'nt' else 'cls')
+    _clear_screen()
 
     frames = [
         ["                    *                    ",
@@ -6696,7 +6697,7 @@ def show_achievement_animation(achievement_name: str):
     ]
 
     for frame in frames:
-        os.system('clear' if os.name != 'nt' else 'cls')
+        _clear_screen()
         print(f"{C.QUEST}{C.BOLD}")
         print("╔═══════════════════════════════════════════════════════════════╗")
         for line in frame:
@@ -6738,7 +6739,7 @@ def check_cheat_code(game, code: str):
 
 def show_performance_dashboard(game):
     """Show performance and optimization stats"""
-    os.system('clear' if os.name != 'nt' else 'cls')
+    _clear_screen()
 
     print(f"{C.TECH}{C.BOLD}╔═══════════════════════════════════════════════════════════════╗{C.RESET}")
     print(f"{C.TECH}{C.BOLD}║              📊 PERFORMANCE DASHBOARD                        ║{C.RESET}")
@@ -6838,7 +6839,7 @@ def main():
 
         elif choice == '7':
             # Credits
-            os.system('clear' if os.name != 'nt' else 'cls')
+            _clear_screen()
             print(f"{C.QUEST}{C.BOLD}")
             print("╔═══════════════════════════════════════════════════════════════╗")
             print("║                       📖 CREDITS                              ║")

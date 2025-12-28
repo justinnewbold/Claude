@@ -16,11 +16,12 @@ This is meta-programming as gameplay.
 """
 
 import ast
-import os
 import sys
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Any, Tuple
 from enum import Enum
+
+from platform_utils import clear_screen
 
 # ANSI colors
 class C:
@@ -93,7 +94,7 @@ class SyntaxTreeClimber:
         self.setup_level(1)
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
