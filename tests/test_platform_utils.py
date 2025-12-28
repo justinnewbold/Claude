@@ -15,7 +15,11 @@ from platform_utils import (
     get_safe_characters,
     Colors,
     get_app_data_dir,
-    get_config_dir
+    get_config_dir,
+    clear_screen,
+    move_cursor,
+    hide_cursor,
+    show_cursor
 )
 
 
@@ -119,3 +123,37 @@ class TestPaths:
         app_dir1 = get_app_data_dir("test_app")
         app_dir2 = get_app_data_dir("test_app")
         assert app_dir1 == app_dir2
+
+
+class TestScreenControl:
+    """Test screen control functions"""
+
+    def test_clear_screen_callable(self):
+        """Test that clear_screen is callable without errors"""
+        # This should not raise an exception
+        try:
+            clear_screen()
+            success = True
+        except Exception:
+            success = False
+        assert success
+
+    def test_move_cursor_callable(self):
+        """Test that move_cursor is callable with valid arguments"""
+        try:
+            move_cursor(1, 1)
+            move_cursor(80, 24)
+            success = True
+        except Exception:
+            success = False
+        assert success
+
+    def test_cursor_visibility(self):
+        """Test cursor visibility functions are callable"""
+        try:
+            hide_cursor()
+            show_cursor()
+            success = True
+        except Exception:
+            success = False
+        assert success

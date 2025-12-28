@@ -15,11 +15,12 @@ The cat would be proud. Or dead. Or both.
 
 import random
 import time
-import os
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
 import copy
+
+from platform_utils import clear_screen
 
 # ANSI colors
 class C:
@@ -120,7 +121,7 @@ class SchrodingersDungeon:
         self.generate_room(0, 0)
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")

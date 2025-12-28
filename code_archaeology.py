@@ -10,12 +10,13 @@ Debug their code. Learn their paradigms. Discover why they fell.
 """
 
 import random
-import os
 import time
 import json
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Optional, Tuple, Any
 from enum import Enum
+
+from platform_utils import clear_screen
 
 # ANSI colors
 class C:
@@ -91,7 +92,7 @@ class CodeArchaeology:
         self.setup_game()
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_slow(self, text, delay=0.02):
         for char in text:

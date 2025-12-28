@@ -319,12 +319,15 @@ def get_safe_characters() -> Dict[str, str]:
 # =============================================================================
 
 def clear_screen():
-    """Clear the terminal screen."""
-    if is_windows():
-        os.system('cls')
-    else:
-        # Use ANSI escape sequence (works on most modern terminals)
-        print('\033[2J\033[H', end='', flush=True)
+    """
+    Clear the terminal screen using ANSI escape sequences.
+    This is faster and more reliable than os.system('clear'/'cls').
+    Works on all modern terminals including Windows 10+ Terminal.
+    """
+    # Use ANSI escape sequence - works on all modern terminals
+    # \033[2J clears the screen, \033[H moves cursor to top-left
+    sys.stdout.write('\033[2J\033[H')
+    sys.stdout.flush()
 
 
 def move_cursor(x: int, y: int):

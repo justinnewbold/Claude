@@ -7,12 +7,13 @@ Every decision creates branching realities that continue to evolve.
 
 import random
 import time
-import os
 import json
 from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Optional, Set, Any
 from enum import Enum
 import sys
+
+from platform_utils import clear_screen
 
 # ANSI color codes for terminal
 class Color:
@@ -120,7 +121,7 @@ class EchoChambers:
         self.setup_game()
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_slow(self, text, delay=0.03):
         """Print text with a typewriter effect"""

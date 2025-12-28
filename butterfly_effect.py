@@ -16,11 +16,12 @@ Your goal: Orchestrate chaos to achieve specific outcomes.
 
 import random
 import time
-import os
 import copy
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple, Set
 from enum import Enum
+
+from platform_utils import clear_screen
 
 # ANSI colors
 class C:
@@ -204,7 +205,7 @@ class ButterflyEffect:
         self.setup_level(1)
 
     def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
