@@ -75,6 +75,39 @@ class PlayerPattern:
     common_responses: Dict[str, List[Any]] = field(default_factory=dict)
     preferred_strategies: Dict[str, int] = field(default_factory=dict)
     games_analyzed: int = 0
+    move_sequences: List[List[Any]] = field(default_factory=list)
+    reaction_times: List[float] = field(default_factory=list)
+    risk_tolerance: float = 0.5  # 0=conservative, 1=aggressive
+
+
+@dataclass
+class AdaptiveDifficulty:
+    """Tracks adaptive difficulty settings"""
+    base_difficulty: Difficulty = Difficulty.MEDIUM
+    current_adjustment: float = 0.0  # -1 to 1 adjustment
+    player_win_streak: int = 0
+    ai_win_streak: int = 0
+    games_for_adjustment: int = 3
+
+    def adjust_after_game(self, player_won: bool):
+        """Adjust difficulty based on results"""
+        if player_won:
+            self.player_win_streak += 1
+            self.ai_win_streak = 0
+            if self.player_win_streak >= self.games_for_adjustment:
+                self.current_adjustment = min(1.0, self.current_adjustment + 0.2)
+        else:
+            self.ai_win_streak += 1
+            self.player_win_streak = 0
+            if self.ai_win_streak >= self.games_for_adjustment:
+                self.current_adjustment = max(-1.0, self.current_adjustment - 0.2)
+
+    def get_effective_mistake_chance(self, base_chance: float) -> float:
+        """Get adjusted mistake chance"""
+        # Negative adjustment = harder (fewer mistakes)
+        # Positive adjustment = easier (more mistakes)
+        adjustment = self.current_adjustment * 0.2
+        return max(0, min(1, base_chance + adjustment))
 
 
 class Strategy(ABC, Generic[GameState, Move]):
@@ -149,9 +182,12 @@ class AIOpponent:
         self.games_played = 0
         self.games_won = 0
         self.player_patterns = PlayerPattern()
+        self.adaptive_difficulty = AdaptiveDifficulty(base_difficulty=self.config.difficulty)
 
         self._last_move_time = 0.0
         self._move_history: List[Any] = []
+        self._player_move_history: List[Any] = []
+        self._last_player_move_time = 0.0
 
         # Adjust mistake chance based on difficulty
         self._setup_difficulty()
@@ -283,12 +319,91 @@ class AIOpponent:
             moves = game_data["player_moves"]
             if moves:
                 self.player_patterns.opening_moves.append(moves[0])
+                # Store full sequence for pattern analysis
+                self.player_patterns.move_sequences.append(moves)
+                # Keep only last 50 games
+                if len(self.player_patterns.move_sequences) > 50:
+                    self.player_patterns.move_sequences.pop(0)
 
         # Track strategies
         if "player_strategy" in game_data:
             strategy = game_data["player_strategy"]
             self.player_patterns.preferred_strategies[strategy] = \
                 self.player_patterns.preferred_strategies.get(strategy, 0) + 1
+
+        # Track risk tolerance from aggressive/conservative plays
+        if "risky_moves" in game_data and "safe_moves" in game_data:
+            risky = game_data["risky_moves"]
+            safe = game_data["safe_moves"]
+            total = risky + safe
+            if total > 0:
+                new_tolerance = risky / total
+                # Exponential moving average
+                alpha = 0.3
+                self.player_patterns.risk_tolerance = (
+                    alpha * new_tolerance +
+                    (1 - alpha) * self.player_patterns.risk_tolerance
+                )
+
+    def predict_player_move(self, current_state: Any,
+                           context: Optional[Dict[str, Any]] = None) -> Optional[Any]:
+        """
+        Predict what move the player is likely to make based on patterns.
+
+        Args:
+            current_state: Current game state
+            context: Additional context (turn number, game phase, etc.)
+
+        Returns:
+            Predicted move or None if not enough data
+        """
+        if self.player_patterns.games_analyzed < 3:
+            return None  # Not enough data
+
+        predictions = {}
+
+        # Check if this matches an opening pattern
+        turn = context.get("turn", 0) if context else 0
+        if turn < 3:
+            # Look for common opening moves
+            for seq in self.player_patterns.move_sequences:
+                if turn < len(seq):
+                    move = seq[turn]
+                    predictions[str(move)] = predictions.get(str(move), 0) + 1
+
+        # Weight by risk tolerance if move categories are known
+        if context and "risky_moves" in context and "safe_moves" in context:
+            risk = self.player_patterns.risk_tolerance
+            if risk > 0.6:  # Player is aggressive
+                # Weight risky moves higher
+                for move in context["risky_moves"]:
+                    predictions[str(move)] = predictions.get(str(move), 0) + 2
+            elif risk < 0.4:  # Player is conservative
+                for move in context["safe_moves"]:
+                    predictions[str(move)] = predictions.get(str(move), 0) + 2
+
+        if not predictions:
+            return None
+
+        # Return most likely move
+        return max(predictions.keys(), key=lambda m: predictions[m])
+
+    def record_player_move(self, move: Any, reaction_time: Optional[float] = None):
+        """Record a player's move for pattern learning"""
+        self._player_move_history.append(move)
+
+        if reaction_time is not None:
+            self.player_patterns.reaction_times.append(reaction_time)
+            # Keep only recent times
+            if len(self.player_patterns.reaction_times) > 100:
+                self.player_patterns.reaction_times.pop(0)
+
+    def get_player_average_reaction_time(self) -> Optional[float]:
+        """Get player's average reaction time"""
+        times = self.player_patterns.reaction_times
+        if not times:
+            return None
+        return sum(times) / len(times)
 
     def get_taunt(self, situation: str = "general") -> Optional[str]:
         """Get a taunt message for the current situation"""

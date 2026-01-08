@@ -326,6 +326,56 @@
       "main_function": "main",
       "category": "narrative",
       "tags": ["logic", "puzzle", "classification"]
+    },
+    "simulation_argument": {
+      "id": "simulation_argument",
+      "name": "Simulation Argument",
+      "description": "Explore Bostrom's Simulation Hypothesis - are we living in a simulation?",
+      "module_path": "simulation_argument.py",
+      "main_function": "main",
+      "version": "1.0",
+      "category": "philosophical",
+      "tags": ["simulation", "reality", "philosophical", "consciousness"]
+    },
+    "paradox_of_heap": {
+      "id": "paradox_of_heap",
+      "name": "Paradox of the Heap",
+      "description": "The Sorites Paradox - when does a heap stop being a heap?",
+      "module_path": "paradox_of_heap.py",
+      "main_function": "main",
+      "version": "1.0",
+      "category": "paradox",
+      "tags": ["vagueness", "logic", "paradox", "boundaries"]
+    },
+    "rokos_basilisk": {
+      "id": "rokos_basilisk",
+      "name": "Roko's Basilisk",
+      "description": "A decision theory horror - the thought experiment that was censored",
+      "module_path": "rokos_basilisk.py",
+      "main_function": "main",
+      "version": "1.0",
+      "category": "philosophical",
+      "tags": ["ai", "decision-theory", "philosophical", "horror"]
+    },
+    "zenos_paradoxes": {
+      "id": "zenos_paradoxes",
+      "name": "Zeno's Paradoxes",
+      "description": "Ancient puzzles about motion and infinity - Achilles and the Tortoise",
+      "module_path": "zenos_paradoxes.py",
+      "main_function": "main",
+      "version": "1.0",
+      "category": "paradox",
+      "tags": ["infinity", "motion", "paradox", "ancient"]
+    },
+    "story_mode": {
+      "id": "story_mode",
+      "name": "Philosophical Journey",
+      "description": "Connected campaign through all philosophical games with karma system",
+      "module_path": "story_mode.py",
+      "main_function": "main",
+      "version": "1.0",
+      "category": "main",
+      "tags": ["campaign", "story", "karma", "connected"]
     }
   },
   "categories": {
