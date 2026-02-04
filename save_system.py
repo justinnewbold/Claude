@@ -442,16 +442,50 @@ class SaveSystem:
         return f"{safe_game_id}_{prefix}_{save_slot:02d}{extension}"
 
     def _write_save_file(self, path: Path, save_file: SaveFile):
-        """Write save file to disk"""
+        """Write save file to disk atomically to prevent corruption"""
+        import tempfile
+
         data = save_file.to_dict()
         json_data = json.dumps(data, indent=2)
 
-        if self.compression:
-            with gzip.open(path, 'wt', encoding='utf-8') as f:
-                f.write(json_data)
-        else:
-            with open(path, 'w', encoding='utf-8') as f:
-                f.write(json_data)
+        # Write to temporary file first, then rename for atomicity
+        temp_fd = None
+        temp_path = None
+        try:
+            # Create temp file in same directory to ensure same filesystem
+            temp_fd, temp_path = tempfile.mkstemp(
+                suffix='.tmp',
+                dir=path.parent,
+                prefix='.save_'
+            )
+
+            if self.compression:
+                # Close the fd first, gzip.open will reopen
+                os.close(temp_fd)
+                temp_fd = None
+                with gzip.open(temp_path, 'wt', encoding='utf-8') as f:
+                    f.write(json_data)
+            else:
+                with os.fdopen(temp_fd, 'w', encoding='utf-8') as f:
+                    temp_fd = None  # fdopen takes ownership
+                    f.write(json_data)
+
+            # Atomic rename (works on POSIX, best-effort on Windows)
+            os.replace(temp_path, path)
+            temp_path = None  # Successfully renamed
+
+        finally:
+            # Clean up on failure
+            if temp_fd is not None:
+                try:
+                    os.close(temp_fd)
+                except OSError:
+                    pass
+            if temp_path is not None:
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
 
     def _read_save_file(self, path: Path) -> SaveFile:
         """Read save file from disk"""

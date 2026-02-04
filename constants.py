@@ -236,6 +236,28 @@ MAX_PARTICLES = 100
 SPARKLINE_WIDTH = 10
 
 # =============================================================================
+# TIMING CONSTANTS (Sleep Delays)
+# =============================================================================
+
+# Animation delays
+ANIMATION_DELAY_FAST = 0.1  # Fast animations, demo mode stepping
+ANIMATION_DELAY_NORMAL = 0.3  # Standard animation delay
+ANIMATION_DELAY_SLOW = 0.5  # Slower transitions, dramatic pauses
+ANIMATION_DELAY_VERY_SLOW = 0.8  # Very slow for emphasis
+
+# Network delays
+NETWORK_POLL_INTERVAL = 0.05  # Polling interval for network messages
+NETWORK_PING_WAIT = 0.5  # Wait time after sending ping
+
+# Game effect delays
+EFFECT_DELAY_PARTICLE = 0.01  # Particle/sparkle effect
+EFFECT_DELAY_TRANSITION = 0.2  # Screen transitions
+EFFECT_DELAY_MESSAGE = 0.5  # Message display pause
+
+# Input delays
+INPUT_DEBOUNCE_DELAY = 0.1  # Prevent input bouncing
+
+# =============================================================================
 # FILE PATHS
 # =============================================================================
 

@@ -75,11 +75,12 @@ class ChineseRoom:
                  "Pattern 什麼是愛 → Response 愛是好"),
         ]
         
-    def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
-        
+    def clear_scr(self):
+        """Clear terminal screen using platform utility"""
+        clear_screen()
+
     def show_intro(self):
-        self.clear_screen()
+        self.clear_scr()
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'THE CHINESE ROOM'.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")
@@ -165,7 +166,7 @@ Send response
         
     def show_room(self, message: List[str]):
         """Display the Chinese Room interface"""
-        self.clear_screen()
+        self.clear_scr()
         
         print(f"\n{C.UNDERSTANDING}╔═ THE CHINESE ROOM ═╗{C.RESET}")
         print(f"{C.SYSTEM}Level {self.level} | Processed: {self.messages_processed} | Correct: {self.correct_responses}{C.RESET}")
@@ -202,7 +203,7 @@ Send response
         rule = self.rules[selected_rule - 1]
         correct_rule = self.find_matching_rule(message)
         
-        self.clear_screen()
+        self.clear_scr()
         
         if correct_rule and rule == correct_rule:
             # Correct!
@@ -242,7 +243,7 @@ Send response
             
     def show_ending(self):
         """Show philosophical conclusion"""
-        self.clear_screen()
+        self.clear_scr()
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'THE CHINESE ROOM ARGUMENT'.center(70)}{C.RESET}")
         print(f"{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}\n")

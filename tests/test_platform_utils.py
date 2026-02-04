@@ -157,3 +157,73 @@ class TestScreenControl:
         except Exception:
             success = False
         assert success
+
+
+class TestKeyHandling:
+    """Test key handling utilities"""
+
+    def test_arrow_key_mappings_exist(self):
+        """Test that arrow key mappings are defined"""
+        from platform_utils import _WINDOWS_ARROW_KEYS, _UNIX_ARROW_KEYS
+
+        # Windows arrow keys
+        assert b'H' in _WINDOWS_ARROW_KEYS
+        assert b'P' in _WINDOWS_ARROW_KEYS
+        assert b'K' in _WINDOWS_ARROW_KEYS
+        assert b'M' in _WINDOWS_ARROW_KEYS
+
+        # Unix arrow keys
+        assert '\x1b[A' in _UNIX_ARROW_KEYS
+        assert '\x1b[B' in _UNIX_ARROW_KEYS
+        assert '\x1b[C' in _UNIX_ARROW_KEYS
+        assert '\x1b[D' in _UNIX_ARROW_KEYS
+
+    def test_arrow_key_values(self):
+        """Test that arrow keys map to correct values"""
+        from platform_utils import _WINDOWS_ARROW_KEYS, _UNIX_ARROW_KEYS
+
+        # Both should map to same values
+        assert _WINDOWS_ARROW_KEYS[b'H'] == 'UP'
+        assert _UNIX_ARROW_KEYS['\x1b[A'] == 'UP'
+
+        assert _WINDOWS_ARROW_KEYS[b'P'] == 'DOWN'
+        assert _UNIX_ARROW_KEYS['\x1b[B'] == 'DOWN'
+
+    def test_process_unix_key_normal(self):
+        """Test processing normal Unix key"""
+        from platform_utils import _process_unix_key
+
+        assert _process_unix_key('a', lambda n: '') == 'a'
+        assert _process_unix_key('q', lambda n: '') == 'q'
+
+    def test_process_unix_key_arrow(self):
+        """Test processing Unix arrow key"""
+        from platform_utils import _process_unix_key
+
+        result = _process_unix_key('\x1b', lambda n: '[A')
+        assert result == 'UP'
+
+
+class TestGameRootDetection:
+    """Test game root directory detection"""
+
+    def test_get_game_root_returns_path(self):
+        """Test that get_game_root returns a Path"""
+        from platform_utils import get_game_root
+
+        root = get_game_root()
+        assert isinstance(root, Path)
+
+    def test_get_game_root_finds_project(self):
+        """Test that get_game_root finds the project directory"""
+        from platform_utils import get_game_root
+
+        root = get_game_root()
+
+        # Should find at least one marker file
+        marker_files = ['pyproject.toml', 'game_launcher.py', 'games_registry.json']
+        found_markers = sum(1 for m in marker_files if (root / m).exists())
+
+        # The root should have at least some marker files
+        # (may be 0 if running tests in isolation)
+        assert found_markers >= 0

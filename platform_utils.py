@@ -346,11 +346,18 @@ def show_cursor():
 
 
 def set_title(title: str):
-    """Set the terminal window title."""
+    """Set the terminal window title safely."""
+    # Sanitize title to prevent shell injection
+    safe_title = ''.join(c for c in title if c.isalnum() or c in ' -_.:')[:80]
     if is_windows():
-        os.system(f'title {title}')
+        # Use ctypes for safer Windows title setting
+        try:
+            import ctypes
+            ctypes.windll.kernel32.SetConsoleTitleW(safe_title)
+        except Exception:
+            pass  # Silently fail if unable to set title
     else:
-        print(f'\033]0;{title}\007', end='', flush=True)
+        print(f'\033]0;{safe_title}\007', end='', flush=True)
 
 
 def print_header(text: str, width: int = 60):
@@ -538,21 +545,35 @@ def get_cache_dir(app_name: str = "vault13") -> Path:
 
 def get_game_root() -> Path:
     """Get the root directory containing all game files."""
+    # Marker files that indicate this is the game root directory
+    # Using multiple markers makes detection more reliable
+    MARKER_FILES = [
+        'pyproject.toml',  # Project configuration
+        'game_launcher.py',  # Main launcher
+        'games_registry.json',  # Game registry
+    ]
+
+    def is_game_root(directory: Path) -> bool:
+        """Check if directory is the game root by looking for marker files."""
+        # Require at least 2 marker files to be confident
+        found = sum(1 for marker in MARKER_FILES if (directory / marker).exists())
+        return found >= 2
+
     # First check if we're running from source
     script_dir = Path(__file__).parent.resolve()
 
     # Check if this looks like the game directory
-    if (script_dir / 'vault_shelter_v6.py').exists():
+    if is_game_root(script_dir):
         return script_dir
 
     # Check if we're in a subdirectory
     parent = script_dir.parent
-    if (parent / 'vault_shelter_v6.py').exists():
+    if is_game_root(parent):
         return parent
 
     # Fall back to current working directory
     cwd = Path.cwd()
-    if (cwd / 'vault_shelter_v6.py').exists():
+    if is_game_root(cwd):
         return cwd
 
     # Last resort: return the script directory
@@ -563,25 +584,43 @@ def get_game_root() -> Path:
 # INPUT HANDLING
 # =============================================================================
 
+# Arrow key mappings - centralized to avoid duplication
+_WINDOWS_ARROW_KEYS = {
+    b'H': 'UP', b'P': 'DOWN',
+    b'K': 'LEFT', b'M': 'RIGHT',
+}
+
+_UNIX_ARROW_KEYS = {
+    '\x1b[A': 'UP', '\x1b[B': 'DOWN',
+    '\x1b[C': 'RIGHT', '\x1b[D': 'LEFT',
+}
+
+
+def _process_windows_key(key: bytes, get_next_key) -> str:
+    """Process a Windows key, handling special keys like arrows."""
+    if key in (b'\x00', b'\xe0'):
+        key = get_next_key()
+        return _WINDOWS_ARROW_KEYS.get(key, '')
+    return key.decode('utf-8', errors='replace')
+
+
+def _process_unix_key(key: str, read_more) -> str:
+    """Process a Unix key, handling escape sequences like arrows."""
+    if key == '\x1b':
+        key += read_more(2)
+        return _UNIX_ARROW_KEYS.get(key, key)
+    return key
+
+
 def get_key() -> str:
     """
     Get a single keypress from the user (non-blocking on Unix, blocking on Windows).
-    Returns the key as a string.
+    Returns the key as a string, or empty string if no key is available.
     """
     if is_windows():
         import msvcrt
         if msvcrt.kbhit():
-            key = msvcrt.getch()
-            # Handle special keys
-            if key in (b'\x00', b'\xe0'):
-                key = msvcrt.getch()
-                # Map arrow keys
-                mapping = {
-                    b'H': 'UP', b'P': 'DOWN',
-                    b'K': 'LEFT', b'M': 'RIGHT',
-                }
-                return mapping.get(key, '')
-            return key.decode('utf-8', errors='replace')
+            return _process_windows_key(msvcrt.getch(), msvcrt.getch)
         return ''
     else:
         import select
@@ -592,18 +631,12 @@ def get_key() -> str:
         old_settings = termios.tcgetattr(fd)
         try:
             tty.setraw(fd)
-            # Check if input is available
+            # Check if input is available (non-blocking)
             if select.select([sys.stdin], [], [], 0)[0]:
                 key = sys.stdin.read(1)
-                # Handle escape sequences (arrow keys, etc.)
-                if key == '\x1b':
-                    if select.select([sys.stdin], [], [], 0.1)[0]:
-                        key += sys.stdin.read(2)
-                        mapping = {
-                            '\x1b[A': 'UP', '\x1b[B': 'DOWN',
-                            '\x1b[C': 'RIGHT', '\x1b[D': 'LEFT',
-                        }
-                        return mapping.get(key, key)
+                # For escape sequences, check if more data is available
+                if key == '\x1b' and select.select([sys.stdin], [], [], 0.1)[0]:
+                    return _process_unix_key(key, sys.stdin.read)
                 return key
             return ''
         finally:
@@ -611,18 +644,10 @@ def get_key() -> str:
 
 
 def wait_for_key() -> str:
-    """Wait for a keypress and return it."""
+    """Wait for a keypress and return it (blocking)."""
     if is_windows():
         import msvcrt
-        key = msvcrt.getch()
-        if key in (b'\x00', b'\xe0'):
-            key = msvcrt.getch()
-            mapping = {
-                b'H': 'UP', b'P': 'DOWN',
-                b'K': 'LEFT', b'M': 'RIGHT',
-            }
-            return mapping.get(key, '')
-        return key.decode('utf-8', errors='replace')
+        return _process_windows_key(msvcrt.getch(), msvcrt.getch)
     else:
         import termios
         import tty
@@ -632,14 +657,7 @@ def wait_for_key() -> str:
         try:
             tty.setraw(fd)
             key = sys.stdin.read(1)
-            if key == '\x1b':
-                key += sys.stdin.read(2)
-                mapping = {
-                    '\x1b[A': 'UP', '\x1b[B': 'DOWN',
-                    '\x1b[C': 'RIGHT', '\x1b[D': 'LEFT',
-                }
-                return mapping.get(key, key)
-            return key
+            return _process_unix_key(key, sys.stdin.read)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 

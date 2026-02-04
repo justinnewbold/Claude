@@ -32,10 +32,12 @@ import socket
 import json
 import threading
 import time
+from collections import defaultdict, deque
 from dataclasses import dataclass, asdict
-from typing import Optional, Dict, Any, Callable, List
+from typing import Optional, Dict, Any, Callable, List, Deque
 from enum import Enum
 from logging_config import get_logger
+from constants import NETWORK_POLL_INTERVAL, NETWORK_PING_WAIT
 
 logger = get_logger(__name__)
 
@@ -81,8 +83,24 @@ class GameMessage:
 
     @classmethod
     def from_json(cls, json_str: str) -> 'GameMessage':
-        """Deserialize from JSON"""
+        """Deserialize from JSON with validation"""
         data = json.loads(json_str)
+
+        # Validate required fields
+        if not isinstance(data, dict):
+            raise TypeError("Message must be a JSON object")
+
+        required_fields = {'msg_type', 'data'}
+        missing = required_fields - set(data.keys())
+        if missing:
+            raise KeyError(f"Missing required fields: {missing}")
+
+        # Validate field types
+        if not isinstance(data.get('msg_type'), str):
+            raise TypeError("msg_type must be a string")
+        if not isinstance(data.get('data'), dict):
+            raise TypeError("data must be a dictionary")
+
         return cls(**data)
 
 
@@ -118,7 +136,8 @@ class NetworkGame:
         self._receive_thread: Optional[threading.Thread] = None
         self._running = False
 
-        self._message_queue: List[GameMessage] = []
+        # Use dict of deques for O(1) message retrieval by type
+        self._message_queues: Dict[str, Deque[GameMessage]] = defaultdict(deque)
         self._message_lock = threading.Lock()
 
         self._on_message_callbacks: List[Callable[[GameMessage], None]] = []
@@ -237,22 +256,28 @@ class NetworkGame:
                 data={"reason": "Player disconnected"},
                 player_id=self.player_id
             ))
-        except Exception:
-            pass
+        except socket.error as e:
+            logger.debug(f"Could not send disconnect message: {e}")
+        except Exception as e:
+            logger.warning(f"Unexpected error sending disconnect: {e}")
 
         # Close sockets
         if self._client_socket:
             try:
                 self._client_socket.close()
-            except Exception:
-                pass
+            except socket.error as e:
+                logger.debug(f"Error closing client socket: {e}")
+            except Exception as e:
+                logger.warning(f"Unexpected error closing client socket: {e}")
             self._client_socket = None
 
         if self._socket:
             try:
                 self._socket.close()
-            except Exception:
-                pass
+            except socket.error as e:
+                logger.debug(f"Error closing socket: {e}")
+            except Exception as e:
+                logger.warning(f"Unexpected error closing socket: {e}")
             self._socket = None
 
         self.state = ConnectionState.DISCONNECTED
@@ -296,7 +321,7 @@ class NetworkGame:
             if msg:
                 return msg.data
 
-            time.sleep(0.05)
+            time.sleep(NETWORK_POLL_INTERVAL)
 
         return None
 
@@ -429,9 +454,19 @@ class NetworkGame:
                     self._handle_message(message)
                 else:
                     # Connection closed
+                    logger.info("Connection closed by peer")
                     break
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON received: {e}")
+                continue  # Skip malformed message, don't disconnect
+            except (KeyError, TypeError) as e:
+                logger.error(f"Malformed message structure: {e}")
+                continue  # Skip malformed message
+            except socket.error as e:
+                logger.error(f"Socket error in receive loop: {e}")
+                break
             except Exception as e:
-                logger.error(f"Receive error: {e}")
+                logger.error(f"Unexpected receive error: {type(e).__name__}: {e}")
                 break
 
         if self._running:
@@ -459,9 +494,9 @@ class NetworkGame:
             self.disconnect()
             return
 
-        # Queue message for processing
+        # Queue message for processing (O(1) insertion)
         with self._message_lock:
-            self._message_queue.append(message)
+            self._message_queues[message.msg_type].append(message)
 
         # Call callbacks
         for callback in self._on_message_callbacks:
@@ -471,11 +506,14 @@ class NetworkGame:
                 logger.error(f"Callback error: {e}")
 
     def _get_queued_message(self, msg_type: MessageType) -> Optional[GameMessage]:
-        """Get a message of specific type from queue"""
+        """Get a message of specific type from queue (O(1) retrieval)"""
         with self._message_lock:
-            for i, msg in enumerate(self._message_queue):
-                if msg.msg_type == msg_type.value:
-                    return self._message_queue.pop(i)
+            queue = self._message_queues.get(msg_type.value)
+            if queue:
+                try:
+                    return queue.popleft()
+                except IndexError:
+                    return None
         return None
 
     # === Utility Methods ===
@@ -487,7 +525,7 @@ class NetworkGame:
             data={},
             player_id=self.player_id
         ))
-        time.sleep(0.5)  # Wait for pong
+        time.sleep(NETWORK_PING_WAIT)  # Wait for pong
         return self.latency_ms
 
     def get_local_ip(self) -> str:

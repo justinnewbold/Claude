@@ -65,8 +65,9 @@ class Entanglement:
 
         self.setup_level(1)
 
-    def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+    def clear_scr(self):
+        """Clear terminal screen using platform utility"""
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
@@ -389,7 +390,7 @@ class Entanglement:
 
     def show_intro(self):
         """Show introduction"""
-        self.clear_screen()
+        self.clear_scr()
         self.print_header("E N T A N G L E M E N T")
 
         intro = f"""
@@ -449,7 +450,7 @@ This is quantum correlation.{C.RESET}
 
     def show_victory_screen(self):
         """Show level complete screen"""
-        self.clear_screen()
+        self.clear_scr()
         print(f"\n{C.SUCCESS}╔═ LEVEL COMPLETE! ═╗{C.RESET}\n")
         print(f"{C.SYSTEM}Level {self.level_num} completed in {self.level.moves} moves!{C.RESET}")
         print(f"\n{C.QUANTUM}All blocks entangled with their goals.{C.RESET}")
@@ -457,7 +458,7 @@ This is quantum correlation.{C.RESET}
 
     def show_final_victory(self):
         """Show final victory screen"""
-        self.clear_screen()
+        self.clear_scr()
         self.print_header("Q U A N T U M   M A S T E R Y")
 
         victory = f"""
@@ -508,7 +509,7 @@ You are quantum-aware.{C.RESET}
         self.show_intro()
 
         while not self.game_over:
-            self.clear_screen()
+            self.clear_scr()
             self.render_level()
 
             # Check victory
