@@ -105,8 +105,9 @@ class EmergenceEngine:
 
         self.setup_level(1)
 
-    def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
+    def clear_scr(self):
+        """Clear terminal screen using platform utility"""
+        clear_screen()
 
     def print_header(self, text):
         print(f"\n{C.BOLD}{C.HEADER}{'═' * 70}{C.RESET}")
@@ -164,7 +165,7 @@ class EmergenceEngine:
 
     def show_intro(self):
         """Show introduction"""
-        self.clear_screen()
+        self.clear_scr()
         self.print_header("T H E   E M E R G E N C E   E N G I N E")
 
         intro = f"""
@@ -293,7 +294,7 @@ Manipulate life itself to reach your goal.{C.RESET}
 
     def show_victory(self):
         """Show victory screen"""
-        self.clear_screen()
+        self.clear_scr()
         self.print_header("E M E R G E N C E   A C H I E V E D")
 
         victory = f"""
@@ -334,7 +335,7 @@ From simple rules, endlessly iterated.{C.RESET}
         auto_step_counter = 0
 
         while not self.game_over:
-            self.clear_screen()
+            self.clear_scr()
             self.render_world()
 
             # Auto-step if not paused

@@ -58,6 +58,40 @@ class TestGameMessage:
         assert msg.data["message"] == "hello"
         assert msg.player_id == "p2"
 
+    def test_from_json_missing_required_fields(self):
+        """Test that from_json raises on missing required fields"""
+        from network_game import GameMessage
+
+        # Missing msg_type
+        with pytest.raises(KeyError):
+            GameMessage.from_json('{"data": {}}')
+
+        # Missing data
+        with pytest.raises(KeyError):
+            GameMessage.from_json('{"msg_type": "move"}')
+
+    def test_from_json_invalid_types(self):
+        """Test that from_json raises on invalid field types"""
+        from network_game import GameMessage
+
+        # msg_type not a string
+        with pytest.raises(TypeError):
+            GameMessage.from_json('{"msg_type": 123, "data": {}}')
+
+        # data not a dict
+        with pytest.raises(TypeError):
+            GameMessage.from_json('{"msg_type": "move", "data": "invalid"}')
+
+    def test_from_json_not_object(self):
+        """Test that from_json raises when JSON is not an object"""
+        from network_game import GameMessage
+
+        with pytest.raises(TypeError):
+            GameMessage.from_json('["a", "list"]')
+
+        with pytest.raises(TypeError):
+            GameMessage.from_json('"a string"')
+
 
 class TestConnectionState:
     """Test ConnectionState enum"""

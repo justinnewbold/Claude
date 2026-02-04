@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from logging_config import setup_game_logger, log_performance, log_exceptions
+from platform_utils import clear_screen as platform_clear_screen
 
 
 class GameState(Enum):
@@ -136,8 +137,8 @@ class BaseGame(ABC):
     # =========================================================================
 
     def clear_screen(self) -> None:
-        """Clear the terminal screen"""
-        os.system('clear' if os.name != 'nt' else 'cls')
+        """Clear the terminal screen using platform utility"""
+        platform_clear_screen()
 
     def hide_cursor(self) -> None:
         """Hide terminal cursor"""
@@ -152,11 +153,18 @@ class BaseGame(ABC):
         print(f'\033[{y};{x}H', end='', flush=True)
 
     def set_title(self, title: str) -> None:
-        """Set terminal window title"""
+        """Set terminal window title safely"""
+        # Sanitize title to prevent shell injection
+        safe_title = ''.join(c for c in title if c.isalnum() or c in ' -_.:')[:80]
         if os.name == 'nt':
-            os.system(f'title {title}')
+            # Use ctypes for safer Windows title setting
+            try:
+                import ctypes
+                ctypes.windll.kernel32.SetConsoleTitleW(safe_title)
+            except Exception:
+                pass  # Silently fail if unable to set title
         else:
-            print(f'\033]0;{title}\007', end='', flush=True)
+            print(f'\033]0;{safe_title}\007', end='', flush=True)
 
     # =========================================================================
     # UI HELPERS

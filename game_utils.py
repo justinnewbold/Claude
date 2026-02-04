@@ -367,7 +367,7 @@ def abbreviate_number(num: int) -> str:
 
 def wrap_text(text: str, width: int = 60) -> List[str]:
     """
-    Wrap text to specified width.
+    Wrap text to specified width efficiently.
 
     Args:
         text: Text to wrap
@@ -377,24 +377,32 @@ def wrap_text(text: str, width: int = 60) -> List[str]:
         List of wrapped lines
     """
     words = text.split()
+    if not words:
+        return []
+
     lines = []
-    current_line = []
-    current_length = 0
+    current_line_words = []
+    current_line_length = 0  # Track actual character count (excluding spaces)
 
     for word in words:
         word_length = len(word)
+        # Calculate total line length: chars + spaces between words
+        spaces_needed = len(current_line_words)  # One space before each existing word
+        potential_length = current_line_length + spaces_needed + word_length
 
-        if current_length + word_length + len(current_line) <= width:
-            current_line.append(word)
-            current_length += word_length
+        if potential_length <= width:
+            current_line_words.append(word)
+            current_line_length += word_length
         else:
-            if current_line:
-                lines.append(' '.join(current_line))
-            current_line = [word]
-            current_length = word_length
+            # Line would be too long, start a new line
+            if current_line_words:
+                lines.append(' '.join(current_line_words))
+            current_line_words = [word]
+            current_line_length = word_length
 
-    if current_line:
-        lines.append(' '.join(current_line))
+    # Don't forget the last line
+    if current_line_words:
+        lines.append(' '.join(current_line_words))
 
     return lines
 

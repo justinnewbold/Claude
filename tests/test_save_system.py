@@ -203,3 +203,65 @@ class TestSaveFile:
         assert "metadata" in d
         assert "data" in d
         assert d["data"]["test"] is True
+
+
+class TestSaveSystemAtomicWrites:
+    """Test atomic write functionality"""
+
+    def test_save_creates_file(self, tmp_path):
+        """Test that save creates the file"""
+        from save_system import SaveSystem
+
+        save_system = SaveSystem(save_dir=tmp_path, compression=False)
+
+        result = save_system.save(
+            game_id="test_game",
+            game_name="Test Game",
+            data={"key": "value"},
+            save_slot=1
+        )
+
+        assert result is True
+        save_files = list(tmp_path.glob("*.sav"))
+        assert len(save_files) == 1
+
+    def test_save_no_temp_files_left(self, tmp_path):
+        """Test that no temp files are left after save"""
+        from save_system import SaveSystem
+
+        save_system = SaveSystem(save_dir=tmp_path, compression=False)
+
+        save_system.save(
+            game_id="test_game",
+            game_name="Test Game",
+            data={"key": "value"},
+            save_slot=1
+        )
+
+        # Check no .tmp files remain
+        tmp_files = list(tmp_path.glob("*.tmp"))
+        assert len(tmp_files) == 0
+
+    def test_save_and_load_roundtrip(self, tmp_path):
+        """Test save and load roundtrip preserves data"""
+        from save_system import SaveSystem
+
+        save_system = SaveSystem(save_dir=tmp_path, compression=False)
+
+        test_data = {
+            "player": {"name": "Test", "level": 10},
+            "inventory": [1, 2, 3],
+            "nested": {"a": {"b": {"c": 42}}}
+        }
+
+        save_system.save(
+            game_id="test_game",
+            game_name="Test Game",
+            data=test_data,
+            save_slot=1
+        )
+
+        loaded = save_system.load("test_game", save_slot=1)
+
+        assert loaded is not None
+        assert loaded.data == test_data

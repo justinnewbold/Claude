@@ -398,12 +398,28 @@ class SyntaxTreeClimber:
         return False
 
     def execute_code(self) -> Tuple[bool, Any]:
-        """Execute the current code and get result"""
+        """Execute the current code and get result safely"""
         try:
-            # Create namespace for execution
-            namespace = {}
+            # Validate the code by parsing it first (ensures valid Python syntax)
+            try:
+                ast.parse(self.code)
+            except SyntaxError as e:
+                return False, f"Syntax error: {e}"
 
-            # Execute the code
+            # Create a restricted namespace with only safe builtins
+            safe_builtins = {
+                'abs': abs, 'all': all, 'any': any, 'bool': bool,
+                'dict': dict, 'enumerate': enumerate, 'filter': filter,
+                'float': float, 'int': int, 'len': len, 'list': list,
+                'map': map, 'max': max, 'min': min, 'pow': pow,
+                'print': print, 'range': range, 'reversed': reversed,
+                'round': round, 'set': set, 'sorted': sorted, 'str': str,
+                'sum': sum, 'tuple': tuple, 'zip': zip,
+                'True': True, 'False': False, 'None': None,
+            }
+            namespace = {'__builtins__': safe_builtins}
+
+            # Execute the code with restricted builtins
             exec(self.code, namespace)
 
             # Find the main function (first FunctionDef)
