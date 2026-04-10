@@ -134,7 +134,7 @@ def setup_logger(
             file_handler.setLevel(logging.DEBUG)  # File gets everything
             logger.addHandler(file_handler)
 
-        except Exception as e:
+        except (IOError, OSError) as e:
             print(f"Warning: Could not set up file logging: {e}", file=sys.stderr)
 
     # Console handler
@@ -328,7 +328,7 @@ def clear_old_logs(days: int = 7):
             logger = get_logger(__name__)
             logger.info(f"Cleaned up {count} old log files")
 
-    except Exception as e:
+    except (IOError, OSError) as e:
         print(f"Warning: Failed to clean old logs: {e}", file=sys.stderr)
 
 
@@ -341,7 +341,7 @@ def get_log_size() -> int:
 
         total_size = sum(f.stat().st_size for f in log_dir.glob('*.log*'))
         return total_size
-    except Exception:
+    except (IOError, OSError):
         return 0
 
 

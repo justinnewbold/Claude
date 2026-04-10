@@ -16,44 +16,53 @@ import random
 from colors import C
 from platform_utils import clear_screen
 
+# Game constants
+NUM_DOORS = 3
+DOORS = list(range(1, NUM_DOORS + 1))
+NUM_ROUNDS = 5
+
 
 class MontyHall:
     def __init__(self):
         self.stay_wins = 0
         self.switch_wins = 0
         self.games_played = 0
-        
+
     def clear_screen(self):
         clear_screen()
-        
+
     def play_round(self):
         # Setup
-        car_door = random.randint(1, 3)
-        
+        car_door = random.choice(DOORS)
+
         self.clear_screen()
+        door_display = " ".join(f"[{d}]" for d in DOORS)
         print(f"\n{C.DOOR}Three doors. Behind one: a car. Behind two: goats.{C.RESET}\n")
-        print(f"{C.DOOR}[1] [2] [3]{C.RESET}\n")
-        
+        print(f"{C.DOOR}{door_display}{C.RESET}\n")
+
         # Player choice
-        player_choice = random.randint(1, 3)  # Simulate choosing door 1
+        player_choice = random.choice(DOORS)  # Simulate random door selection
         print(f"You choose door {player_choice}.\n")
         input(f"{C.SYSTEM}[Press ENTER]{C.RESET}")
-        
+
         # Host reveals goat
-        available = [d for d in [1,2,3] if d != player_choice and d != car_door]
-        revealed = random.choice(available) if available else ([d for d in [1,2,3] if d != player_choice][0])
-        
+        available = [d for d in DOORS if d != player_choice and d != car_door]
+        revealed = random.choice(available) if available else ([d for d in DOORS if d != player_choice][0])
+
+        remaining = [d for d in DOORS if d != player_choice and d != revealed]
+        switch_door = remaining[0] if remaining else player_choice
+
         print(f"\n{C.GOAT}Host opens door {revealed}... It's a GOAT!{C.RESET}\n")
-        print(f"Remaining: Door {player_choice} (your choice) and Door {[d for d in [1,2,3] if d != player_choice and d != revealed][0]}\n")
-        
+        print(f"Remaining: Door {player_choice} (your choice) and Door {switch_door}\n")
+
         # Switch or stay?
         print(f"[S]tay with door {player_choice}")
-        print(f"[W]itch to door {[d for d in [1,2,3] if d != player_choice and d != revealed][0]}\n")
-        
+        print(f"S[w]itch to door {switch_door}\n")
+
         choice = input(f"{C.SYSTEM}Your choice: {C.RESET}").strip().upper()
-        
+
         if choice == 'W':
-            final_choice = [d for d in [1,2,3] if d != player_choice and d != revealed][0]
+            final_choice = switch_door
             strategy = "SWITCHED"
         else:
             final_choice = player_choice
@@ -101,7 +110,7 @@ After host reveals goat: Should you switch?{C.RESET}
 """)
         input()
         
-        for _ in range(5):
+        for _ in range(NUM_ROUNDS):
             self.play_round()
             
         # Final reveal

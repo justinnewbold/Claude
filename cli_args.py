@@ -203,7 +203,7 @@ def _disable_colors():
         for attr in dir(Colors):
             if attr.isupper() and not attr.startswith('_'):
                 setattr(Colors, attr, '')
-    except Exception:
+    except (AttributeError, TypeError):
         pass
 
 

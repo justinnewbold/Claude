@@ -138,7 +138,7 @@ class ModLoader:
                         path=mod_dir,
                         status=ModStatus.LOADED
                     )
-            except Exception as e:
+            except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
                 self.logger.error(f"Failed to load mod metadata from {mod_dir}: {e}")
 
         # Resolve dependencies and sort by load order
@@ -235,7 +235,7 @@ class ModLoader:
 
                 self.logger.debug(f"Loaded mod data: {json_file.name}")
 
-            except Exception as e:
+            except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
                 self.logger.error(f"Error loading mod data {json_file}: {e}")
 
     def _load_mod_module(self, mod: LoadedMod):
@@ -259,7 +259,7 @@ class ModLoader:
                 mod.module = module
                 self.logger.debug(f"Loaded mod module: {mod.metadata.id}")
 
-        except Exception as e:
+        except (ImportError, AttributeError, TypeError, SyntaxError) as e:
             mod.status = ModStatus.ERROR
             mod.error_message = f"Failed to load module: {e}"
             self.logger.error(f"Error loading mod module {mod.metadata.id}: {e}")

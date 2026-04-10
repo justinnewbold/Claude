@@ -335,7 +335,7 @@ class SaveSystem:
             try:
                 save = self._read_save_file(save_file)
                 saves.append(save.metadata)
-            except Exception as e:
+            except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
                 self.logger.warning(f"Could not read save file {save_file}: {e}")
 
         # Sort by timestamp (newest first)
@@ -499,7 +499,7 @@ class SaveSystem:
 
             return SaveFile.from_dict(data)
 
-        except Exception as e:
+        except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
             raise GameError(f"Could not read save file: {e}")
 
     def _create_backup(self, save_path: Path):

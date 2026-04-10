@@ -258,7 +258,7 @@ class DataLoader:
             raise DataLoadError(f"Invalid JSON in {filename}: {e}")
         except DataValidationError:
             raise
-        except Exception as e:
+        except (IOError, OSError, KeyError, TypeError) as e:
             raise DataLoadError(f"Failed to load {filename}: {e}")
 
     def get_rooms(self, use_cache: bool = True) -> Dict[str, Any]:

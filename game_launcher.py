@@ -111,7 +111,7 @@ class GameLauncher:
                     self.logger.info(f"Loaded preferences: {len(self.recent_games)} recent, {len(self.favorites)} favorites")
         except json.JSONDecodeError as e:
             self.logger.warning(f"Invalid preferences file, resetting: {e}")
-        except Exception as e:
+        except (IOError, OSError) as e:
             self.logger.warning(f"Could not load preferences: {e}")
 
     def _save_preferences(self):
@@ -124,7 +124,7 @@ class GameLauncher:
             with open(PREFERENCES_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
             self.logger.info("Preferences saved successfully")
-        except Exception as e:
+        except (IOError, OSError) as e:
             self.logger.warning(f"Could not save preferences: {e}")
 
     def run(self):
