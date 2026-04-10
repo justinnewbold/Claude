@@ -1574,7 +1574,7 @@ class VaultGame:
 
             print(f"\n{C.SUCCESS}Game saved successfully!{C.RESET}")
             self.add_event("Game saved")
-        except Exception as e:
+        except (IOError, OSError) as e:
             print(f"\n{C.DANGER}Failed to save game: {e}{C.RESET}")
 
         input("\nPress Enter to continue...")
@@ -1610,7 +1610,7 @@ class VaultGame:
             return True
         except FileNotFoundError:
             return False
-        except Exception as e:
+        except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
             print(f"\n{C.DANGER}Failed to load game: {e}{C.RESET}")
             input("\nPress Enter to continue...")
             return False

@@ -24,6 +24,9 @@ from error_handling import error_context
 
 logger = get_logger(__name__)
 
+# Default analytics data directory
+DEFAULT_ANALYTICS_DIR = Path.home() / ".vault13" / "analytics"
+
 
 class EventType(Enum):
     """Types of analytics events"""
@@ -90,7 +93,7 @@ class Analytics:
 
         # Analytics directory
         if analytics_dir is None:
-            analytics_dir = Path.home() / ".vault13" / "analytics"
+            analytics_dir = DEFAULT_ANALYTICS_DIR
         self.analytics_dir = analytics_dir
         self.analytics_dir.mkdir(parents=True, exist_ok=True)
 
@@ -203,6 +206,7 @@ For questions: see README.md
             metadata: Optional session metadata
         """
         if not self.enabled:
+            self.logger.debug("Analytics disabled, skipping session start")
             return
 
         self.current_session = SessionData(
@@ -334,7 +338,7 @@ For questions: see README.md
 
                 sessions.append(session)
 
-            except Exception as e:
+            except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
                 self.logger.error(f"Error loading session {session_file}: {e}")
 
         return sessions

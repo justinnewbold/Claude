@@ -399,7 +399,7 @@ def call_ai_model(prompt: str, max_tokens: int = 500, system_prompt: str = "") -
         )
 
         return response.content[0].text
-    except Exception as e:
+    except (ConnectionError, TimeoutError, ValueError, AttributeError, IndexError) as e:
         print(f"{C.WARNING}AI Error: {e}{C.RESET}")
         return generate_fallback_response(prompt)
 
@@ -920,7 +920,7 @@ class VaultGame:
             else:
                 print(f"{C.WARNING}Unknown action: {action}{C.RESET}")
                 return False
-        except Exception as e:
+        except (KeyError, ValueError, TypeError, AttributeError) as e:
             print(f"{C.DANGER}Error executing action: {e}{C.RESET}")
             return False
 

@@ -1495,7 +1495,7 @@ def call_ai_model(prompt: str, max_tokens: int = 500, system_prompt: str = "") -
             messages=messages
         )
         return response.content[0].text
-    except Exception as e:
+    except (ConnectionError, TimeoutError, ValueError, AttributeError, IndexError) as e:
         return generate_fallback_response(prompt)
 
 
@@ -1566,10 +1566,10 @@ Return ONLY valid JSON:
                 rewards=quest_data.get("rewards", {"caps": 100}),
                 created_day=game.day
             )
-    except Exception:
+    except (KeyError, TypeError, ValueError):
         pass
 
-    return Quest(id=f"quest_{game.day}", title="Vault Emergency", 
+    return Quest(id=f"quest_{game.day}", title="Vault Emergency",
                 description="Handle crisis.", steps=[{"description": "Survive", "type": "survival"}],
                 rewards={"caps": 150}, created_day=game.day)
 
@@ -4316,7 +4316,7 @@ class VaultGame:
             print(f"  • Resource levels")
             print(f"  • All statistics")
             print(f"  • Major events")
-        except Exception as e:
+        except (IOError, OSError) as e:
             print(f"{C.DANGER}✗ Export failed: {e}{C.RESET}")
 
         input(f"\n{C.DIM}Press Enter...{C.RESET}")
@@ -4742,7 +4742,7 @@ class VaultGame:
 
             self.log_event(f"✓ Game loaded from Day {self.day}")
             return True
-        except Exception as e:
+        except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
             print(f"{C.DANGER}✗ Load failed: {e}{C.RESET}")
             return False
 
@@ -6577,7 +6577,7 @@ def save_game(game, filename="vault_save.json"):
             json.dump(save_data, f, indent=2)
         log_game_event("SAVE", "Game saved successfully")
         return True
-    except Exception as e:
+    except (IOError, OSError) as e:
         log_error("save_game", e)
         print(f"{C.DANGER}Save failed: {e}{C.RESET}")
         return False
@@ -6597,7 +6597,7 @@ def load_game(filename="vault_save.json"):
         game_logger.warning(f"Save file not found: {filename}")
         print(f"{C.WARNING}No save file found.{C.RESET}")
         return None
-    except Exception as e:
+    except (json.JSONDecodeError, KeyError, IOError, OSError) as e:
         log_error("load_game", e)
         print(f"{C.DANGER}Load failed: {e}{C.RESET}")
         return None

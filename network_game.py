@@ -392,7 +392,7 @@ class NetworkGame:
 
             return False
 
-        except Exception as e:
+        except (socket.error, json.JSONDecodeError, KeyError, TypeError) as e:
             logger.error(f"Handshake failed: {e}")
             return False
 
@@ -536,7 +536,7 @@ class NetworkGame:
             ip = s.getsockname()[0]
             s.close()
             return ip
-        except Exception:
+        except OSError:
             return "127.0.0.1"
 
     @property

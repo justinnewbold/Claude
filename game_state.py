@@ -124,7 +124,7 @@ class GameStateManager:
                 logger.info(f"Loaded state: {len(self.game_stats)} games, {len(self.global_achievements)} achievements")
         except json.JSONDecodeError as e:
             logger.warning(f"Corrupted state file, starting fresh: {e}")
-        except Exception as e:
+        except (IOError, OSError, KeyError, TypeError) as e:
             logger.warning(f"Could not load state: {e}")
 
     def _save_state(self):
@@ -148,7 +148,7 @@ class GameStateManager:
                 json.dump(data, f, indent=2)
 
             logger.info("State saved successfully")
-        except Exception as e:
+        except (IOError, OSError) as e:
             logger.error(f"Could not save state: {e}")
 
     def _get_or_create_stats(self, game_id: str) -> GameStats:

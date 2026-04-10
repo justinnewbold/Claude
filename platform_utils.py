@@ -154,7 +154,7 @@ def init_terminal() -> bool:
                     kernel32.GetStdHandle(-11),  # STD_OUTPUT_HANDLE
                     0x0001 | 0x0004  # ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING
                 )
-            except Exception:
+            except (AttributeError, OSError):
                 # Method 3: Simple fallback - running any command enables ANSI
                 os.system('')
                 success = False
@@ -164,7 +164,7 @@ def init_terminal() -> bool:
             import ctypes
             ctypes.windll.kernel32.SetConsoleOutputCP(65001)
             ctypes.windll.kernel32.SetConsoleCP(65001)
-        except Exception:
+        except (AttributeError, OSError):
             pass
 
     # Set UTF-8 encoding for stdout/stderr
@@ -172,7 +172,7 @@ def init_terminal() -> bool:
         try:
             sys.stdout.reconfigure(encoding='utf-8', errors='replace')
             sys.stderr.reconfigure(encoding='utf-8', errors='replace')
-        except Exception:
+        except (AttributeError, OSError):
             pass
 
     _terminal_initialized = True
@@ -198,7 +198,7 @@ def get_terminal_size(fallback: Tuple[int, int] = (80, 24)) -> Tuple[int, int]:
     try:
         size = shutil.get_terminal_size(fallback)
         return (size.columns, size.lines)
-    except Exception:
+    except (ValueError, OSError):
         return fallback
 
 
@@ -230,7 +230,7 @@ def supports_color() -> bool:
             version = platform.version()
             build = int(version.split('.')[-1])
             return build >= 14393
-        except Exception:
+        except (ValueError, IndexError):
             return True  # Assume modern Windows
 
     return True  # Unix systems generally support color
@@ -354,7 +354,7 @@ def set_title(title: str):
         try:
             import ctypes
             ctypes.windll.kernel32.SetConsoleTitleW(safe_title)
-        except Exception:
+        except (AttributeError, OSError):
             pass  # Silently fail if unable to set title
     else:
         print(f'\033]0;{safe_title}\007', end='', flush=True)
